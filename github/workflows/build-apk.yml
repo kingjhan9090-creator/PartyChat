@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build PartyChat APK
 
 on:
   workflow_dispatch:
