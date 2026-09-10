@@ -21,6 +21,9 @@ jobs:
           channel: stable
       - name: Create Android project
         run: flutter create --platforms=android .
+      - name: Get SHA-1
+        working-directory: android
+        run: ./gradlew signingReport
       - name: Get dependencies
         run: flutter pub get
 
