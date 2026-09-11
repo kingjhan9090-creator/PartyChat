@@ -565,8 +565,8 @@ Widget build(BuildContext context) {
     config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
   );}
 }
-
-    
+}
+   
   
 class GamesTab extends StatelessWidget {
   const GamesTab({super.key});
