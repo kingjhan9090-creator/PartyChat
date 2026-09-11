@@ -575,7 +575,7 @@ class ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(18),
-      children: const [
+      children:  [
         Text(
           'Profile',
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
