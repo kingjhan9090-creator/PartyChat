@@ -594,7 +594,7 @@ class GameCard extends StatelessWidget {
   final String title;
   final IconData icon;
 
-  const GameCard(this.title, this.icon, {super.key});
+  const GameCard(this.title, this.icon, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
