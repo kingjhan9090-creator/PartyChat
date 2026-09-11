@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-
+import 'package:zego_uikit/zego_uikit.dart';
+import 'package:zego_uikit_prebuilt_live_audio_room/zego_uikit_prebuilt_live_audio_room.dart';
+const int zegoAppId = int.fromEnvironment('ZEGO_APP_ID');
+const String zegoAppSign = String.fromEnvironment('ZEGO_APP_SIGN');
 Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
