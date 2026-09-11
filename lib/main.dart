@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:zego_uikit/zego_uikit.dart';
@@ -492,6 +493,8 @@ class RoomPage extends StatefulWidget {
 
 class _RoomPageState extends State<RoomPage> {
   bool micOn = false;
+  bool isSpeaking = false;
+  StreamSubscription<double>? soundLevelSubscription;
   bool speakerOn = true;
   final messageController = TextEditingController();
   final List<String> messages = [];
@@ -513,105 +516,25 @@ class _RoomPageState extends State<RoomPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: Icon(
-              speakerOn ? Icons.volume_up : Icons.volume_off,
-            ),
-            onPressed: () {
-              setState(() {
-                speakerOn = !speakerOn;
-              });
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 20),
-          const Text(
-            '🎙️ Live Room',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${widget.online} listening',
-            style: const TextStyle(
-              color: Colors.greenAccent,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const CircleAvatar(
-            radius: 40,
-            child: Icon(Icons.person, size: 45),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'You',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const Divider(height: 30),
-          Expanded(
-            child: messages.isEmpty
-                ? const Center(
-                    child: Text('No messages yet 💬'),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
-                        title: Text(messages[index]),
-                      );
-                    },
-                  ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: Icon(
-                    micOn ? Icons.mic : Icons.mic_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      micOn = !micOn;
-                    });
-                  },
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: messageController,
-                    decoration: const InputDecoration(
-                      hintText: 'Write a message...',
-                      border: OutlineInputBorder(),
-                    ),
-                    onSubmitted: (_) => sendMessage(),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: sendMessage,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+Widget build(BuildContext context) {
+  final String roomId =
+      widget.title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+
+  final String userId =
+      'party_user_${DateTime.now().millisecondsSinceEpoch}';
+
+  return ZegoUIKitPrebuiltLiveAudioRoom(
+    appID: zegoAppId,
+    appSign: zegoAppSign,
+    userID: userId,
+    userName: 'Party User',
+    roomID: roomId,
+    config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
+  );}
 }
+
+    
+  
 class GamesTab extends StatelessWidget {
   const GamesTab({super.key});
 
