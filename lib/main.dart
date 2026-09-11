@@ -454,7 +454,7 @@ class RoomTile extends StatelessWidget {
             onPressed: () {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text('$title room joined!')),
-  ),
+  );
 },
             child: const Text('Join'),
           ),
