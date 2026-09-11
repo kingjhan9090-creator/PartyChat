@@ -498,9 +498,25 @@ class _RoomPageState extends State<RoomPage> {
   bool speakerOn = true;
   final messageController = TextEditingController();
   final List<String> messages = [];
+    void startMicGlow(String userId) {
+  soundLevelSubscription?.cancel();
+
+  soundLevelSubscription =
+      ZegoUIKit().getSoundLevelStream(userId).listen((level) {
+    if (!micOn) return;
+
+    final speaking = level > 20;
+
+    if (speaking != isSpeaking) {
+      setState(() {
+        isSpeaking = speaking;
+      });
+    }
+  });
+    }
 
   @override
-  void dispose() {
+  void dispose() {soundLevelSubscription?.cancel();
     messageController.dispose();
     super.dispose();
   }
@@ -514,14 +530,31 @@ class _RoomPageState extends State<RoomPage> {
       messageController.clear();
     });
   }
+late final String userId =
+    'party_user_${DateTime.now().millisecondsSinceEpoch}';
+    void toggleMic() {
+  micOn = !micOn;
 
+  ZegoUIKit().turnMicrophoneOn(
+    micOn,
+    userID: userId,
+  );
+
+  if (micOn) {
+    startMicGlow(userId);
+  } else {
+    soundLevelSubscription?.cancel();
+    setState(() {
+      isSpeaking = false;
+    });
+  }
+    
   @override
 Widget build(BuildContext context) {
   final String roomId =
       widget.title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
 
-  final String userId =
-      'party_user_${DateTime.now().millisecondsSinceEpoch}';
+  
 
   return ZegoUIKitPrebuiltLiveAudioRoom(
     appID: zegoAppId,
