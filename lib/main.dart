@@ -451,7 +451,11 @@ class RoomTile extends StatelessWidget {
             ),
           ),
           FilledButton(
-            onPressed: () {},
+            onPressed: () {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('$title room joined!')),
+  ),
+},
             child: const Text('Join'),
           ),
         ],
