@@ -480,7 +480,8 @@ class RoomTile extends StatelessWidget {
 class RoomPage extends StatefulWidget {
   final String title;
   final String online;
-
+late final String userId =
+    'party_user_${DateTime.now().millisecondsSinceEpoch}';
   const RoomPage({
     super.key,
     required this.title,
@@ -497,7 +498,18 @@ Widget build(BuildContext context) {
     userID: userId,
     userName: 'Party User',
     roomID: roomId,
-    config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
+    config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
+  ..turnOnMicrophoneWhenJoining = false
+  ..bottomMenuBar = ZegoLiveAudioRoomBottomMenuBarConfig(
+    hostButtons: [
+      ZegoLiveAudioRoomMenuBarButtonName.soundEffectButton,
+      ZegoLiveAudioRoomMenuBarButtonName.showMemberListButton,
+    ],
+    hostExtendButtons: [
+      _buildMicButton(),
+    ],
+    maxCount: 3,
+  ),
   );
 }
   @override
@@ -511,11 +523,39 @@ class _RoomPageState extends State<RoomPage> {
   bool speakerOn = true;
   final messageController = TextEditingController();
   final List<String> messages = [];
+    Widget _buildMicButton() {
+  return GestureDetector(
+    onTap: toggleMic,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: micOn ? Colors.white : Colors.grey.shade800,
+        boxShadow: isSpeaking
+            ? [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.9),
+                  blurRadius: 22,
+                  spreadRadius: 7,
+                ),
+              ]
+            : [],
+      ),
+      child: Icon(
+        micOn ? Icons.mic : Icons.mic_off,
+        color: micOn ? Colors.black : Colors.white,
+        size: 28,
+      ),
+    ),
+  );
+    }
     void startMicGlow(String userId) {
   soundLevelSubscription?.cancel();
 
   soundLevelSubscription =
-      ZegoUIKit().getSoundLevelStream(userId).listen((level) {
+      ZegoUIKit().getSoundLevelStream(widget.userId).listen((level) {
     if (!micOn) return;
 
     final speaking = level > 20;
@@ -543,8 +583,7 @@ class _RoomPageState extends State<RoomPage> {
       messageController.clear();
     });
   }
-late final String userId =
-    'party_user_${DateTime.now().millisecondsSinceEpoch}';
+
     void toggleMic() {
   micOn = !micOn;
 
