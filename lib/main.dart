@@ -457,8 +457,14 @@ class RoomTile extends StatelessWidget {
           ),
           FilledButton(
             onPressed: () {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('$title room joined!')),
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => RoomPage(
+        title: title,
+        online: online,
+      ),
+    ),
   );
 },
             child: const Text('Join'),
@@ -468,7 +474,142 @@ class RoomTile extends StatelessWidget {
     );
   }
 }
+class RoomPage extends StatefulWidget {
+  final String title;
+  final String online;
 
+  const RoomPage({
+    super.key,
+    required this.title,
+    required this.online,
+  });
+
+  @override
+  State<RoomPage> createState() => _RoomPageState();
+}
+
+class _RoomPageState extends State<RoomPage> {
+  bool micOn = false;
+  bool speakerOn = true;
+  final messageController = TextEditingController();
+  final List<String> messages = [];
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
+  }
+
+  void sendMessage() {
+    final text = messageController.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      messages.add(text);
+      messageController.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: Icon(
+              speakerOn ? Icons.volume_up : Icons.volume_off,
+            ),
+            onPressed: () {
+              setState(() {
+                speakerOn = !speakerOn;
+              });
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          const SizedBox(height: 20),
+          const Text(
+            '🎙️ Live Room',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${widget.online} listening',
+            style: const TextStyle(
+              color: Colors.greenAccent,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const CircleAvatar(
+            radius: 40,
+            child: Icon(Icons.person, size: 45),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'You',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Divider(height: 30),
+          Expanded(
+            child: messages.isEmpty
+                ? const Center(
+                    child: Text('No messages yet 💬'),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: const CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
+                        title: Text(messages[index]),
+                      );
+                    },
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    micOn ? Icons.mic : Icons.mic_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      micOn = !micOn;
+                    });
+                  },
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: messageController,
+                    decoration: const InputDecoration(
+                      hintText: 'Write a message...',
+                      border: OutlineInputBorder(),
+                    ),
+                    onSubmitted: (_) => sendMessage(),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: sendMessage,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 class GamesTab extends StatelessWidget {
   const GamesTab({super.key});
 
