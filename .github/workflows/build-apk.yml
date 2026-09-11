@@ -34,7 +34,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
-          settings = Path("android/settings.gradle")
+          settings = Path("android/settings.gradle.kts")
           text = settings.read_text()
           text = text.replace(
               'id "com.android.application" version ',
@@ -43,7 +43,7 @@ jobs:
           )
           settings.write_text(text)
 
-          app = Path("android/app/build.gradle")
+          app = Path("android/app/build.gradle.kts")
           text = app.read_text()
           text = text.replace(
               'id "dev.flutter.flutter-gradle-plugin"',
