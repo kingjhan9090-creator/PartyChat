@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "921954130312",
+    "project_id": "partychat-a9ae2",
+    "storage_bucket": "partychat-a9ae2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:921954130312:android:a8e075d09aaf329960423d",
+        "android_client_info": {
+          "package_name": "com.partychat.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNkyrW0Z73XDfQIVDvOuOxCbPsS8FCN3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
