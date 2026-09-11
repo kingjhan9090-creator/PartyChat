@@ -22,8 +22,12 @@ jobs:
 
       - name: Create Android project
         run: flutter create --platforms=android .
-      - name: Fix Kotlin version
-        run: sed -i 's/id("org.jetbrains.kotlin.android") version "2.1.0"/id("org.jetbrains.kotlin.android") version "2.3.20"/' android/settings.gradle.kts
+      - name: Fix Kotlin and JVM target
+        run: |
+            sed -i 's/id("org.jetbrains.kotlin.android") version "2.1.0"/id("org.jetbrains.kotlin.android") version "2.3.20"/' android/settings.gradle.kts
+            sed -i '/kotlinOptions {/,/}/d' android/app/build.gradle.kts
+            sed -i '/^android {/i kotlin {\n    compilerOptions {\n        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)\n    }\n}\n' android/app/build.gradle.kts
+
       - name: Add Firebase config      
         env:
           FIREBASE_JSON: ${{ secrets.FIREBASE_JSON }}
