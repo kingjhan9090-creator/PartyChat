@@ -630,7 +630,7 @@ class GameCard extends StatelessWidget {
 }
 
 class WalletTab extends StatelessWidget {
-  const WalletTab({super.key});
+  const WalletTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -684,7 +684,7 @@ class WalletTab extends StatelessWidget {
 }
 
 class ProfileTab extends StatelessWidget {
-  const ProfileTab({super.key});
+  const ProfileTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
