@@ -7,11 +7,12 @@ environment:
   sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.0
+  zego_uikit_prebuilt_live_audio_room: ^3.16.10
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
