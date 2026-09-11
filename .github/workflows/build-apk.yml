@@ -22,7 +22,7 @@ jobs:
 
       - name: Create Android project
         run: flutter create --platforms=android .
-      
+
       - name: Add Firebase config
         env:
           FIREBASE_JSON: ${{ secrets.FIREBASE_JSON }}
