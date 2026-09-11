@@ -22,6 +22,9 @@ jobs:
 
       - name: Create Android project
         run: flutter create --platforms=android .
+      - name: Fix package name  
+        run: |
+            find android -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' \) -exec sed -i 's/com\.example\.partychat/com.partychat.app/g' {} +
       - name: Fix Kotlin and JVM target
         run: |
             sed -i 's/id("org.jetbrains.kotlin.android") version "2.1.0"/id("org.jetbrains.kotlin.android") version "2.3.20"/' android/settings.gradle.kts
