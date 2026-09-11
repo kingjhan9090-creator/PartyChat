@@ -11,7 +11,8 @@ Future<void> main() async {
     debugPrint('Firebase initialization failed: $e');
   }
 
-  runApp(const PartyChatApp());
+    runApp(const PartyChatApp());
+}
 
 class PartyChatApp extends StatelessWidget {
   const PartyChatApp({super.key});
