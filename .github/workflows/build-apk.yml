@@ -22,7 +22,8 @@ jobs:
 
       - name: Create Android project
         run: flutter create --platforms=android .
-
+      - name: Fix Kotlin
+        run: sed -i 's/version "2.1.0"/version "2.3.20"/' android/settings.gradle.kts
       - name: Add Firebase config
         env:
           FIREBASE_JSON: ${{ secrets.FIREBASE_JSON }}
