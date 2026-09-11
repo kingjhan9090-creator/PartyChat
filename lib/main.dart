@@ -614,11 +614,42 @@ class ProfileTab extends StatelessWidget {
           title: Text('Friends'),
           trailing: Icon(Icons.chevron_right),
         ),
-        ListTile(
-          leading: Icon(Icons.settings),
-          title: Text('Settings'),
-          trailing: Icon(Icons.chevron_right),
+  ListTile(
+  leading: const Icon(Icons.settings),
+  title: const Text('Settings'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Settings'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.notifications),
+              title: Text('Notifications'),
+            ),
+            ListTile(
+              leading: Icon(Icons.lock),
+              title: Text('Privacy'),
+            ),
+            ListTile(
+              leading: Icon(Icons.language),
+              title: Text('Language'),
+            ),
+          ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  },
+),
       ],
     );
   }
