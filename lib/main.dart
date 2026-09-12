@@ -482,7 +482,7 @@ class RoomPage extends StatefulWidget {
   final String online;
 late final String userId =
     'party_user_${DateTime.now().millisecondsSinceEpoch}';
-  const RoomPage({
+  RoomPage({
     super.key,
     required this.title,
     required this.online,
@@ -495,7 +495,7 @@ Widget build(BuildContext context) {
   return ZegoUIKitPrebuiltLiveAudioRoom(
     appID: zegoAppId,
     appSign: zegoAppSign,
-    userID: userId,
+    userID: widget.userId,
     userName: 'Party User',
     roomID: roomId,
     config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
