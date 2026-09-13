@@ -658,7 +658,7 @@ class GameCard extends StatelessWidget {
 }
 
 class WalletTab extends StatelessWidget {
-  const WalletTab({Key? key}) : super(key: key);
+  const WalletTab({super.key});
 
   @override
   Widget build(BuildContext context) {
