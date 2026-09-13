@@ -589,11 +589,11 @@ class _RoomPageState extends State<RoomPage> {
 
   ZegoUIKit().turnMicrophoneOn(
     micOn,
-    userID: userId,
+    userID: widget.userId,
   );
 
   if (micOn) {
-    startMicGlow(userId);
+    startMicGlow(widget.userId);
   } else {
     soundLevelSubscription?.cancel();
     setState(() {
