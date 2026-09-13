@@ -586,16 +586,26 @@ Widget build(BuildContext context) {
 
   
 
-  return ZegoUIKitPrebuiltLiveAudioRoom(
-    appID: zegoAppId,
-    appSign: zegoAppSign,
-    userID: widget.userId,
-    userName: 'Party User',
-    roomID: roomId,
-    config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
-        );
-      }
-    }
+ return Stack(
+  children: [
+    ZegoUIKitPrebuiltLiveAudioRoom(
+      appID: zegoAppId,
+      appSign: zegoAppSign,
+      userID: widget.userId,
+      userName: 'Party User',
+      roomID: roomId,
+      config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
+    ),
+    Positioned(
+      bottom: 24,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: _buildMicButton(),
+      ),
+    ),
+  ],
+);
    
   
 class GamesTab extends StatelessWidget {
