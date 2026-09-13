@@ -589,7 +589,7 @@ Widget build(BuildContext context) {
   return ZegoUIKitPrebuiltLiveAudioRoom(
     appID: zegoAppId,
     appSign: zegoAppSign,
-    userID: userId,
+    userID: widget.userId,
     userName: 'Party User',
     roomID: roomId,
     config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
