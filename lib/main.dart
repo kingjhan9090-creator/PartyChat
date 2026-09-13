@@ -487,31 +487,7 @@ late final String userId =
     required this.title,
     required this.online,
   });
-@override
-Widget build(BuildContext context) {
-  final String roomId =
-      widget.title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
 
-  return ZegoUIKitPrebuiltLiveAudioRoom(
-    appID: zegoAppId,
-    appSign: zegoAppSign,
-    userID: widget.userId,
-    userName: 'Party User',
-    roomID: roomId,
-    config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
-  ..turnOnMicrophoneWhenJoining = false
-  ..bottomMenuBar = ZegoLiveAudioRoomBottomMenuBarConfig(
-    hostButtons: [
-      ZegoLiveAudioRoomMenuBarButtonName.soundEffectButton,
-      ZegoLiveAudioRoomMenuBarButtonName.showMemberListButton,
-    ],
-    hostExtendButtons: [
-      _buildMicButton(),
-    ],
-    maxCount: 3,
-  ),
-  );
-}
   @override
   State<RoomPage> createState() => _RoomPageState();
 }
