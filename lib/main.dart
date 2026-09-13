@@ -667,7 +667,7 @@ class GameCard extends StatelessWidget {
     );
   }
 }
-
+}
 class WalletTab extends StatelessWidget {
   const WalletTab({super.key});
 
