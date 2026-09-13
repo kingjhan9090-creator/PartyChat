@@ -712,7 +712,7 @@ class WalletTab extends StatelessWidget {
 }
 
 class ProfileTab extends StatelessWidget {
-  const ProfileTab({Key? key}) : super(key: key);
+  const ProfileTab({super.key});
   @override
   Widget build(BuildContext context) {
     return ListView(
