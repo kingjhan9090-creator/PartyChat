@@ -201,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
     );
     } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.message ?? 'Authentication failed')),
+      SnackBar(content: Text(e.toString())),
     );
   }
   }
