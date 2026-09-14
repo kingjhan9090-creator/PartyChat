@@ -865,6 +865,7 @@ if (newName.isEmpty || newName.length < 3 || newName.length > 12) {
   return;
 }
 debugPrint('SAVE USERNAME: $newName');
+debugPrint('USER UID: ${user?.uid}');             
 final lastChange = (await userDoc.get()).data()?['lastNameChangeAt'];
 
 if (lastChange != null) {
@@ -885,6 +886,8 @@ if (lastChange != null) {
   return;
 }
 }
+
+  debugPrint('ABOUT TO SAVE USERNAME');            
 
   await userDoc.update({
   'name': newName,
