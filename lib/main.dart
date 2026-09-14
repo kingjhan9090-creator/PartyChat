@@ -749,6 +749,17 @@ class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final userDoc = FirebaseFirestore.instance
+    .collection('users')
+    .doc(user?.uid);
+      final userId = user?.uid;
+      
+      if (userId == null) {
+  return const Center(
+    child: Text('Please login first'),
+  );
+      }
     return ListView(
       padding: const EdgeInsets.all(18),
       children:  [
@@ -758,27 +769,126 @@ class ProfileTab extends StatelessWidget {
         ),
         SizedBox(height: 22),
         Center(
-          child: CircleAvatar(
-            radius: 52,
-            child: Icon(Icons.person, size: 52),
-          ),
-        ),
-        SizedBox(height: 10),
+  child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: userDoc.snapshots(),
+    builder: (context, snapshot) {
+      final data = snapshot.data?.data();
+      final photoURL = data?['photoURL'] as String?;
+
+      return CircleAvatar(
+        radius: 52,
+        backgroundImage: (photoURL != null && photoURL.isNotEmpty)
+            ? NetworkImage(photoURL)
+            : null,
+        child: (photoURL == null || photoURL.isEmpty)
+            ? const Icon(Icons.person, size: 52)
+            : null,
+      );
+    },
+  ),
+),
+ SizedBox(height: 10),
         Center(
-          child: Text(
-            'PartyChat User 👑',
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+  child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: userDoc.snapshots(),
+    builder: (context, snapshot) {
+      final data = snapshot.data?.data();
+      final name = data?['name'] as String? ?? 'PartyChat User';
+
+      return Text(
+        '$name 👑',
+        style: const TextStyle(
+          fontSize: 21,
+          fontWeight: FontWeight.bold,
         ),
+      );
+    },
+  ),
+),
         Center(
           child: Text(
             'VIP Level 3',
             style: TextStyle(color: Color(0xFFFFD15C)),
           ),
         ),
+
+          const SizedBox(height: 15),
+
+Center(
+  child: ElevatedButton.icon(
+    onPressed: () {
+  final controller = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Change Username'),
+      content: TextField(
+  controller: controller,
+  maxLength: 12,
+  decoration: const InputDecoration(
+    hintText: 'Enter new username',
+  ),
+),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+  final newName = controller.text.trim();
+
+if (newName.isEmpty || newName.length < 3 || newName.length > 12) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Username 3 se 12 characters ka hona chahiye.'),
+    ),
+  );
+  return;
+}
+
+final lastChange = (await userDoc.get()).data()?['lastNameChangeAt'];
+
+if (lastChange != null) {
+  final lastTime = (lastChange as Timestamp).toDate();
+  final difference = DateTime.now().difference(lastTime);
+
+  if (difference.inHours < 24) {
+  final remaining = 24 - difference.inHours;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        'Username dobara change karne ke liye $remaining hours wait karein.',
+      ),
+    ),
+  );
+
+  return;
+}
+}
+
+  await userDoc.update({
+  'name': newName,
+  'lastNameChangeAt': FieldValue.serverTimestamp(),
+});
+
+  if (context.mounted) {
+    Navigator.pop(context);
+  }
+},
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+},
+      
+    icon: const Icon(Icons.edit),
+    label: const Text('Change Username'),
+  ),
+),
         SizedBox(height: 20),
         ListTile(
           leading: Icon(Icons.card_giftcard),
