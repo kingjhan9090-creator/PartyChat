@@ -53,13 +53,19 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const WelcomePage()),
-        );
-      }
-    });
+  if (!mounted) return;
+
+  final user = FirebaseAuth.instance.currentUser;
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => user != null
+          ? const MainPage()
+          : const WelcomePage(),
+    ),
+  );
+});
   }
 
   @override
