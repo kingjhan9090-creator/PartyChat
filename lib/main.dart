@@ -570,7 +570,7 @@ class _RoomPageState extends State<RoomPage> {
 
   if (micOn) {
     startMicGlow(widget.userId);
-    } else {
+  } else {
     soundLevelSubscription?.cancel();
     setState(() {
       isSpeaking = false;
