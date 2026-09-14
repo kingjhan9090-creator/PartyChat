@@ -179,11 +179,31 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void continueToApp() {
+  Future<void> continueToApp() async {
+  try {
+    if (signup) {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+    } else {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+    }
+
+    if (!mounted) return;
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const MainPage()),
     );
+  } on FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message ?? 'Authentication failed')),
+    );
+  }
   }
 
   @override
