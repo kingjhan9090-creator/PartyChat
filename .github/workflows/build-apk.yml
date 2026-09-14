@@ -21,12 +21,13 @@ jobs:
           channel: stable
       - name: Create Android project
         run: flutter create --platforms=android .
-        
+  
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
+          
+      
 
       - name: Install Android NDK
         run: sdkmanager "ndk;27.0.12077973"
