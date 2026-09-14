@@ -23,7 +23,7 @@ jobs:
         run: flutter create --platforms=android .
 
       - name: Install Android NDK
-        run: sdkmanager "ndk;27.0.12077973"
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
       
       - name: Add microphone permission
         run: |
