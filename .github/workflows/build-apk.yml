@@ -21,10 +21,13 @@ jobs:
           channel: stable
       - name: Create Android project
         run: flutter create --platforms=android .
+        
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Install Android NDK
-        run: yes | sdkmanager --install "ndk;27.0.12077973"
-
+        run: sdkmanager "ndk;27.0.12077973"
+      
       - name: Add microphone permission
         run: |
           sed -i '/<manifest/a\    <uses-permission android:name="android.permission.RECORD_AUDIO"/>' android/app/src/main/AndroidManifest.xml
