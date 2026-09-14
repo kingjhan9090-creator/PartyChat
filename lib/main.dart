@@ -173,7 +173,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool signup = false;
-
+bool obscurePassword = true;
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -256,11 +256,21 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 14),
             TextField(
               controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
+              obscureText: obscurePassword,
+              decoration: InputDecoration(
                 labelText: 'Password',
                 prefixIcon: Icon(Icons.lock),
                 border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+  icon: Icon(
+    obscurePassword ? Icons.visibility : Icons.visibility_off,
+  ),
+  onPressed: () {
+    setState(() {
+      obscurePassword = !obscurePassword;
+    });
+  },
+),
               ),
             ),
             const SizedBox(height: 20),
@@ -854,7 +864,7 @@ if (newName.isEmpty || newName.length < 3 || newName.length > 12) {
   );
   return;
 }
-
+debugPrint('SAVE USERNAME: $newName');
 final lastChange = (await userDoc.get()).data()?['lastNameChangeAt'];
 
 if (lastChange != null) {
