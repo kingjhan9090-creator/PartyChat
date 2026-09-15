@@ -889,10 +889,10 @@ if (lastChange != null) {
 
   debugPrint('ABOUT TO SAVE USERNAME');            
 
-  await userDoc.update({
+  await userDoc.set({
   'name': newName,
   'lastNameChangeAt': FieldValue.serverTimestamp(),
-});
+}, SetOptions(merge: true));
 
   if (context.mounted) {
     Navigator.pop(context);
