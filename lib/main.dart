@@ -809,9 +809,23 @@ class ProfileTab extends StatelessWidget {
           const SizedBox(height: 12),
 
 ElevatedButton.icon(
-  onPressed: () {
-    // Profile photo / avatar selector yahan add hoga
-  },
+  onPressed: () async {
+  final picker = ImagePicker();
+
+  final image = await picker.pickImage(
+    source: ImageSource.gallery,
+  );
+
+  if (image == null) return;
+
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Photo select ho gayi 👍'),
+    ),
+  );
+},
   icon: const Icon(Icons.camera_alt),
   label: const Text('Change Profile Photo'),
 ),
