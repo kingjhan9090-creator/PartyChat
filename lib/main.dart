@@ -816,8 +816,9 @@ builder: (context, snapshot) {
             (avatar == null || avatarImages[avatar] == null)
         ? const Icon(Icons.person, size: 52)
         : null,
-  );
+    );
 },
+),
 ),
  SizedBox(height: 10),
           const SizedBox(height: 12),
