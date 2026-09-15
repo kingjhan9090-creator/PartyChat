@@ -765,356 +765,521 @@ class WalletTab extends StatelessWidget {
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Center(
+        child: Text('Please login first'),
+      );
+    }
+
     final userDoc = FirebaseFirestore.instance
-    .collection('users')
-    .doc(user?.uid);
-      final userId = user?.uid;
-      
-      if (userId == null) {
-  return const Center(
-    child: Text('Please login first'),
-  );
-      }
+        .collection('users')
+        .doc(user.uid);
+
     return ListView(
       padding: const EdgeInsets.all(18),
-      children:  [
-        Text(
+      children: [
+        const Text(
           'Profile',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
-        ),
-        SizedBox(height: 22),
-        Center(
-  child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-    stream: userDoc.snapshots(),
-builder: (context, snapshot) {
-  final data = snapshot.data?.data();
-  final photoURL = data?['photoURL'] as String?;
-  final avatar = data?['avatar'] as String?;
-
-  final avatarImages = {
-    'avatar1': 'assets/avatar1_pakistan_female-2.png',
-    'avatar2': 'assets/avatar2_uae_male.png',
-    'avatar3': 'assets/avatar3_uk_male.png',
-    'avatar4': 'assets/avatar4_russia_female.png',
-    'avatar5': 'assets/avatar5_saudi_female.png',
-    'avatar6': 'assets/avatar6_turkey_male.png',
-    'avatar7': 'assets/avatar7_india_female.png',
-    'avatar8': 'assets/avatar8_usa_male.png',
-  };
-
-  return CircleAvatar(
-    radius: 52,
-        backgroundImage: photoURL != null && photoURL.isNotEmpty
-        ? NetworkImage(photoURL) as ImageProvider<Object>
-        : avatar != null && avatarImages[avatar] != null
-            ? AssetImage(avatarImages[avatar]!) as ImageProvider<Object>
-            : null,
-    child: (photoURL == null || photoURL.isEmpty) &&
-            (avatar == null || avatarImages[avatar] == null)
-        ? const Icon(Icons.person, size: 52)
-        : null,
-    );
-},
-),
-),
- SizedBox(height: 10),
-          const SizedBox(height: 12),
-
-ElevatedButton.icon(
-  onPressed: () async {
-  final picker = ImagePicker();
-
-  final image = await picker.pickImage(
-    source: ImageSource.gallery,
-  );
-
-  if (image == null) return;
-
-  if (!context.mounted) return;
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text('Photo select ho gayi 👍'),
-    ),
-  );
-},
-  icon: const Icon(Icons.camera_alt),
-  label: const Text('Change Profile Photo'),
-),
-          const SizedBox(height: 12),
-
-ElevatedButton.icon(
-  onPressed: () async {
-  final avatars = [
-    'avatar1',
-    'avatar2',
-    'avatar3',
-    'avatar4',
-    'avatar5',
-    'avatar6',
-    'avatar7',
-    'avatar8',
-  ];
-
-  final avatarImages = {
-    'avatar1': 'assets/avatar1_pakistan_female-2.png',
-    'avatar2': 'assets/avatar2_uae_male.png',
-    'avatar3': 'assets/avatar3_uk_male.png',
-    'avatar4': 'assets/avatar4_russia_female.png',
-    'avatar5': 'assets/avatar5_saudi_female.png',
-    'avatar6': 'assets/avatar6_turkey_male.png',
-    'avatar7': 'assets/avatar7_india_female.png',
-    'avatar8': 'assets/avatar8_usa_male.png',
-  };
-
-  String? selected = await showDialog<String>(
-    context: context,
-    builder: (context) {
-      String? tempSelected;
-
-      return StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text('Choose Avatar'),
-            content: GridView.builder(
-              shrinkWrap: true,
-              itemCount: avatars.length,
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemBuilder: (context, index) {
-                final avatar = avatars[index];
-
-                return GestureDetector(
-                  onTap: () {
-                    setDialogState(() {
-                      tempSelected = avatar;
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: tempSelected == avatar
-                            ? Colors.white
-                            : Colors.grey,
-                        width: tempSelected == avatar ? 3 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(4),
-                    child: Image.asset(
-                      avatarImages[avatar]!,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                );
-              },
-            ), 
-            actions: [
-              ElevatedButton(
-                onPressed: tempSelected == null
-                    ? null
-                    : () {
-                        Navigator.pop(context, tempSelected);
-                      },
-                child: const Text('Save'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-
-  if (selected == null) return;
-
-  if (selected == null) return;
-
-  await userDoc.set({
-    'avatar': selected,
-    'photoURL': '',
-  }, SetOptions(merge: true));
-
-  if (!context.mounted) return;
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text('Avatar save ho gaya 👍'),
-    ),
-  );
-},
-icon: const Icon(Icons.face),
-label: const Text('Choose Avatar'),
-),
-
-Center(
-  child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-    stream: userDoc.snapshots(),
-    builder: (context, snapshot) {
-      final data = snapshot.data?.data();
-      final name = data?['name'] as String? ?? 'PartyChat User';
-
-      return Text(
-        '$name 👑',
-        style: const TextStyle(
-          fontSize: 21,
-          fontWeight: FontWeight.bold,
-        ),
-      );
-    },
-  ),
-),
-        Center(
-          child: Text(
-            'VIP Level 3',
-            style: TextStyle(color: Color(0xFFFFD15C)),
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
           ),
         ),
 
-          const SizedBox(height: 15),
+        const SizedBox(height: 22),
 
-Center(
-  child: ElevatedButton.icon(
-    onPressed: () {
-  final controller = TextEditingController();
+        // =========================
+        // PROFILE DP
+        // =========================
+        Center(
+          child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: userDoc.snapshots(),
+            builder: (context, snapshot) {
+              final data = snapshot.data?.data();
 
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Change Username'),
-      content: TextField(
-  controller: controller,
-  maxLength: 12,
-  decoration: const InputDecoration(
-    hintText: 'Enter new username',
-  ),
-),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+              final photoURL = data?['photoURL'] as String?;
+              final photoBase64 = data?['photoBase64'] as String?;
+              final avatar = data?['avatar'] as String?;
+
+              final avatarImages = {
+                'avatar1': 'assets/avatar1_pakistan_female-2.png',
+                'avatar2': 'assets/avatar2_uae_male.png',
+                'avatar3': 'assets/avatar3_uk_male.png',
+                'avatar4': 'assets/avatar4_russia_female.png',
+                'avatar5': 'assets/avatar5_saudi_female.png',
+                'avatar6': 'assets/avatar6_turkey_male.png',
+                'avatar7': 'assets/avatar7_india_female.png',
+                'avatar8': 'assets/avatar8_usa_male.png',
+              };
+
+              ImageProvider<Object>? profileImage;
+
+              // Gallery photo first
+              if (photoBase64 != null && photoBase64.isNotEmpty) {
+                try {
+                  profileImage = MemoryImage(
+                    base64Decode(photoBase64),
+                  ) as ImageProvider<Object>;
+                } catch (_) {
+                  profileImage = null;
+                }
+              }
+
+              // Old network photo support
+              if (profileImage == null &&
+                  photoURL != null &&
+                  photoURL.isNotEmpty) {
+                profileImage =
+                    NetworkImage(photoURL) as ImageProvider<Object>;
+              }
+
+              // Avatar if no gallery photo
+              if (profileImage == null &&
+                  avatar != null &&
+                  avatarImages[avatar] != null) {
+                profileImage =
+                    AssetImage(avatarImages[avatar]!) as ImageProvider<Object>;
+              }
+
+              return CircleAvatar(
+                radius: 52,
+                backgroundImage: profileImage,
+                child: profileImage == null
+                    ? const Icon(
+                        Icons.person,
+                        size: 52,
+                      )
+                    : null,
+              );
+            },
+          ),
         ),
-        ElevatedButton(
+
+        const SizedBox(height: 12),
+
+        // =========================
+        // CHANGE PROFILE PHOTO
+        // =========================
+        ElevatedButton.icon(
           onPressed: () async {
-  final newName = controller.text.trim();
+            final picker = ImagePicker();
 
-  if (newName.isEmpty || newName.length < 3 || newName.length > 12) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Username 3 se 12 characters ka hona chahiye.'),
-      ),
-    );
-    return;
-  }
+            final image = await picker.pickImage(
+              source: ImageSource.gallery,
+              imageQuality: 20,
+              maxWidth: 256,
+              maxHeight: 256,
+            );
 
-  debugPrint('SAVE USERNAME: $newName');
-    final data = (await userDoc.get()).data();
-final lastChange = data?['lastNameChangeAt'];
+            if (image == null) return;
 
-if (lastChange != null) {
-  final lastTime = (lastChange as Timestamp).toDate();
-  final difference = DateTime.now().difference(lastTime);
+            final bytes = await image.readAsBytes();
 
-  if (difference.inHours < 24) {
-    final remaining = 24 - difference.inHours;
+            // Safety limit for Firestore
+            if (bytes.length > 500000) {
+              if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Username dobara change karne ke liye $remaining hours wait karein.',
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Photo size zyada hai. Choti photo select karein.',
+                  ),
+                ),
+              );
+              return;
+            }
+
+            final encodedPhoto = base64Encode(bytes);
+
+            try {
+              await userDoc.set(
+                {
+                  'photoBase64': encodedPhoto,
+                  'photoURL': '',
+                  'avatar': '',
+                },
+                SetOptions(merge: true),
+              );
+
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Profile photo save ho gayi 👍',
+                  ),
+                ),
+              );
+            } catch (e) {
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Photo save nahi hui: $e',
+                  ),
+                ),
+              );
+            }
+          },
+          icon: const Icon(Icons.camera_alt),
+          label: const Text('Change Profile Photo'),
         ),
-      ),
-    );
-    return;
-  }
-}
-  debugPrint('USER UID: ${user?.uid}');
-  debugPrint('ABOUT TO SAVE USERNAME');
 
-  try {
-    await userDoc.set({
-      'name': newName,
-      'lastNameChangeAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+        const SizedBox(height: 12),
 
-    if (context.mounted) {
-      Navigator.pop(context);
-    }
-  } catch (e) {
-    debugPrint('USERNAME SAVE FAILED: $e');
+        // =========================
+        // CHOOSE AVATAR
+        // =========================
+        ElevatedButton.icon(
+          onPressed: () async {
+            final avatars = [
+              'avatar1',
+              'avatar2',
+              'avatar3',
+              'avatar4',
+              'avatar5',
+              'avatar6',
+              'avatar7',
+              'avatar8',
+            ];
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Username save nahi hua: $e')),
-      );
-    }
-  }
-},
-child: const Text('Save'),
+            final avatarImages = {
+              'avatar1': 'assets/avatar1_pakistan_female-2.png',
+              'avatar2': 'assets/avatar2_uae_male.png',
+              'avatar3': 'assets/avatar3_uk_male.png',
+              'avatar4': 'assets/avatar4_russia_female.png',
+              'avatar5': 'assets/avatar5_saudi_female.png',
+              'avatar6': 'assets/avatar6_turkey_male.png',
+              'avatar7': 'assets/avatar7_india_female.png',
+              'avatar8': 'assets/avatar8_usa_male.png',
+            };
+
+            String? selected = await showDialog<String>(
+              context: context,
+              builder: (context) {
+                String? tempSelected;
+
+                return StatefulBuilder(
+                  builder: (context, setDialogState) {
+                    return AlertDialog(
+                      title: const Text('Choose Avatar'),
+                      content: GridView.builder(
+                        shrinkWrap: true,
+                        itemCount: avatars.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                        itemBuilder: (context, index) {
+                          final avatar = avatars[index];
+
+                          return GestureDetector(
+                            onTap: () {
+                              setDialogState(() {
+                                tempSelected = avatar;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: tempSelected == avatar
+                                      ? Colors.white
+                                      : Colors.grey,
+                                  width:
+                                      tempSelected == avatar ? 3 : 1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: Image.asset(
+                                avatarImages[avatar]!,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      actions: [
+                        ElevatedButton(
+                          onPressed: tempSelected == null
+                              ? null
+                              : () {
+                                  Navigator.pop(
+                                    context,
+                                    tempSelected,
+                                  );
+                                },
+                          child: const Text('Save'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+
+            if (selected == null) return;
+
+            try {
+              await userDoc.set(
+                {
+                  'avatar': selected,
+                  'photoURL': '',
+                  'photoBase64': '',
+                },
+                SetOptions(merge: true),
+              );
+
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Avatar save ho gaya 👍',
+                  ),
+                ),
+              );
+            } catch (e) {
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Avatar save nahi hua: $e',
+                  ),
+                ),
+              );
+            }
+          },
+          icon: const Icon(Icons.face),
+          label: const Text('Choose Avatar'),
         ),
-      ],
-    ),
-  );
-},
-      
-    icon: const Icon(Icons.edit),
-    label: const Text('Change Username'),
-  ),
-),
-        SizedBox(height: 20),
-        ListTile(
+
+        const SizedBox(height: 12),
+
+        // =========================
+        // USERNAME
+        // =========================
+        Center(
+          child: StreamBuilder<
+              DocumentSnapshot<Map<String, dynamic>>>(
+            stream: userDoc.snapshots(),
+            builder: (context, snapshot) {
+              final data = snapshot.data?.data();
+              final name =
+                  data?['name'] as String? ?? 'PartyChat User';
+
+              return Text(
+                '$name 👑',
+                style: const TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
+        ),
+
+        const Center(
+          child: Text(
+            'VIP Level 3',
+            style: TextStyle(
+              color: Color(0xFFFFD15C),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 15),
+
+        // =========================
+        // CHANGE USERNAME
+        // =========================
+        Center(
+          child: ElevatedButton.icon(
+            onPressed: () {
+              final controller = TextEditingController();
+
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  title: const Text('Change Username'),
+                  content: TextField(
+                    controller: controller,
+                    maxLength: 12,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter new username',
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final newName =
+                            controller.text.trim();
+
+                        if (newName.isEmpty ||
+                            newName.length < 3 ||
+                            newName.length > 12) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Username 3 se 12 characters ka hona chahiye.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          final data =
+                              (await userDoc.get()).data();
+
+                          final lastChange =
+                              data?['lastNameChangeAt'];
+
+                          if (lastChange != null &&
+                              lastChange is Timestamp) {
+                            final lastTime =
+                                lastChange.toDate();
+
+                            final difference =
+                                DateTime.now().difference(
+                              lastTime,
+                            );
+
+                            if (difference.inHours < 24) {
+                              final remaining =
+                                  24 - difference.inHours;
+
+                              if (!context.mounted) return;
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Username dobara change karne ke liye $remaining hours wait karein.',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                          }
+
+                          await userDoc.set(
+                            {
+                              'name': newName,
+                              'lastNameChangeAt':
+                                  FieldValue.serverTimestamp(),
+                            },
+                            SetOptions(merge: true),
+                          );
+
+                          if (!dialogContext.mounted) return;
+
+                          Navigator.pop(dialogContext);
+
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Username save ho gaya 👍',
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Username save nahi hua: $e',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            icon: const Icon(Icons.edit),
+            label: const Text('Change Username'),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        const ListTile(
           leading: Icon(Icons.card_giftcard),
           title: Text('My Gifts'),
           trailing: Icon(Icons.chevron_right),
         ),
-        ListTile(
+
+        const ListTile(
           leading: Icon(Icons.people),
           title: Text('Friends'),
           trailing: Icon(Icons.chevron_right),
         ),
-  ListTile(
-  leading: const Icon(Icons.settings),
-  title: const Text('Settings'),
-  trailing: const Icon(Icons.chevron_right),
-  onTap: () {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Settings'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.notifications),
-              title: Text('Notifications'),
-            ),
-            ListTile(
-              leading: Icon(Icons.lock),
-              title: Text('Privacy'),
-            ),
-            ListTile(
-              leading: Icon(Icons.language),
-              title: Text('Language'),
-            ),
-          ],
+
+        // =========================
+        // SETTINGS
+        // =========================
+        ListTile(
+          leading: const Icon(Icons.settings),
+          title: const Text('Settings'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Settings'),
+                content: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.notifications),
+                      title: Text('Notifications'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.lock),
+                      title: Text('Privacy'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.language),
+                      title: Text('Language'),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  },
-),
       ],
     );
   }
 }
+        
