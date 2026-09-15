@@ -852,7 +852,21 @@ ElevatedButton.icon(
   return SimpleDialogOption(
     onPressed: () => Navigator.pop(context, avatar),
     child: Image.asset(
-      'assets/$avatar.png',
+      avatar == 'avatar1'
+    ? 'assets/avatar1_pakistan_female-2.png'
+    : avatar == 'avatar2'
+        ? 'assets/avatar2_uae_male.png'
+        : avatar == 'avatar3'
+            ? 'assets/avatar3_uk_male.png'
+            : avatar == 'avatar4'
+                ? 'assets/avatar4_russia_female.png'
+                : avatar == 'avatar5'
+                    ? 'assets/avatar5_saudi_female.png'
+                    : avatar == 'avatar6'
+                        ? 'assets/avatar6_turkey_male.png'
+                        : avatar == 'avatar7'
+                            ? 'assets/avatar7_india_female.png'
+                            : 'assets/avatar8_usa_male.png',
       width: 100,
       height: 100,
       fit: BoxFit.contain,
