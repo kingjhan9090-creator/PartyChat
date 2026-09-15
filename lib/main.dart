@@ -789,21 +789,35 @@ class ProfileTab extends StatelessWidget {
         Center(
   child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     stream: userDoc.snapshots(),
-    builder: (context, snapshot) {
-      final data = snapshot.data?.data();
-      final photoURL = data?['photoURL'] as String?;
+builder: (context, snapshot) {
+  final data = snapshot.data?.data();
+  final photoURL = data?['photoURL'] as String?;
+  final avatar = data?['avatar'] as String?;
 
-      return CircleAvatar(
-        radius: 52,
-        backgroundImage: (photoURL != null && photoURL.isNotEmpty)
-            ? NetworkImage(photoURL)
+  final avatarImages = {
+    'avatar1': 'assets/avatar1_pakistan_female-2.png',
+    'avatar2': 'assets/avatar2_uae_male.png',
+    'avatar3': 'assets/avatar3_uk_male.png',
+    'avatar4': 'assets/avatar4_russia_female.png',
+    'avatar5': 'assets/avatar5_saudi_female.png',
+    'avatar6': 'assets/avatar6_turkey_male.png',
+    'avatar7': 'assets/avatar7_india_female.png',
+    'avatar8': 'assets/avatar8_usa_male.png',
+  };
+
+  return CircleAvatar(
+    radius: 52,
+    backgroundImage: (photoURL != null && photoURL.isNotEmpty)
+        ? NetworkImage(photoURL)
+        : (avatar != null && avatarImages[avatar] != null)
+            ? AssetImage(avatarImages[avatar]!)
             : null,
-        child: (photoURL == null || photoURL.isEmpty)
-            ? const Icon(Icons.person, size: 52)
-            : null,
-      );
-    },
-  ),
+    child: (photoURL == null || photoURL.isEmpty) &&
+            (avatar == null || avatarImages[avatar] == null)
+        ? const Icon(Icons.person, size: 52)
+        : null,
+  );
+},
 ),
  SizedBox(height: 10),
           const SizedBox(height: 12),
