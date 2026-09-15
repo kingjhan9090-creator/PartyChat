@@ -833,67 +833,108 @@ ElevatedButton.icon(
 
 ElevatedButton.icon(
   onPressed: () async {
-    final avatars = [
-      'avatar1',
-      'avatar2',
-      'avatar3',
-      'avatar4',
-      'avatar5',
-      'avatar6',
-      'avatar7',
-      'avatar8',
-    ];
+  final avatars = [
+    'avatar1',
+    'avatar2',
+    'avatar3',
+    'avatar4',
+    'avatar5',
+    'avatar6',
+    'avatar7',
+    'avatar8',
+  ];
 
-    final selected = await showDialog<String>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('Choose Avatar'),
-        children: avatars.map((avatar) {
-  return SimpleDialogOption(
-    onPressed: () => Navigator.pop(context, avatar),
-    child: Image.asset(
-      avatar == 'avatar1'
-    ? 'assets/avatar1_pakistan_female-2.png'
-    : avatar == 'avatar2'
-        ? 'assets/avatar2_uae_male.png'
-        : avatar == 'avatar3'
-            ? 'assets/avatar3_uk_male.png'
-            : avatar == 'avatar4'
-                ? 'assets/avatar4_russia_female.png'
-                : avatar == 'avatar5'
-                    ? 'assets/avatar5_saudi_female.png'
-                    : avatar == 'avatar6'
-                        ? 'assets/avatar6_turkey_male.png'
-                        : avatar == 'avatar7'
-                            ? 'assets/avatar7_india_female.png'
-                            : 'assets/avatar8_usa_male.png',
-      width: 100,
-      height: 100,
-      fit: BoxFit.contain,
+  final avatarImages = {
+    'avatar1': 'assets/avatar1_pakistan_female-2.png',
+    'avatar2': 'assets/avatar2_uae_male.png',
+    'avatar3': 'assets/avatar3_uk_male.png',
+    'avatar4': 'assets/avatar4_russia_female.png',
+    'avatar5': 'assets/avatar5_saudi_female.png',
+    'avatar6': 'assets/avatar6_turkey_male.png',
+    'avatar7': 'assets/avatar7_india_female.png',
+    'avatar8': 'assets/avatar8_usa_male.png',
+  };
+
+  String? selected = await showDialog<String>(
+    context: context,
+    builder: (context) {
+      String? tempSelected;
+
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text('Choose Avatar'),
+            content: GridView.builder(
+              shrinkWrap: true,
+              itemCount: avatars.length,
+              gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemBuilder: (context, index) {
+                final avatar = avatars[index];
+
+                return GestureDetector(
+                  onTap: () {
+                    setDialogState(() {
+                      tempSelected = avatar;
+                    });
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: tempSelected == avatar
+                            ? Colors.white
+                            : Colors.grey,
+                        width: tempSelected == avatar ? 3 : 1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Image.asset(
+                      avatarImages[avatar]!,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                );
+              },
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: tempSelected == null
+                    ? null
+                    : () {
+                        Navigator.pop(context, tempSelected);
+                      },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+
+  if (selected == null) return;
+
+  await userDoc.set({
+    'avatar': selected,
+    'photoURL': '',
+  }, SetOptions(merge: true));
+
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Avatar save ho gaya 👍'),
     ),
   );
-}).toList(),
-      ),
-    );
-
-    if (selected == null) return;
-
-    await userDoc.set({
-      'avatar': selected,
-      'photoURL': '',
-    }, SetOptions(merge: true));
-
-    if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Avatar save ho gaya 👍'),
-      ),
-    );
-  },
-  icon: const Icon(Icons.face),
-  label: const Text('Choose Avatar'),
-),
+},
+icon: const Icon(Icons.face),
+label: const Text('Choose Avatar'),
+    
         Center(
   child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     stream: userDoc.snapshots(),
