@@ -838,6 +838,10 @@ ElevatedButton.icon(
       'avatar2',
       'avatar3',
       'avatar4',
+      'avatar5',
+      'avatar6',
+      'avatar7',
+      'avatar8',
     ];
 
     final selected = await showDialog<String>(
