@@ -829,6 +829,51 @@ ElevatedButton.icon(
   icon: const Icon(Icons.camera_alt),
   label: const Text('Change Profile Photo'),
 ),
+          const SizedBox(height: 12),
+
+ElevatedButton.icon(
+  onPressed: () async {
+    final avatars = [
+      'avatar1',
+      'avatar2',
+      'avatar3',
+      'avatar4',
+    ];
+
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Choose Avatar'),
+        children: avatars.map((avatar) {
+          return SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, avatar),
+            child: Text(
+              avatar,
+              style: const TextStyle(fontSize: 18),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+
+    if (selected == null) return;
+
+    await userDoc.set({
+      'avatar': selected,
+      'photoURL': '',
+    }, SetOptions(merge: true));
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Avatar save ho gaya 👍'),
+      ),
+    );
+  },
+  icon: const Icon(Icons.face),
+  label: const Text('Choose Avatar'),
+),
         Center(
   child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     stream: userDoc.snapshots(),
