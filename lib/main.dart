@@ -807,10 +807,10 @@ builder: (context, snapshot) {
 
   return CircleAvatar(
     radius: 52,
-    backgroundImage: (photoURL != null && photoURL.isNotEmpty)
-        ? NetworkImage(photoURL)
-        : (avatar != null && avatarImages[avatar] != null)
-            ? AssetImage(avatarImages[avatar]!)
+        backgroundImage: photoURL != null && photoURL.isNotEmpty
+        ? NetworkImage(photoURL) as ImageProvider<Object>
+        : avatar != null && avatarImages[avatar] != null
+            ? AssetImage(avatarImages[avatar]!) as ImageProvider<Object>
             : null,
     child: (photoURL == null || photoURL.isEmpty) &&
             (avatar == null || avatarImages[avatar] == null)
