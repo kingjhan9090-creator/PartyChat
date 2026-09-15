@@ -805,6 +805,15 @@ class ProfileTab extends StatelessWidget {
   ),
 ),
  SizedBox(height: 10),
+          const SizedBox(height: 12),
+
+ElevatedButton.icon(
+  onPressed: () {
+    // Profile photo / avatar selector yahan add hoga
+  },
+  icon: const Icon(Icons.camera_alt),
+  label: const Text('Change Profile Photo'),
+),
         Center(
   child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     stream: userDoc.snapshots(),
@@ -866,6 +875,26 @@ Center(
   }
 
   debugPrint('SAVE USERNAME: $newName');
+    final data = (await userDoc.get()).data();
+final lastChange = data?['lastNameChangeAt'];
+
+if (lastChange != null) {
+  final lastTime = (lastChange as Timestamp).toDate();
+  final difference = DateTime.now().difference(lastTime);
+
+  if (difference.inHours < 24) {
+    final remaining = 24 - difference.inHours;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Username dobara change karne ke liye $remaining hours wait karein.',
+        ),
+      ),
+    );
+    return;
+  }
+}
   debugPrint('USER UID: ${user?.uid}');
   debugPrint('ABOUT TO SAVE USERNAME');
 
