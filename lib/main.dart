@@ -901,21 +901,7 @@ ElevatedButton.icon(
                 );
               },
             ),
-            actions: [
-              ElevatedButton(
-                onPressed: tempSelected == null
-                    ? null
-                    : () {
-                        Navigator.pop(context, tempSelected);
-                      },
-                child: const Text('Save'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
+        
 
   if (selected == null) return;
 
@@ -934,8 +920,9 @@ ElevatedButton.icon(
 },
 icon: const Icon(Icons.face),
 label: const Text('Choose Avatar'),
-    
-        Center(
+),
+
+Center(
   child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
     stream: userDoc.snapshots(),
     builder: (context, snapshot) {
