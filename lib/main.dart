@@ -856,49 +856,39 @@ Center(
           onPressed: () async {
   final newName = controller.text.trim();
 
-if (newName.isEmpty || newName.length < 3 || newName.length > 12) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text('Username 3 se 12 characters ka hona chahiye.'),
-    ),
-  );
-  return;
-}
-debugPrint('SAVE USERNAME: $newName');
-debugPrint('USER UID: ${user?.uid}');             
-final lastChange = (await userDoc.get()).data()?['lastNameChangeAt'];
-
-if (lastChange != null) {
-  final lastTime = (lastChange as Timestamp).toDate();
-  final difference = DateTime.now().difference(lastTime);
-
-  if (difference.inHours < 24) {
-  final remaining = 24 - difference.inHours;
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        'Username dobara change karne ke liye $remaining hours wait karein.',
+  if (newName.isEmpty || newName.length < 3 || newName.length > 12) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Username 3 se 12 characters ka hona chahiye.'),
       ),
-    ),
-  );
+    );
+    return;
+  }
 
-  return;
-}
-}
+  debugPrint('SAVE USERNAME: $newName');
+  debugPrint('USER UID: ${user?.uid}');
+  debugPrint('ABOUT TO SAVE USERNAME');
 
-  debugPrint('ABOUT TO SAVE USERNAME');            
+  try {
+    await userDoc.set({
+      'name': newName,
+      'lastNameChangeAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
 
-  await userDoc.set({
-  'name': newName,
-  'lastNameChangeAt': FieldValue.serverTimestamp(),
-}, SetOptions(merge: true));
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+  } catch (e) {
+    debugPrint('USERNAME SAVE FAILED: $e');
 
-  if (context.mounted) {
-    Navigator.pop(context);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Username save nahi hua: $e')),
+      );
+    }
   }
 },
-          child: const Text('Save'),
+child: const Text('Save'),
         ),
       ],
     ),
