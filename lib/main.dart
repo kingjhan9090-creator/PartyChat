@@ -900,8 +900,24 @@ ElevatedButton.icon(
                   ),
                 );
               },
-            ),
-        
+            ), 
+            actions: [
+              ElevatedButton(
+                onPressed: tempSelected == null
+                    ? null
+                    : () {
+                        Navigator.pop(context, tempSelected);
+                      },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+
+  if (selected == null) return;
 
   if (selected == null) return;
 
