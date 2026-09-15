@@ -849,14 +849,16 @@ ElevatedButton.icon(
       builder: (context) => SimpleDialog(
         title: const Text('Choose Avatar'),
         children: avatars.map((avatar) {
-          return SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, avatar),
-            child: Text(
-              avatar,
-              style: const TextStyle(fontSize: 18),
-            ),
-          );
-        }).toList(),
+  return SimpleDialogOption(
+    onPressed: () => Navigator.pop(context, avatar),
+    child: Image.asset(
+      'assets/$avatar.png',
+      width: 100,
+      height: 100,
+      fit: BoxFit.contain,
+    ),
+  );
+}).toList(),
       ),
     );
 
