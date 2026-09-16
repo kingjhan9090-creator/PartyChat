@@ -1180,17 +1180,110 @@ class ProfileTab extends StatelessWidget {
 
         const SizedBox(height: 20),
 
-        const ListTile(
-          leading: Icon(Icons.card_giftcard),
-          title: Text('My Gifts'),
-          trailing: Icon(Icons.chevron_right),
-        ),
+ListTile(
+  leading: const Icon(Icons.person_add),
+  title: const Text('Friend Requests'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FriendRequestsPage(),
+      ),
+    );
+  },
+),
+          
 
-        const ListTile(
-          leading: Icon(Icons.people),
-          title: Text('Friends'),
-          trailing: Icon(Icons.chevron_right),
-        ),
+ListTile(
+  leading: const Icon(Icons.meeting_room),
+  title: const Text('Room Invites'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RoomInvitesPage(),
+      ),
+    );
+  },
+),
+          
+ ListTile(
+  leading: const Icon(Icons.message),
+  title: const Text('Friend Messages'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FriendMessagesPage(),
+      ),
+    );
+  },
+),
+
+
+          
+
+ListTile(
+  leading: const Icon(Icons.card_giftcard),
+  title: const Text('Gifts'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GiftsPage(),
+      ),
+    );
+  },
+),
+          
+          
+ListTile(
+  leading: const Icon(Icons.notifications),
+  title: const Text('Notifications'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NotificationsPage(),
+      ),
+    );
+  },
+),
+
+ListTile(
+  leading: const Icon(Icons.card_giftcard),
+  title: const Text('My Gifts'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GiftsPage(),
+      ),
+    );
+  },
+),
+
+ListTile(
+  leading: const Icon(Icons.people),
+  title: const Text('Friends'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FriendsPage(),
+      ),
+    );
+  },
+),
+          
+
 
         ListTile(
           leading: const Icon(Icons.settings),
@@ -1206,6 +1299,9 @@ class ProfileTab extends StatelessWidget {
           },
         ),
 
+
+
+          
         const SizedBox(height: 20),
 
         Container(
@@ -1254,6 +1350,110 @@ class ProfileTab extends StatelessWidget {
   }
 }
 
+
+           class FriendRequestsPage extends StatelessWidget {
+  const FriendRequestsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Friend Requests'),
+      ),
+      body: const Center(
+        child: Text(
+          'No friend requests yet.',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+      
+
+
+class RoomInvitesPage extends StatelessWidget {
+  const RoomInvitesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Room Invites'),
+      ),
+      body: const Center(
+        child: Text(
+          'No room invites yet.',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+class FriendMessagesPage extends StatelessWidget {
+  const FriendMessagesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Friend Messages'),
+      ),
+      body: const Center(
+        child: Text(
+          'No messages yet.',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+
+class GiftsPage extends StatelessWidget {
+  const GiftsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Gifts'),
+      ),
+      body: const Center(
+        child: Text(
+          'No gifts yet.',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+
+class FriendsPage extends StatelessWidget {
+  const FriendsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Friends'),
+      ),
+      body: const Center(
+        child: Text(
+          'No friends yet.',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -1332,12 +1532,8 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  bool allNotifications = true;
-  bool messages = true;
-  bool friendRequests = true;
-  bool roomInvites = true;
-  bool gifts = true;
-  bool announcements = true;
+bool messages = true;
+bool announcements = true;
 
   @override
   Widget build(BuildContext context) {
@@ -1357,21 +1553,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
           const SizedBox(height: 20),
 
-          _notificationTile(
-            'All Notifications',
-            'Turn on or off all notifications.',
-            allNotifications,
-            (value) {
-              setState(() {
-                allNotifications = value;
-                messages = value;
-                friendRequests = value;
-                roomInvites = value;
-                gifts = value;
-                announcements = value;
-              });
-            },
-          ),
+          
 
           _notificationTile(
             'Messages',
@@ -1384,38 +1566,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
             },
           ),
 
-          _notificationTile(
-            'Friend Requests',
-            'Get notified when someone sends you a friend request.',
-            friendRequests,
-            (value) {
-              setState(() {
-                friendRequests = value;
-              });
-            },
-          ),
+          
 
-          _notificationTile(
-            'Room Invites',
-            'Get notified when someone invites you to a room.',
-            roomInvites,
-            (value) {
-              setState(() {
-                roomInvites = value;
-              });
-            },
-          ),
-
-          _notificationTile(
-            'Gifts',
-            'Get notified when you receive a gift.',
-            gifts,
-            (value) {
-              setState(() {
-                gifts = value;
-              });
-            },
-          ),
+          
+          
 
           _notificationTile(
             'Announcements',
