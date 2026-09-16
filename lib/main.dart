@@ -1270,7 +1270,14 @@ class SettingsPage extends StatelessWidget {
             leading: const Icon(Icons.notifications),
             title: const Text('Notifications'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const NotificationsPage(),
+    ),
+  );
+},
           ),
           ListTile(
             leading: const Icon(Icons.lock),
@@ -1311,6 +1318,141 @@ class SettingsPage extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+class NotificationsPage extends StatefulWidget {
+  const NotificationsPage({super.key});
+
+  @override
+  State<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  bool allNotifications = true;
+  bool messages = true;
+  bool friendRequests = true;
+  bool roomInvites = true;
+  bool gifts = true;
+  bool announcements = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Notifications'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const Text(
+            'Choose what you want to be notified about.',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          _notificationTile(
+            'All Notifications',
+            'Turn on or off all notifications.',
+            allNotifications,
+            (value) {
+              setState(() {
+                allNotifications = value;
+                messages = value;
+                friendRequests = value;
+                roomInvites = value;
+                gifts = value;
+                announcements = value;
+              });
+            },
+          ),
+
+          _notificationTile(
+            'Messages',
+            'Get notified when you receive a new message.',
+            messages,
+            (value) {
+              setState(() {
+                messages = value;
+              });
+            },
+          ),
+
+          _notificationTile(
+            'Friend Requests',
+            'Get notified when someone sends you a friend request.',
+            friendRequests,
+            (value) {
+              setState(() {
+                friendRequests = value;
+              });
+            },
+          ),
+
+          _notificationTile(
+            'Room Invites',
+            'Get notified when someone invites you to a room.',
+            roomInvites,
+            (value) {
+              setState(() {
+                roomInvites = value;
+              });
+            },
+          ),
+
+          _notificationTile(
+            'Gifts',
+            'Get notified when you receive a gift.',
+            gifts,
+            (value) {
+              setState(() {
+                gifts = value;
+              });
+            },
+          ),
+
+          _notificationTile(
+            'Announcements',
+            'Get notified about important updates and events from PartyChat.',
+            announcements,
+            (value) {
+              setState(() {
+                announcements = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _notificationTile(
+    String title,
+    String subtitle,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 5),
+        child: Text(subtitle),
+      ),
+      trailing: Switch(
+        value: value,
+        onChanged: onChanged,
       ),
     );
   }
