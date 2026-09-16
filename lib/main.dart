@@ -898,17 +898,31 @@ class ProfileTab extends StatelessWidget {
 
             final encodedPhoto = base64Encode(bytes);
 
-            try {
-              await userDoc.set(
-                {
-                  'photoBase64': encodedPhoto,
-                  'photoURL': '',
-                  'avatar': '',
-                },
-                SetOptions(merge: true),
-              );
+            final workerUrl = 'https://partychat-moderation.hamzajarar76.workers.dev';
+              try {
+             final response = await http.post(
+  Uri.parse(workerUrl),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: jsonEncode({
+    'media_base64': encodedPhoto,
+  }),
+);
 
-              if (!context.mounted) return;
+if (response.statusCode != 200) {
+  throw Exception('Photo moderation failed: ${response.statusCode}');
+}
+                  
+            await userDoc.set(
+  {
+    'photoBase64': encodedPhoto,
+    'photoURL': '',
+    'avatar': '',
+  },
+  SetOptions(merge: true),
+);
+     if (!context.mounted) return;
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
