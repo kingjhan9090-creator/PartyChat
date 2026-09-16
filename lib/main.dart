@@ -765,6 +765,8 @@ class WalletTab extends StatelessWidget {
   }
 }
 
+
+
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
@@ -778,9 +780,19 @@ class ProfileTab extends StatelessWidget {
       );
     }
 
-    final userDoc = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid);
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+    final avatarImages = {
+      'avatar1': 'assets/avatar1_pakistan_female-2.png',
+      'avatar2': 'assets/avatar2_uae_male.png',
+      'avatar3': 'assets/avatar3_uk_male.png',
+      'avatar4': 'assets/avatar4_russia_female.png',
+      'avatar5': 'assets/avatar5_saudi_female.png',
+      'avatar6': 'assets/avatar6_turkey_male.png',
+      'avatar7': 'assets/avatar7_india_female.png',
+      'avatar8': 'assets/avatar8_usa_male.png',
+    };
 
     return ListView(
       padding: const EdgeInsets.all(18),
@@ -795,9 +807,6 @@ class ProfileTab extends StatelessWidget {
 
         const SizedBox(height: 22),
 
-        // =========================
-        // PROFILE DP
-        // =========================
         Center(
           child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
             stream: userDoc.snapshots(),
@@ -808,44 +817,26 @@ class ProfileTab extends StatelessWidget {
               final photoBase64 = data?['photoBase64'] as String?;
               final avatar = data?['avatar'] as String?;
 
-              final avatarImages = {
-                'avatar1': 'assets/avatar1_pakistan_female-2.png',
-                'avatar2': 'assets/avatar2_uae_male.png',
-                'avatar3': 'assets/avatar3_uk_male.png',
-                'avatar4': 'assets/avatar4_russia_female.png',
-                'avatar5': 'assets/avatar5_saudi_female.png',
-                'avatar6': 'assets/avatar6_turkey_male.png',
-                'avatar7': 'assets/avatar7_india_female.png',
-                'avatar8': 'assets/avatar8_usa_male.png',
-              };
-
               ImageProvider<Object>? profileImage;
 
-              // Gallery photo first
               if (photoBase64 != null && photoBase64.isNotEmpty) {
                 try {
                   profileImage = MemoryImage(
                     base64Decode(photoBase64),
-                  ) as ImageProvider<Object>;
-                } catch (_) {
-                  profileImage = null;
-                }
+                  );
+                } catch (_) {}
               }
 
-              // Old network photo support
               if (profileImage == null &&
                   photoURL != null &&
                   photoURL.isNotEmpty) {
-                profileImage =
-                    NetworkImage(photoURL) as ImageProvider<Object>;
+                profileImage = NetworkImage(photoURL);
               }
 
-              // Avatar if no gallery photo
               if (profileImage == null &&
                   avatar != null &&
                   avatarImages[avatar] != null) {
-                profileImage =
-                    AssetImage(avatarImages[avatar]!) as ImageProvider<Object>;
+                profileImage = AssetImage(avatarImages[avatar]!);
               }
 
               return CircleAvatar(
@@ -864,9 +855,6 @@ class ProfileTab extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        // =========================
-        // CHANGE PROFILE PHOTO
-        // =========================
         ElevatedButton.icon(
           onPressed: () async {
             final picker = ImagePicker();
@@ -882,7 +870,6 @@ class ProfileTab extends StatelessWidget {
 
             final bytes = await image.readAsBytes();
 
-            // Safety limit for Firestore
             if (bytes.length > 500000) {
               if (!context.mounted) return;
 
@@ -898,39 +885,21 @@ class ProfileTab extends StatelessWidget {
 
             final encodedPhoto = base64Encode(bytes);
 
-            final workerUrl = 'https://partychat-moderation.hamzajarar76.workers.dev';
-              try {
-             final response = await http.post(
-  Uri.parse(workerUrl),
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: jsonEncode({
-    'media_base64': encodedPhoto,
-  }),
-);
+            try {
+              await userDoc.set(
+                {
+                  'photoBase64': encodedPhoto,
+                  'photoURL': '',
+                  'avatar': '',
+                },
+                SetOptions(merge: true),
+              );
 
-final result = jsonDecode(response.body);
-
-if (response.statusCode != 200 || result['allowed'] != true) {
-  throw Exception('Ye photo NSFW/porn content ki wajah se reject ho gayi.');
-}
-                  
-            await userDoc.set(
-  {
-    'photoBase64': encodedPhoto,
-    'photoURL': '',
-    'avatar': '',
-  },
-  SetOptions(merge: true),
-);
-     if (!context.mounted) return;
+              if (!context.mounted) return;
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text(
-                    'Profile photo save ho gayi 👍',
-                  ),
+                  content: Text('Profile photo save ho gayi 👍'),
                 ),
               );
             } catch (e) {
@@ -938,9 +907,7 @@ if (response.statusCode != 200 || result['allowed'] != true) {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    'Photo save nahi hui: $e',
-                  ),
+                  content: Text('Photo save nahi hui: $e'),
                 ),
               );
             }
@@ -951,9 +918,6 @@ if (response.statusCode != 200 || result['allowed'] != true) {
 
         const SizedBox(height: 12),
 
-        // =========================
-        // CHOOSE AVATAR
-        // =========================
         ElevatedButton.icon(
           onPressed: () async {
             final avatars = [
@@ -967,20 +931,9 @@ if (response.statusCode != 200 || result['allowed'] != true) {
               'avatar8',
             ];
 
-            final avatarImages = {
-              'avatar1': 'assets/avatar1_pakistan_female-2.png',
-              'avatar2': 'assets/avatar2_uae_male.png',
-              'avatar3': 'assets/avatar3_uk_male.png',
-              'avatar4': 'assets/avatar4_russia_female.png',
-              'avatar5': 'assets/avatar5_saudi_female.png',
-              'avatar6': 'assets/avatar6_turkey_male.png',
-              'avatar7': 'assets/avatar7_india_female.png',
-              'avatar8': 'assets/avatar8_usa_male.png',
-            };
-
-            String? selected = await showDialog<String>(
+            final selected = await showDialog<String>(
               context: context,
-              builder: (context) {
+              builder: (dialogContext) {
                 String? tempSelected;
 
                 return StatefulBuilder(
@@ -1006,6 +959,7 @@ if (response.statusCode != 200 || result['allowed'] != true) {
                               });
                             },
                             child: Container(
+                              padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: tempSelected == avatar
@@ -1016,7 +970,6 @@ if (response.statusCode != 200 || result['allowed'] != true) {
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: const EdgeInsets.all(4),
                               child: Image.asset(
                                 avatarImages[avatar]!,
                                 fit: BoxFit.contain,
@@ -1031,7 +984,7 @@ if (response.statusCode != 200 || result['allowed'] != true) {
                               ? null
                               : () {
                                   Navigator.pop(
-                                    context,
+                                    dialogContext,
                                     tempSelected,
                                   );
                                 },
@@ -1060,9 +1013,7 @@ if (response.statusCode != 200 || result['allowed'] != true) {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text(
-                    'Avatar save ho gaya 👍',
-                  ),
+                  content: Text('Avatar save ho gaya 👍'),
                 ),
               );
             } catch (e) {
@@ -1070,9 +1021,7 @@ if (response.statusCode != 200 || result['allowed'] != true) {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    'Avatar save nahi hua: $e',
-                  ),
+                  content: Text('Avatar save nahi hua: $e'),
                 ),
               );
             }
@@ -1083,12 +1032,8 @@ if (response.statusCode != 200 || result['allowed'] != true) {
 
         const SizedBox(height: 12),
 
-        // =========================
-        // USERNAME
-        // =========================
         Center(
-          child: StreamBuilder<
-              DocumentSnapshot<Map<String, dynamic>>>(
+          child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
             stream: userDoc.snapshots(),
             builder: (context, snapshot) {
               final data = snapshot.data?.data();
@@ -1106,20 +1051,20 @@ if (response.statusCode != 200 || result['allowed'] != true) {
           ),
         ),
 
+        const SizedBox(height: 4),
+
         const Center(
           child: Text(
             'VIP Level 3',
             style: TextStyle(
               color: Color(0xFFFFD15C),
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
 
-        const SizedBox(height: 15),
+        const SizedBox(height: 20),
 
-        // =========================
-        // CHANGE USERNAME
-        // =========================
         Center(
           child: ElevatedButton.icon(
             onPressed: () {
@@ -1145,11 +1090,9 @@ if (response.statusCode != 200 || result['allowed'] != true) {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        final newName =
-                            controller.text.trim();
+                        final newName = controller.text.trim();
 
-                        if (newName.isEmpty ||
-                            newName.length < 3 ||
+                        if (newName.length < 3 ||
                             newName.length > 12) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -1162,20 +1105,14 @@ if (response.statusCode != 200 || result['allowed'] != true) {
                         }
 
                         try {
-                          final data =
-                              (await userDoc.get()).data();
-
+                          final data = (await userDoc.get()).data();
                           final lastChange =
                               data?['lastNameChangeAt'];
 
-                          if (lastChange != null &&
-                              lastChange is Timestamp) {
-                            final lastTime =
-                                lastChange.toDate();
-
+                          if (lastChange is Timestamp) {
                             final difference =
                                 DateTime.now().difference(
-                              lastTime,
+                              lastChange.toDate(),
                             );
 
                             if (difference.inHours < 24) {
@@ -1255,141 +1192,122 @@ if (response.statusCode != 200 || result['allowed'] != true) {
           trailing: Icon(Icons.chevron_right),
         ),
 
-        // =========================
-        // SETTINGS
-        // =========================
         ListTile(
           leading: const Icon(Icons.settings),
           title: const Text('Settings'),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => const SettingsPage(),
-    ),
-  );
-},
-            class SettingsPage extends StatelessWidget {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsPage(),
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFF15121F),
+          ),
+          child: const Column(
+            children: [
+              Text(
+                'Coins',
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 6),
+              Text(
+                '12,580 🪙',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text('2,450 💎 Diamonds'),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 15),
+
+        FilledButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.add),
+          label: const Text('Recharge'),
+        ),
+
+        const SizedBox(height: 8),
+
+        OutlinedButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.history),
+          label: const Text('Transaction History'),
+        ),
+      ],
+    );
+  }
+}
+
+
+class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Settings',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Settings'),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 10),
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 8),
-            child: Text(
-              'General',
-              style: TextStyle(
-                color: Colors.white54,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
           ListTile(
             leading: const Icon(Icons.notifications),
             title: const Text('Notifications'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
-
           ListTile(
             leading: const Icon(Icons.lock),
             title: const Text('Privacy'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
-
           ListTile(
             leading: const Icon(Icons.language),
             title: const Text('Language'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
-
-          const Divider(),
-
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 8),
-            child: Text(
-              'Account',
-              style: TextStyle(
-                color: Colors.white54,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text('Account'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
-
           ListTile(
             leading: const Icon(Icons.block),
             title: const Text('Blocked Users'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
-
-          const Divider(),
-
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 8),
-            child: Text(
-              'Support',
-              style: TextStyle(
-                color: Colors.white54,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
           ListTile(
             leading: const Icon(Icons.help_outline),
             title: const Text('Help Center'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
-
-          const SizedBox(height: 10),
-
+          const Divider(),
           ListTile(
-            leading: const Icon(
-              Icons.logout,
-              color: Colors.redAccent,
-            ),
-            title: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.redAccent),
-            ),
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
             onTap: () async {
               await FirebaseAuth.instance.signOut();
-
-              if (!context.mounted) return;
-
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const WelcomePage(),
-                ),
-                (route) => false,
-              );
             },
           ),
         ],
@@ -1397,3 +1315,4 @@ if (response.statusCode != 200 || result['allowed'] != true) {
     );
   }
 }
+              
