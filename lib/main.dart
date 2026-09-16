@@ -1730,8 +1730,9 @@ Future<void> _loadPrivacySettings() async {
     'roomActivity': value,
   });
 },
+),
 
-          SwitchListTile(
+SwitchListTile(
             secondary: const Icon(Icons.lock),
             title: const Text('Private Account'),
             subtitle: const Text('Only approved people can interact with me'),
