@@ -1536,9 +1536,6 @@ class SettingsPage extends StatelessWidget {
 }
 
 
-
-
-
 class PrivacyPage extends StatefulWidget {
   const PrivacyPage({super.key});
 
@@ -1547,7 +1544,8 @@ class PrivacyPage extends StatefulWidget {
 }
 
 class _PrivacyPageState extends State<PrivacyPage> {
- String get userId => FirebaseAuth.instance.currentUser!.uid;
+  String get userId => FirebaseAuth.instance.currentUser!.uid;
+
   String profileVisibility = 'Everyone';
   String photoVisibility = 'Everyone';
   String messagePermission = 'Everyone';
@@ -1557,37 +1555,35 @@ class _PrivacyPageState extends State<PrivacyPage> {
   bool roomActivity = true;
   bool privateAccount = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadPrivacySettings();
+  }
 
+  Future<void> _loadPrivacySettings() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .get();
 
-@override
-void initState() {
-  super.initState();
-  _loadPrivacySettings();
-}
+    if (!doc.exists) return;
 
-Future<void> _loadPrivacySettings() async {
-  final doc = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .get();
+    final data = doc.data()!;
 
-  if (!doc.exists) return;
+    if (!mounted) return;
 
-  final data = doc.data()!;
+    setState(() {
+      profileVisibility = data['profileVisibility'] ?? 'Everyone';
+      photoVisibility = data['photoVisibility'] ?? 'Everyone';
+      messagePermission = data['messagePermission'] ?? 'Everyone';
+      giftPermission = data['giftPermission'] ?? 'Everyone';
+      onlineStatus = data['onlineStatus'] ?? true;
+      roomActivity = data['roomActivity'] ?? true;
+      privateAccount = data['privateAccount'] ?? false;
+    });
+  }
 
-  setState(() {
-    profileVisibility = data['profileVisibility'] ?? 'Everyone';
-    photoVisibility = data['photoVisibility'] ?? 'Everyone';
-    messagePermission = data['messagePermission'] ?? 'Everyone';
-    giftPermission = data['giftPermission'] ?? 'Everyone';
-    onlineStatus = data['onlineStatus'] ?? true;
-    roomActivity = data['roomActivity'] ?? true;
-    privateAccount = data['privateAccount'] ?? false;
-  });
-}
-
-
-    
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1607,71 +1603,73 @@ Future<void> _loadPrivacySettings() async {
                 ['Everyone', 'Friends Only', 'Nobody'],
                 profileVisibility,
                 (value) async {
-  setState(() {
-    profileVisibility = value;
-  });
+                  setState(() {
+                    profileVisibility = value;
+                  });
 
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-    'profileVisibility': value,
-   });
-},
-); 
-                
-                
-                ListTile(
-  leading: const Icon(Icons.photo),
-  title: const Text('Who can view my profile photo'),
-  subtitle: Text(photoVisibility),
-  trailing: const Icon(Icons.chevron_right),
-  onTap: () {
-    _chooseOption(
-      'Who can view my profile photo',
-      ['Everyone', 'Friends Only', 'Nobody'],
-      photoVisibility,
-      (value) async {
-        setState(() {
-          photoVisibility = value;
-        });
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .update({
-          'photoVisibility': value,
-        });
-      },
-    );
-  },
-),
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .update({
+                    'profileVisibility': value,
+                  });
+                },
+              );
+            },
+          ),
 
           ListTile(
-  leading: const Icon(Icons.message),
-  title: const Text('Who can message me'),
-  subtitle: Text(messagePermission),
-  trailing: const Icon(Icons.chevron_right),
-  onTap: () {
-    _chooseOption(
-      'Who can message me',
-      ['Everyone', 'Friends Only', 'Nobody'],
-      messagePermission,
-      (value) async {
-        setState(() {
-          messagePermission = value;
-        });
+            leading: const Icon(Icons.photo),
+            title: const Text('Who can view my profile photo'),
+            subtitle: Text(photoVisibility),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _chooseOption(
+                'Who can view my profile photo',
+                ['Everyone', 'Friends Only', 'Nobody'],
+                photoVisibility,
+                (value) async {
+                  setState(() {
+                    photoVisibility = value;
+                  });
 
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .update({
-          'messagePermission': value,
-        });
-      },
-    );
-  },
-),
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .update({
+                    'photoVisibility': value,
+                  });
+                },
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text('Who can message me'),
+            subtitle: Text(messagePermission),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _chooseOption(
+                'Who can message me',
+                ['Everyone', 'Friends Only', 'Nobody'],
+                messagePermission,
+                (value) async {
+                  setState(() {
+                    messagePermission = value;
+                  });
+
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .update({
+                    'messagePermission': value,
+                  });
+                },
+              );
+            },
+          ),
+
           ListTile(
             leading: const Icon(Icons.card_giftcard),
             title: const Text('Who can send me gifts'),
@@ -1683,17 +1681,17 @@ Future<void> _loadPrivacySettings() async {
                 ['Everyone', 'Friends Only', 'Nobody'],
                 giftPermission,
                 (value) async {
-  setState(() {
-    giftPermission = value;
-  });
+                  setState(() {
+                    giftPermission = value;
+                  });
 
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-    'giftPermission': value,
-  });
-},
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .update({
+                    'giftPermission': value,
+                  });
+                },
               );
             },
           ),
@@ -1703,18 +1701,18 @@ Future<void> _loadPrivacySettings() async {
             title: const Text('Online Status'),
             subtitle: const Text('Show when I am online'),
             value: onlineStatus,
-              onChanged: (value) async {
-  setState(() {
-    onlineStatus = value;
-  });
+            onChanged: (value) async {
+              setState(() {
+                onlineStatus = value;
+              });
 
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-    'onlineStatus': value,
-  });
-},
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId)
+                  .update({
+                'onlineStatus': value,
+              });
+            },
           ),
 
           SwitchListTile(
@@ -1723,37 +1721,40 @@ Future<void> _loadPrivacySettings() async {
             subtitle: const Text('Show my room activity to others'),
             value: roomActivity,
             onChanged: (value) async {
-  setState(() {
-    roomActivity = value;
-  });
+              setState(() {
+                roomActivity = value;
+              });
 
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-    'roomActivity': value,
-  });
-},
-),
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId)
+                  .update({
+                'roomActivity': value,
+              });
+            },
+          ),
 
-SwitchListTile(
+          SwitchListTile(
             secondary: const Icon(Icons.lock),
             title: const Text('Private Account'),
-            subtitle: const Text('Only approved people can interact with me'),
+            subtitle: const Text(
+              'Only approved people can interact with me',
+            ),
             value: privateAccount,
             onChanged: (value) async {
-  setState(() {
-    privateAccount = value;
-  });
+              setState(() {
+                privateAccount = value;
+              });
 
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-    'privateAccount': value,
-  });
-},
-),
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId)
+                  .update({
+                'privateAccount': value,
+              });
+            },
+          ),
+
           ListTile(
             leading: const Icon(Icons.block),
             title: const Text('Blocked Users'),
@@ -1808,6 +1809,12 @@ SwitchListTile(
   }
 }
 
+
+
+                
+                
+                
+  
 
 
 
