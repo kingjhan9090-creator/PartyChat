@@ -1452,8 +1452,6 @@ class FriendsPage extends StatelessWidget {
   }
 }
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
