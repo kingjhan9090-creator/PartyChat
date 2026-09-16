@@ -1622,52 +1622,56 @@ Future<void> _loadPrivacySettings() async {
                 
                 
                 ListTile(
-            leading: const Icon(Icons.photo),
-            title: const Text('Who can view my profile photo'),
-            subtitle: Text(photoVisibility),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _chooseOption(
-                'Who can view my profile photo',
-                ['Everyone', 'Friends Only', 'Nobody'],
-                photoVisibility,
-                (value) async {
-  setState(() {
-    photoVisibility = value;
-  });
+  leading: const Icon(Icons.photo),
+  title: const Text('Who can view my profile photo'),
+  subtitle: Text(photoVisibility),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    _chooseOption(
+      'Who can view my profile photo',
+      ['Everyone', 'Friends Only', 'Nobody'],
+      photoVisibility,
+      (value) async {
+        setState(() {
+          photoVisibility = value;
+        });
 
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-    'photoVisibility': value,
-});
-},
-)
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({
+          'photoVisibility': value,
+        });
+      },
+    );
+  },
+),
 
           ListTile(
-            leading: const Icon(Icons.message),
-            title: const Text('Who can message me'),
-            subtitle: Text(messagePermission),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _chooseOption(
-                'Who can message me',
-                ['Everyone', 'Friends Only', 'Nobody'],
-                messagePermission,
-                (value) async {
-  setState(() {
-    messagePermission = value;
-  });
+  leading: const Icon(Icons.message),
+  title: const Text('Who can message me'),
+  subtitle: Text(messagePermission),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () {
+    _chooseOption(
+      'Who can message me',
+      ['Everyone', 'Friends Only', 'Nobody'],
+      messagePermission,
+      (value) async {
+        setState(() {
+          messagePermission = value;
+        });
 
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-    'messagePermission': value,
-  });
-},
-);
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({
+          'messagePermission': value,
+        });
+      },
+    );
+  },
+),
           ListTile(
             leading: const Icon(Icons.card_giftcard),
             title: const Text('Who can send me gifts'),
@@ -1749,7 +1753,7 @@ SwitchListTile(
     'privateAccount': value,
   });
 },
-
+),
           ListTile(
             leading: const Icon(Icons.block),
             title: const Text('Blocked Users'),
