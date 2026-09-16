@@ -910,8 +910,10 @@ class ProfileTab extends StatelessWidget {
   }),
 );
 
-if (response.statusCode != 200) {
-  throw Exception('Photo moderation failed: ${response.statusCode}');
+final result = jsonDecode(response.body);
+
+if (response.statusCode != 200 || result['allowed'] != true) {
+  throw Exception('Ye photo NSFW/porn content ki wajah se reject ho gayi.');
 }
                   
             await userDoc.set(
