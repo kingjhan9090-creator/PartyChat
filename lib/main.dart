@@ -1481,13 +1481,27 @@ class SettingsPage extends StatelessWidget {
             leading: const Icon(Icons.lock),
             title: const Text('Privacy'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const PrivacyPage(),
+    ),
+  );
+},
           ),
           ListTile(
             leading: const Icon(Icons.language),
             title: const Text('Language'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const LanguagePage(),
+    ),
+  );
+},
           ),
           ListTile(
             leading: const Icon(Icons.person),
@@ -1520,6 +1534,248 @@ class SettingsPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+class PrivacyPage extends StatefulWidget {
+  const PrivacyPage({super.key});
+
+  @override
+  State<PrivacyPage> createState() => _PrivacyPageState();
+}
+
+class _PrivacyPageState extends State<PrivacyPage> {
+  String profileVisibility = 'Everyone';
+  String photoVisibility = 'Everyone';
+  String messagePermission = 'Everyone';
+  String giftPermission = 'Everyone';
+
+  bool onlineStatus = true;
+  bool roomActivity = true;
+  bool privateAccount = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Privacy'),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Who can view my profile'),
+            subtitle: Text(profileVisibility),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _chooseOption(
+                'Who can view my profile',
+                ['Everyone', 'Friends Only', 'Nobody'],
+                profileVisibility,
+                (value) => setState(() {
+                  profileVisibility = value;
+                }),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.photo),
+            title: const Text('Who can view my profile photo'),
+            subtitle: Text(photoVisibility),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _chooseOption(
+                'Who can view my profile photo',
+                ['Everyone', 'Friends Only', 'Nobody'],
+                photoVisibility,
+                (value) => setState(() {
+                  photoVisibility = value;
+                }),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text('Who can message me'),
+            subtitle: Text(messagePermission),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _chooseOption(
+                'Who can message me',
+                ['Everyone', 'Friends Only', 'Nobody'],
+                messagePermission,
+                (value) => setState(() {
+                  messagePermission = value;
+                }),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.card_giftcard),
+            title: const Text('Who can send me gifts'),
+            subtitle: Text(giftPermission),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _chooseOption(
+                'Who can send me gifts',
+                ['Everyone', 'Friends Only', 'Nobody'],
+                giftPermission,
+                (value) => setState(() {
+                  giftPermission = value;
+                }),
+              );
+            },
+          ),
+
+          SwitchListTile(
+            secondary: const Icon(Icons.circle),
+            title: const Text('Online Status'),
+            subtitle: const Text('Show when I am online'),
+            value: onlineStatus,
+            onChanged: (value) {
+              setState(() {
+                onlineStatus = value;
+              });
+            },
+          ),
+
+          SwitchListTile(
+            secondary: const Icon(Icons.meeting_room),
+            title: const Text('Room Activity Visibility'),
+            subtitle: const Text('Show my room activity to others'),
+            value: roomActivity,
+            onChanged: (value) {
+              setState(() {
+                roomActivity = value;
+              });
+            },
+          ),
+
+          SwitchListTile(
+            secondary: const Icon(Icons.lock),
+            title: const Text('Private Account'),
+            subtitle: const Text('Only approved people can interact with me'),
+            value: privateAccount,
+            onChanged: (value) {
+              setState(() {
+                privateAccount = value;
+              });
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.block),
+            title: const Text('Blocked Users'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _chooseOption(
+    String title,
+    List<String> options,
+    String currentValue,
+    ValueChanged<String> onSelected,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ...options.map(
+                (option) => ListTile(
+                  title: Text(option),
+                  trailing: option == currentValue
+                      ? const Icon(Icons.check)
+                      : null,
+                  onTap: () {
+                    onSelected(option);
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+
+
+class LanguagePage extends StatefulWidget {
+  const LanguagePage({super.key});
+
+  @override
+  State<LanguagePage> createState() => _LanguagePageState();
+}
+
+class _LanguagePageState extends State<LanguagePage> {
+  String selectedLanguage = 'English';
+
+  final List<String> languages = [
+    'English',
+    'Urdu',
+    'Hindi',
+    'Arabic',
+    'Bengali',
+    'Turkish',
+    'Indonesian',
+    'Spanish',
+    'French',
+    'Chinese',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Language'),
+      ),
+      body: ListView.builder(
+        itemCount: languages.length,
+        itemBuilder: (context, index) {
+          final language = languages[index];
+
+          return ListTile(
+            title: Text(language),
+            trailing: language == selectedLanguage
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () {
+              setState(() {
+                selectedLanguage = language;
+              });
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
 
 
 class NotificationsPage extends StatefulWidget {
