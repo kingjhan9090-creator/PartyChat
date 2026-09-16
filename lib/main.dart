@@ -1263,41 +1263,137 @@ if (response.statusCode != 200 || result['allowed'] != true) {
           title: const Text('Settings'),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Settings'),
-                content: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.notifications),
-                      title: Text('Notifications'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.lock),
-                      title: Text('Privacy'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.language),
-                      title: Text('Language'),
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-            );
-          },
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const SettingsPage(),
+    ),
+  );
+},
+            class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Settings',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-      ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 8),
+            child: Text(
+              'General',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Notifications'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.lock),
+            title: const Text('Privacy'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: const Text('Language'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+
+          const Divider(),
+
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 8),
+            child: Text(
+              'Account',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Account'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.block),
+            title: const Text('Blocked Users'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+
+          const Divider(),
+
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 8),
+            child: Text(
+              'Support',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('Help Center'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+
+          const SizedBox(height: 10),
+
+          ListTile(
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.redAccent,
+            ),
+            title: const Text(
+              'Logout',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+            onTap: () async {
+              await FirebaseAuth.instance.signOut();
+
+              if (!context.mounted) return;
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const WelcomePage(),
+                ),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
-        
