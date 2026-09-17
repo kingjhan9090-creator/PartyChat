@@ -976,10 +976,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
-Future<void> continueWithGoogle() async {
-  try {
-    final GoogleSignInAccount? googleUser =
-        await GoogleSignIn().signIn();
+final GoogleSignInAccount? googleUser =
+    await GoogleSignIn(
+      serverClientId:
+          '921954130312-51u4nsu0f1eqsssei3ph1o12hkunfomu.apps.googleusercontent.com',
+    ).signIn();
 
     if (googleUser == null) return;
 
