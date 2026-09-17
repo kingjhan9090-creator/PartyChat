@@ -1811,13 +1811,6 @@ class _PrivacyPageState extends State<PrivacyPage> {
 
 
 
-                
-                
-                
-  
-
-
-
 class LanguagePage extends StatefulWidget {
   const LanguagePage({super.key});
 
@@ -1842,6 +1835,55 @@ class _LanguagePageState extends State<LanguagePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (!doc.exists) return;
+
+    final savedLanguage = doc.data()?['language'];
+
+    if (savedLanguage != null && languages.contains(savedLanguage)) {
+      if (!mounted) return;
+
+      setState(() {
+        selectedLanguage = savedLanguage;
+      });
+    }
+  }
+
+  Future<void> _selectLanguage(String language) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    setState(() {
+      selectedLanguage = language;
+    });
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set(
+      {
+        'language': language,
+      },
+      SetOptions(merge: true),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -1858,9 +1900,7 @@ class _LanguagePageState extends State<LanguagePage> {
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
-              setState(() {
-                selectedLanguage = language;
-              });
+              _selectLanguage(language);
             },
           );
         },
