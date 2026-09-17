@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "921954130312-1tvqen0lln84aujrce588m12i2ptm0ov.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.partychat.app",
+            "certificate_hash": "34385f38b69b9a282e2d9aa6cf8b330926fe5af2"
+          }
+        },
+        {
           "client_id": "921954130312-970ob4d0krsqeko9r7akafsq1g28uv7o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
