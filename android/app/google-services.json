@@ -12,7 +12,20 @@
           "package_name": "com.partychat.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "921954130312-970ob4d0krsqeko9r7akafsq1g28uv7o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.partychat.app",
+            "certificate_hash": "12cb8dc6bea52299bde0f8ba24ed3ea0a9dd49a0"
+          }
+        },
+        {
+          "client_id": "921954130312-51u4nsu0f1eqsssei3ph1o12hkunfomu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDNkyrW0Z73XDfQIVDvOuOxCbPsS8FCN3U"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "921954130312-51u4nsu0f1eqsssei3ph1o12hkunfomu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
