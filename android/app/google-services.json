@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "921954130312-ofrm72rhpjsrqq74evkj5u378m8macq7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.partychat.app",
+            "certificate_hash": "ae3ec1b969c12b52b859b3534b1e7b629c821f33"
+          }
+        },
+        {
           "client_id": "921954130312-51u4nsu0f1eqsssei3ph1o12hkunfomu.apps.googleusercontent.com",
           "client_type": 3
         }
