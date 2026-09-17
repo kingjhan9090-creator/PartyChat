@@ -92,11 +92,16 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      
       - name: Build APK
         run: |
          flutter build apk --release \
                 --dart-define=ZEGO_APP_ID="${{ vars.ZEGOCLOUD_APP_ID }}" \
           --dart-define=ZEGO_APP_SIGN="${{ secrets.ZEGOCLOUD_APP_SIGN }}"
+
+      - name: Check release APK SHA-1
+        run: |
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
