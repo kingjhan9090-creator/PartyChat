@@ -2693,113 +2693,104 @@ class SettingsPage extends StatelessWidget {
           body: ListView(
             children: [
               ListTile(
-                leading:
-                    const Icon(Icons.notifications),
+                leading: const Icon(Icons.notifications),
                 title: Text(
-                  AppLanguage.text(
-                    'notifications',
-                  ),
+                  AppLanguage.text('notifications'),
                 ),
-                trailing:
-                    const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const NotificationsPage(),
+                      builder: (_) => const NotificationsPage(),
                     ),
                   );
                 },
               ),
+
               ListTile(
-                leading:
-                    const Icon(Icons.lock),
+                leading: const Icon(Icons.lock),
                 title: Text(
                   AppLanguage.text('privacy'),
                 ),
-                trailing:
-                    const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const PrivacyPage(),
+                      builder: (_) => const PrivacyPage(),
                     ),
                   );
                 },
               ),
+
               ListTile(
-                leading:
-                    const Icon(Icons.language),
+                leading: const Icon(Icons.language),
                 title: Text(
                   AppLanguage.text('language'),
                 ),
-                trailing:
-                    const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const LanguagePage(),
+                      builder: (_) => const LanguagePage(),
                     ),
                   );
                 },
               ),
+
+              // ACCOUNT
               ListTile(
-                leading:
-                    const Icon(Icons.person),
+                leading: const Icon(Icons.person),
                 title: Text(
                   AppLanguage.text('account'),
                 ),
-                trailing:
-                    const Icon(Icons.chevron_right),
-                onTap: () {},
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AccountPage(),
+                    ),
+                  );
+                },
               ),
+
               ListTile(
-                leading:
-                    const Icon(Icons.block),
+                leading: const Icon(Icons.block),
                 title: Text(
-                  AppLanguage.text(
-                    'blocked_users',
-                  ),
+                  AppLanguage.text('blocked_users'),
                 ),
-                trailing:
-                    const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.chevron_right),
                 onTap: () {},
               ),
+
               ListTile(
-                leading:
-                    const Icon(Icons.help_outline),
+                leading: const Icon(Icons.help_outline),
                 title: Text(
-                  AppLanguage.text(
-                    'help_center',
-                  ),
+                  AppLanguage.text('help_center'),
                 ),
-                trailing:
-                    const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.chevron_right),
                 onTap: () {},
               ),
+
               const Divider(),
+
               ListTile(
-                leading:
-                    const Icon(Icons.logout),
+                leading: const Icon(Icons.logout),
                 title: Text(
                   AppLanguage.text('logout'),
                 ),
                 onTap: () async {
-                  await FirebaseAuth.instance
-                      .signOut();
+                  await FirebaseAuth.instance.signOut();
 
                   if (!context.mounted) return;
 
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const WelcomePage(),
+                      builder: (_) => const WelcomePage(),
                     ),
                     (route) => false,
                   );
@@ -2812,6 +2803,313 @@ class SettingsPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
+
+class AccountPage extends StatelessWidget {
+  const AccountPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Account'),
+        ),
+        body: const Center(
+          child: Text('Please login first.'),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Account'),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.email),
+            title: const Text('Email'),
+            subtitle: Text(
+              user.email ?? 'Not available',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showEmailDialog(context, user);
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.phone),
+            title: const Text('Mobile Number'),
+            subtitle: const Text('Not linked'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoon(context, 'Mobile Number');
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.facebook),
+            title: const Text('Facebook'),
+            subtitle: const Text('Not connected'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoon(context, 'Facebook');
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.alternate_email),
+            title: const Text('Twitter'),
+            subtitle: const Text('Not connected'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoon(context, 'Twitter');
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.security),
+            title: const Text('Password & Security'),
+            subtitle: const Text(
+              'Manage your password and security',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoon(
+                context,
+                'Password & Security',
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.devices),
+            title: const Text('Login Devices'),
+            subtitle: const Text(
+              'Manage devices signed in to your account',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoon(
+                context,
+                'Login Devices',
+              );
+            },
+          ),
+
+          const Divider(),
+
+          ListTile(
+            leading: const Icon(
+              Icons.delete_forever,
+              color: Colors.red,
+            ),
+            title: const Text(
+              'Delete Account',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            subtitle: const Text(
+              'Permanently delete your PartyChat account',
+            ),
+            onTap: () {
+              _showDeleteAccountDialog(context, user);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Future<void> _showEmailDialog(
+    BuildContext context,
+    User user,
+  ) async {
+    final controller = TextEditingController(
+      text: user.email ?? '',
+    );
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Email'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final email = controller.text.trim();
+
+                if (email.isEmpty) return;
+
+                try {
+                  await user.verifyBeforeUpdateEmail(email);
+
+                  if (!dialogContext.mounted) return;
+
+                  Navigator.pop(dialogContext);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Verification email sent. Please verify your new email.',
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  if (!dialogContext.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Could not change email: $e',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+  }
+
+  static void _showComingSoon(
+    BuildContext context,
+    String feature,
+  ) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$feature setup will be completed next.',
+        ),
+      ),
+    );
+  }
+
+  static Future<void> _showDeleteAccountDialog(
+    BuildContext context,
+    User user,
+  ) async {
+    final confirmController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Account?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'This will permanently delete your PartyChat account. '
+                'This action cannot be undone.',
+              ),
+              const SizedBox(height: 15),
+              TextField(
+                controller: confirmController,
+                decoration: const InputDecoration(
+                  labelText: 'Type DELETE to confirm',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              onPressed: () async {
+                if (confirmController.text.trim() != 'DELETE') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Please type DELETE to confirm.',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .delete();
+
+                  await user.delete();
+
+                  if (!dialogContext.mounted) return;
+
+                  Navigator.pop(dialogContext);
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WelcomePage(),
+                    ),
+                    (route) => false,
+                  );
+                } catch (e) {
+                  if (!dialogContext.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Account deletion failed: $e',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    confirmController.dispose();
+  }
+}
+
+
+
 
 /* ============================================================
    PRIVACY
