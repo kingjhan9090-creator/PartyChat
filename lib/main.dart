@@ -868,6 +868,7 @@ class WelcomePage extends StatelessWidget {
    LOGIN
    ============================================================ */
 
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -979,102 +980,251 @@ class _LoginPageState extends State<LoginPage> {
       valueListenable: AppLanguage.current,
       builder: (context, language, child) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              signup
-                  ? AppLanguage.text('create_account')
-                  : AppLanguage.text('login'),
-            ),
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 25),
-                const Icon(
-                  Icons.account_circle,
-                  size: 90,
-                ),
-                const SizedBox(height: 25),
-                Text(
-                  signup
-                      ? AppLanguage.text('create_account')
-                      : AppLanguage.text('welcome_back'),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 30,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 30),
+
+                  // PartyChat icon
+                  const Icon(
+                    Icons.chat_bubble_rounded,
+                    size: 75,
                   ),
-                ),
-                const SizedBox(height: 25),
-                if (signup)
+
+                  const SizedBox(height: 14),
+
+                  // PartyChat name
+                  const Text(
+                    'PartyChat',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    'Welcome to PartyChat',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Login / Sign Up
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () {
+                            setState(() {
+                              signup = false;
+                            });
+                          },
+                          child: const Text('Login'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              signup = true;
+                            });
+                          },
+                          child: const Text('Sign Up'),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Google
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // Google Firebase login already connected.
+                        // Is button ki functionality ko abhi change nahi kar rahe.
+                      },
+                      icon: const Icon(
+                        Icons.g_mobiledata,
+                        size: 30,
+                      ),
+                      label: const Text(
+                        'Continue with Google',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Facebook
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // Facebook baad mein connect karenge.
+                      },
+                      icon: const Icon(
+                        Icons.facebook,
+                      ),
+                      label: const Text(
+                        'Continue with Facebook',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Twitter / X
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // Twitter/X baad mein connect karenge.
+                      },
+                      icon: const Icon(
+                        Icons.close,
+                      ),
+                      label: const Text(
+                        'Continue with Twitter / X',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Mobile Number
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // Mobile login baad mein connect karenge.
+                      },
+                      icon: const Icon(
+                        Icons.phone_android,
+                      ),
+                      label: const Text(
+                        'Continue with Mobile Number',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Email / Password section
+                  if (signup)
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: AppLanguage.text('username'),
+                        prefixIcon: const Icon(
+                          Icons.person,
+                        ),
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+
+                  if (signup)
+                    const SizedBox(height: 14),
+
                   TextField(
-                    controller: nameController,
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: AppLanguage.text('username'),
-                      prefixIcon: const Icon(Icons.person),
+                      labelText: AppLanguage.text('email'),
+                      prefixIcon: const Icon(
+                        Icons.email,
+                      ),
                       border: const OutlineInputBorder(),
                     ),
                   ),
-                if (signup) const SizedBox(height: 14),
-                TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: AppLanguage.text('email'),
-                    prefixIcon: const Icon(Icons.email),
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: passwordController,
-                  obscureText: obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: AppLanguage.text('password'),
-                    prefixIcon: const Icon(Icons.lock),
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+
+                  const SizedBox(height: 14),
+
+                  TextField(
+                    controller: passwordController,
+                    obscureText: obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: AppLanguage.text('password'),
+                      prefixIcon: const Icon(
+                        Icons.lock,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          obscurePassword = !obscurePassword;
-                        });
-                      },
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscurePassword = !obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 52,
-                  child: FilledButton(
-                    onPressed: continueToApp,
-                    child: Text(
-                      signup
-                          ? AppLanguage.text('create_account')
-                          : AppLanguage.text('login'),
+
+                  const SizedBox(height: 18),
+
+                  SizedBox(
+                    height: 52,
+                    child: FilledButton(
+                      onPressed: continueToApp,
+                      child: Text(
+                        signup
+                            ? AppLanguage.text('create_account')
+                            : AppLanguage.text('login'),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      signup = !signup;
-                    });
-                  },
-                  child: Text(
-                    signup
-                        ? '${AppLanguage.text('account')}? ${AppLanguage.text('login')}'
-                        : '${AppLanguage.text('create_account')}?',
+
+                  const SizedBox(height: 12),
+
+                  // Create New Account
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        signup = true;
+                      });
+                    },
+                    child: const Text(
+                      'Create New Account',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         );
@@ -1082,6 +1232,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
+
 
 /* ============================================================
    MAIN PAGE
