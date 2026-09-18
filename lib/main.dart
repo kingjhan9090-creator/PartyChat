@@ -101,6 +101,7 @@ class AppLanguage {
       'room_activity': 'Room Activity Visibility',
       'private_account': 'Private Account',
     },
+
     'Urdu': {
       'settings': 'سیٹنگز',
       'language': 'زبان',
@@ -155,6 +156,7 @@ class AppLanguage {
       'room_activity': 'روم ایکٹیویٹی',
       'private_account': 'پرائیویٹ اکاؤنٹ',
     },
+
     'Hindi': {
       'settings': 'सेटिंग्स',
       'language': 'भाषा',
@@ -209,6 +211,7 @@ class AppLanguage {
       'room_activity': 'रूम एक्टिविटी',
       'private_account': 'प्राइवेट अकाउंट',
     },
+
     'Arabic': {
       'settings': 'الإعدادات',
       'language': 'اللغة',
@@ -263,6 +266,7 @@ class AppLanguage {
       'room_activity': 'نشاط الغرفة',
       'private_account': 'حساب خاص',
     },
+
     'Bengali': {
       'settings': 'সেটিংস',
       'language': 'ভাষা',
@@ -314,1289 +318,13 @@ class AppLanguage {
       'my_wallet': 'আমার ওয়ালেট',
       'vip_level': 'VIP লেভেল 3',
       'online_status': 'অনলাইন স্ট্যাটাস',
-      'room_activity': 'রুম কার্যকলাপ',
+      'room_activity': 'রুম অ্যাক্টিভিটি',
       'private_account': 'প্রাইভেট অ্যাকাউন্ট',
     },
-    'Turkish': {
-      'settings': 'Ayarlar',
-      'language': 'Dil',
-      'privacy': 'Gizlilik',
-      'notifications': 'Bildirimler',
-      'messages': 'Mesajlar',
-      'announcements': 'Duyurular',
-      'friends': 'Arkadaşlar',
-      'gifts': 'Hediyeler',
-      'blocked_users': 'Engellenen Kullanıcılar',
-      'home': 'Ana Sayfa',
-      'rooms': 'Odalar',
-      'games': 'Oyunlar',
-      'wallet': 'Cüzdan',
-      'profile': 'Profil',
-      'join': 'Katıl',
-      'login': 'Giriş',
-      'create_account': 'Hesap Oluştur',
-      'get_started': 'Başla',
-      'username': 'Kullanıcı Adı',
-      'email': 'E-posta',
-      'password': 'Şifre',
-      'welcome': 'Hoş Geldiniz',
-      'welcome_back': 'Tekrar hoş geldiniz',
-      'chat_rooms': 'Sohbet Odaları',
-      'popular_rooms': 'Popüler Odalar 🔥',
-      'your_balance': 'Bakiyeniz',
-      'diamonds': 'Elmaslar',
-      'online': 'çevrimiçi',
-      'account': 'Hesap',
-      'help_center': 'Yardım Merkezi',
-      'logout': 'Çıkış',
-      'privacy_settings': 'Gizlilik',
-      'friend_requests': 'Arkadaşlık İstekleri',
-      'room_invites': 'Oda Davetleri',
-      'friend_messages': 'Arkadaş Mesajları',
-      'my_gifts': 'Hediyelerim',
-      'transaction_history': 'İşlem Geçmişi',
-      'coins': 'Paralar',
-      'recharge': 'Yükle',
-      'welcome_to_partychat': 'PartyChat\'e Hoş Geldiniz',
-      'chat_play_make_friends': 'Sohbet • Oyna • Arkadaş Edin',
-      'change_profile_photo': 'Profil Fotoğrafını Değiştir',
-      'choose_avatar': 'Avatar Seç',
-      'change_username': 'Kullanıcı Adını Değiştir',
-      'save': 'Kaydet',
-      'cancel': 'İptal',
-      'play_now': 'Şimdi Oyna',
-      'my_wallet': 'Cüzdanım',
-      'vip_level': 'VIP Seviye 3',
-      'online_status': 'Çevrimiçi Durumu',
-      'room_activity': 'Oda Aktivitesi',
-      'private_account': 'Özel Hesap',
-    },
-    'Indonesian': {
-      'settings': 'Pengaturan',
-      'language': 'Bahasa',
-      'privacy': 'Privasi',
-      'notifications': 'Notifikasi',
-      'messages': 'Pesan',
-      'announcements': 'Pengumuman',
-      'friends': 'Teman',
-      'gifts': 'Hadiah',
-      'blocked_users': 'Pengguna Diblokir',
-      'home': 'Beranda',
-      'rooms': 'Ruang',
-      'games': 'Game',
-      'wallet': 'Dompet',
-      'profile': 'Profil',
-      'join': 'Gabung',
-      'login': 'Masuk',
-      'create_account': 'Buat Akun',
-      'get_started': 'Mulai',
-      'username': 'Nama Pengguna',
-      'email': 'Email',
-      'password': 'Kata Sandi',
-      'welcome': 'Selamat Datang',
-      'welcome_back': 'Selamat datang kembali',
-      'chat_rooms': 'Ruang Chat',
-      'popular_rooms': 'Ruang Populer 🔥',
-      'your_balance': 'Saldo Anda',
-      'diamonds': 'Berlian',
-      'online': 'online',
-      'account': 'Akun',
-      'help_center': 'Pusat Bantuan',
-      'logout': 'Keluar',
-      'privacy_settings': 'Privasi',
-      'friend_requests': 'Permintaan Teman',
-      'room_invites': 'Undangan Ruang',
-      'friend_messages': 'Pesan Teman',
-      'my_gifts': 'Hadiah Saya',
-      'transaction_history': 'Riwayat Transaksi',
-      'coins': 'Koin',
-      'recharge': 'Isi Ulang',
-      'welcome_to_partychat': 'Selamat Datang di PartyChat',
-      'chat_play_make_friends': 'Chat • Main • Cari Teman',
-      'change_profile_photo': 'Ubah Foto Profil',
-      'choose_avatar': 'Pilih Avatar',
-      'change_username': 'Ubah Nama Pengguna',
-      'save': 'Simpan',
-      'cancel': 'Batal',
-      'play_now': 'Main Sekarang',
-      'my_wallet': 'Dompet Saya',
-      'vip_level': 'VIP Level 3',
-      'online_status': 'Status Online',
-      'room_activity': 'Aktivitas Ruang',
-      'private_account': 'Akun Privat',
-    },
-    'Spanish': {
-      'settings': 'Ajustes',
-      'language': 'Idioma',
-      'privacy': 'Privacidad',
-      'notifications': 'Notificaciones',
-      'messages': 'Mensajes',
-      'announcements': 'Anuncios',
-      'friends': 'Amigos',
-      'gifts': 'Regalos',
-      'blocked_users': 'Usuarios bloqueados',
-      'home': 'Inicio',
-      'rooms': 'Salas',
-      'games': 'Juegos',
-      'wallet': 'Billetera',
-      'profile': 'Perfil',
-      'join': 'Unirse',
-      'login': 'Iniciar sesión',
-      'create_account': 'Crear cuenta',
-      'get_started': 'Comenzar',
-      'username': 'Nombre de usuario',
-      'email': 'Correo electrónico',
-      'password': 'Contraseña',
-      'welcome': 'Bienvenido',
-      'welcome_back': 'Bienvenido de nuevo',
-      'chat_rooms': 'Salas de chat',
-      'popular_rooms': 'Salas populares 🔥',
-      'your_balance': 'Tu saldo',
-      'diamonds': 'Diamantes',
-      'online': 'en línea',
-      'account': 'Cuenta',
-      'help_center': 'Centro de ayuda',
-      'logout': 'Cerrar sesión',
-      'privacy_settings': 'Privacidad',
-      'friend_requests': 'Solicitudes de amistad',
-      'room_invites': 'Invitaciones de sala',
-      'friend_messages': 'Mensajes de amigos',
-      'my_gifts': 'Mis regalos',
-      'transaction_history': 'Historial de transacciones',
-      'coins': 'Monedas',
-      'recharge': 'Recargar',
-      'welcome_to_partychat': 'Bienvenido a PartyChat',
-      'chat_play_make_friends': 'Chatea • Juega • Haz amigos',
-      'change_profile_photo': 'Cambiar foto de perfil',
-      'choose_avatar': 'Elegir avatar',
-      'change_username': 'Cambiar nombre de usuario',
-      'save': 'Guardar',
-      'cancel': 'Cancelar',
-      'play_now': 'Jugar ahora',
-      'my_wallet': 'Mi billetera',
-      'vip_level': 'Nivel VIP 3',
-      'online_status': 'Estado en línea',
-      'room_activity': 'Actividad de sala',
-      'private_account': 'Cuenta privada',
-    },
-    'French': {
-      'settings': 'Paramètres',
-      'language': 'Langue',
-      'privacy': 'Confidentialité',
-      'notifications': 'Notifications',
-      'messages': 'Messages',
-      'announcements': 'Annonces',
-      'friends': 'Amis',
-      'gifts': 'Cadeaux',
-      'blocked_users': 'Utilisateurs bloqués',
-      'home': 'Accueil',
-      'rooms': 'Salons',
-      'games': 'Jeux',
-      'wallet': 'Portefeuille',
-      'profile': 'Profil',
-      'join': 'Rejoindre',
-      'login': 'Connexion',
-      'create_account': 'Créer un compte',
-      'get_started': 'Commencer',
-      'username': 'Nom d’utilisateur',
-      'email': 'E-mail',
-      'password': 'Mot de passe',
-      'welcome': 'Bienvenue',
-      'welcome_back': 'Bon retour',
-      'chat_rooms': 'Salons de discussion',
-      'popular_rooms': 'Salons populaires 🔥',
-      'your_balance': 'Votre solde',
-      'diamonds': 'Diamants',
-      'online': 'en ligne',
-      'account': 'Compte',
-      'help_center': 'Centre d’aide',
-      'logout': 'Déconnexion',
-      'privacy_settings': 'Confidentialité',
-      'friend_requests': 'Demandes d’amis',
-      'room_invites': 'Invitations de salon',
-      'friend_messages': 'Messages des amis',
-      'my_gifts': 'Mes cadeaux',
-      'transaction_history': 'Historique des transactions',
-      'coins': 'Pièces',
-      'recharge': 'Recharger',
-      'welcome_to_partychat': 'Bienvenue sur PartyChat',
-      'chat_play_make_friends': 'Discutez • Jouez • Faites des amis',
-      'change_profile_photo': 'Changer la photo de profil',
-      'choose_avatar': 'Choisir un avatar',
-      'change_username': 'Changer le nom d’utilisateur',
-      'save': 'Enregistrer',
-      'cancel': 'Annuler',
-      'play_now': 'Jouer maintenant',
-      'my_wallet': 'Mon portefeuille',
-      'vip_level': 'Niveau VIP 3',
-      'online_status': 'Statut en ligne',
-      'room_activity': 'Activité du salon',
-      'private_account': 'Compte privé',
-    },
-    'Chinese': {
-      'settings': '设置',
-      'language': '语言',
-      'privacy': '隐私',
-      'notifications': '通知',
-      'messages': '消息',
-      'announcements': '公告',
-      'friends': '好友',
-      'gifts': '礼物',
-      'blocked_users': '已屏蔽用户',
-      'home': '首页',
-      'rooms': '房间',
-      'games': '游戏',
-      'wallet': '钱包',
-      'profile': '个人资料',
-      'join': '加入',
-      'login': '登录',
-      'create_account': '创建账号',
-      'get_started': '开始',
-      'username': '用户名',
-      'email': '邮箱',
-      'password': '密码',
-      'welcome': '欢迎',
-      'welcome_back': '欢迎回来',
-      'chat_rooms': '聊天房间',
-      'popular_rooms': '热门房间 🔥',
-      'your_balance': '您的余额',
-      'diamonds': '钻石',
-      'online': '在线',
-      'account': '账号',
-      'help_center': '帮助中心',
-      'logout': '退出登录',
-      'privacy_settings': '隐私',
-      'friend_requests': '好友请求',
-      'room_invites': '房间邀请',
-      'friend_messages': '好友消息',
-      'my_gifts': '我的礼物',
-      'transaction_history': '交易记录',
-      'coins': '金币',
-      'recharge': '充值',
-      'welcome_to_partychat': '欢迎来到 PartyChat',
-      'chat_play_make_friends': '聊天 • 游戏 • 交朋友',
-      'change_profile_photo': '更换头像照片',
-      'choose_avatar': '选择头像',
-      'change_username': '更改用户名',
-      'save': '保存',
-      'cancel': '取消',
-      'play_now': '立即游戏',
-      'my_wallet': '我的钱包',
-      'vip_level': 'VIP 等级 3',
-      'online_status': '在线状态',
-      'room_activity': '房间动态',
-      'private_account': '私人账号',
-    },
-  };
 
-  static String text(String key) {
-    return translations[current.value]?[key] ??
-        translations['English']?[key] ??
-        key;
-  }
 
-  static Future<void> load() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
 
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
 
-      final savedLanguage = doc.data()?['language'];
-
-      if (savedLanguage != null &&
-          languages.contains(savedLanguage)) {
-        current.value = savedLanguage;
-      }
-    } catch (e) {
-      debugPrint('Language load failed: $e');
-    }
-  }
-
-  static Future<void> change(String language) async {
-    if (!languages.contains(language)) return;
-
-    current.value = language;
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set(
-        {'language': language},
-        SetOptions(merge: true),
-      );
-    } catch (e) {
-      debugPrint('Language save failed: $e');
-    }
-  }
-}
-
-/* ============================================================
-   PROFILE UNREAD SYSTEM
-   ============================================================ */
-
-class ProfileUnreadService {
-  static const List<String> keys = [
-    'friendRequests',
-    'roomInvites',
-    'friendMessages',
-    'gifts',
-    'notifications',
-    'myGifts',
-    'friends',
-  ];
-
-  static DocumentReference<Map<String, dynamic>> ref(
-    String uid,
-  ) {
-    return FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('notificationState')
-        .doc('profile');
-  }
-
-  static Future<void> ensure(String uid) async {
-    try {
-      final snapshot = await ref(uid).get();
-
-      if (!snapshot.exists) {
-        await ref(uid).set({
-          for (final key in keys) key: 0,
-        });
-      }
-    } catch (e) {
-      debugPrint('Unread state create failed: $e');
-    }
-  }
-
-  static Future<void> markRead(
-    String uid,
-    String key,
-  ) async {
-    if (!keys.contains(key)) return;
-
-    try {
-      await ref(uid).set(
-        {key: 0},
-        SetOptions(merge: true),
-      );
-    } catch (e) {
-      debugPrint('Unread mark read failed: $e');
-    }
-  }
-
-  // Future event system ke liye framework.
-  // Abhi kisi fake event mein call nahi kiya ja raha.
-  static Future<void> increment(
-    String uid,
-    String key, {
-    int by = 1,
-  }) async {
-    if (!keys.contains(key)) return;
-
-    try {
-      await ref(uid).set(
-        {
-          key: FieldValue.increment(by),
-        },
-        SetOptions(merge: true),
-      );
-    } catch (e) {
-      debugPrint('Unread increment failed: $e');
-    }
-  }
-}
-
-/* ============================================================
-   APP
-   ============================================================ */
-
-class PartyChatApp extends StatefulWidget {
-  const PartyChatApp({super.key});
-
-  @override
-  State<PartyChatApp> createState() => _PartyChatAppState();
-}
-
-class _PartyChatAppState extends State<PartyChatApp> {
-  @override
-  void initState() {
-    super.initState();
-
-    AppLanguage.current.addListener(_languageChanged);
-    AppLanguage.load();
-  }
-
-  void _languageChanged() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  @override
-  void dispose() {
-    AppLanguage.current.removeListener(_languageChanged);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'PartyChat',
-          theme: ThemeData(
-            brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF08070F),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF8D3DFF),
-              brightness: Brightness.dark,
-            ),
-            useMaterial3: true,
-          ),
-          home: const SplashPage(),
-        );
-      },
-    );
-  }
-}
-
-/* ============================================================
-   SPLASH
-   ============================================================ */
-
-class SplashPage extends StatefulWidget {
-  const SplashPage({super.key});
-
-  @override
-  State<SplashPage> createState() => _SplashPageState();
-}
-
-class _SplashPageState extends State<SplashPage> {
-  @override
-  void initState() {
-    super.initState();
-
-    Future.delayed(const Duration(seconds: 2), () async {
-      if (!mounted) return;
-
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user != null) {
-        await AppLanguage.load();
-        await ProfileUnreadService.ensure(user.uid);
-      }
-
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              user != null ? const MainPage() : const WelcomePage(),
-        ),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircleAvatar(
-              radius: 62,
-              child: Icon(
-                Icons.groups_rounded,
-                size: 70,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'PartyChat',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLanguage.text('chat_play_make_friends'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   WELCOME
-   ============================================================ */
-
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Spacer(),
-              const CircleAvatar(
-                radius: 60,
-                child: Icon(
-                  Icons.groups_rounded,
-                  size: 68,
-                ),
-              ),
-              const SizedBox(height: 22),
-              Text(
-                AppLanguage.text('welcome_to_partychat'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                AppLanguage.text('chat_play_make_friends'),
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 17,
-                ),
-              ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    AppLanguage.text('get_started'),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    AppLanguage.text('login'),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 25),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   LOGIN
-   ============================================================ */
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool signup = false;
-  bool obscurePassword = true;
-
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> continueToApp() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
-    final name = nameController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Email aur password required hain.',
-          ),
-        ),
-      );
-      return;
-    }
-
-    if (signup && (name.length < 3 || name.length > 20)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Username 3 se 20 characters ka hona chahiye.',
-          ),
-        ),
-      );
-      return;
-    }
-
-    try {
-      UserCredential credential;
-
-      if (signup) {
-        credential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-
-        final user = credential.user;
-
-        if (user != null) {
-          await user.updateDisplayName(name);
-
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set(
-            {
-              'name': name,
-              'email': email,
-              'photoURL': '',
-              'language': AppLanguage.current.value,
-              'coins': 12580,
-              'diamonds': 2450,
-              'createdAt': FieldValue.serverTimestamp(),
-            },
-            SetOptions(merge: true),
-          );
-
-          await ProfileUnreadService.ensure(user.uid);
-        }
-      } else {
-        credential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-
-        await AppLanguage.load();
-
-        final user = credential.user;
-        if (user != null) {
-          await ProfileUnreadService.ensure(user.uid);
-        }
-      }
-
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const MainPage(),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
-    }
-  }
-
-  Future<void> continueWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser =
-          await GoogleSignIn(
-        serverClientId:
-            '921954130312-51u4nsu0f1eqsssei3ph1o12hkunfomu.apps.googleusercontent.com',
-      ).signIn();
-
-      if (googleUser == null) return;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(
-        credential,
-      );
-
-      final user = userCredential.user;
-
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set(
-          {
-            'name': user.displayName ?? '',
-            'email': user.email ?? '',
-            'photoURL': user.photoURL ?? '',
-            'language': AppLanguage.current.value,
-            'coins': 12580,
-            'diamonds': 2450,
-            'createdAt': FieldValue.serverTimestamp(),
-          },
-          SetOptions(merge: true),
-        );
-
-        await ProfileUnreadService.ensure(user.uid);
-      }
-
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const MainPage(),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 30,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 30),
-              const Icon(
-                Icons.chat_bubble_rounded,
-                size: 75,
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                'PartyChat',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Welcome to PartyChat',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        setState(() {
-                          signup = false;
-                        });
-                      },
-                      child: const Text('Login'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          signup = true;
-                        });
-                      },
-                      child: const Text('Sign Up'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: continueWithGoogle,
-                  icon: const Icon(
-                    Icons.g_mobiledata,
-                    size: 30,
-                  ),
-                  label: const Text(
-                    'Continue with Google',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.facebook),
-                  label: const Text(
-                    'Continue with Facebook',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.close),
-                  label: const Text(
-                    'Continue with Twitter / X',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.phone_android),
-                  label: const Text(
-                    'Continue with Mobile Number',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              if (signup)
-                TextField(
-                  controller: nameController,
-                  maxLength: 20,
-                  decoration: InputDecoration(
-                    labelText: AppLanguage.text('username'),
-                    prefixIcon: const Icon(Icons.person),
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              if (signup) const SizedBox(height: 14),
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: AppLanguage.text('email'),
-                  prefixIcon: const Icon(Icons.email),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: passwordController,
-                obscureText: obscurePassword,
-                decoration: InputDecoration(
-                  labelText: AppLanguage.text('password'),
-                  prefixIcon: const Icon(Icons.lock),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              SizedBox(
-                height: 52,
-                child: FilledButton(
-                  onPressed: continueToApp,
-                  child: Text(
-                    signup
-                        ? AppLanguage.text('create_account')
-                        : AppLanguage.text('login'),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    signup = true;
-                  });
-                },
-                child: const Text(
-                  'Create New Account',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   MAIN PAGE
-   ============================================================ */
-
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
-
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
-
-class _MainPageState extends State<MainPage> {
-  int selected = 0;
-
-  final pages = const [
-    HomeTab(),
-    RoomsTab(),
-    GamesTab(),
-    WalletTab(),
-    ProfileTab(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: pages[selected],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selected,
-        onDestinationSelected: (value) {
-          setState(() {
-            selected = value;
-          });
-        },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: AppLanguage.text('home'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.forum_outlined),
-            selectedIcon: const Icon(Icons.forum),
-            label: AppLanguage.text('rooms'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.sports_esports_outlined),
-            selectedIcon: const Icon(Icons.sports_esports),
-            label: AppLanguage.text('games'),
-          ),
-          NavigationDestination(
-            icon: const Icon(
-              Icons.account_balance_wallet_outlined,
-            ),
-            selectedIcon: const Icon(
-              Icons.account_balance_wallet,
-            ),
-            label: AppLanguage.text('wallet'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
-            label: AppLanguage.text('profile'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   HOME
-   ============================================================ */
-
-class HomeTab extends StatelessWidget {
-  const HomeTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(18),
-      children: [
-        Row(
-          children: [
-            const CircleAvatar(
-              radius: 25,
-              child: Icon(Icons.person),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Hello, Party User 👋',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    AppLanguage.text('welcome_back'),
-                    style: const TextStyle(
-                      color: Colors.white54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.notifications_none),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF7130B7),
-                Color(0xFFB22C8D),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLanguage.text('your_balance'),
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                '12,580 🪙',
-                style: TextStyle(
-                  fontSize: 27,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              Text(
-                '💎 2,450 ${AppLanguage.text('diamonds')}',
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          AppLanguage.text('popular_rooms'),
-          style: const TextStyle(
-            fontSize: 21,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        const RoomTile(
-          'Friends Forever 💜',
-          '2.4K online',
-          Icons.people,
-        ),
-        const RoomTile(
-          'Gaming Zone 🎮',
-          '1.8K online',
-          Icons.games,
-        ),
-        const RoomTile(
-          'Music Lovers 🎵',
-          '1.2K online',
-          Icons.music_note,
-        ),
-      ],
-    );
-  }
-}
-
-/* ============================================================
-   ROOMS
-   ============================================================ */
-
-class RoomsTab extends StatelessWidget {
-  const RoomsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(18),
-      children: [
-        Text(
-          AppLanguage.text('chat_rooms'),
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 18),
-        const RoomTile(
-          'Friends Forever 💜',
-          '2.4K online',
-          Icons.people,
-        ),
-        const RoomTile(
-          'Gaming Zone 🎮',
-          '1.8K online',
-          Icons.games,
-        ),
-        const RoomTile(
-          'Music Lovers 🎵',
-          '1.2K online',
-          Icons.music_note,
-        ),
-        const RoomTile(
-          'Fun Room 😊',
-          '980 online',
-          Icons.celebration,
-        ),
-      ],
-    );
-  }
-}
-
-class RoomTile extends StatelessWidget {
-  final String title;
-  final String online;
-  final IconData icon;
-
-  const RoomTile(
-    this.title,
-    this.online,
-    this.icon, {
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        color: const Color(0xFF15131F),
-        borderRadius: BorderRadius.circular(17),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 24,
-            child: Icon(icon),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  online,
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => RoomPage(
-                    title: title,
-                    online: online,
-                  ),
-                ),
-              );
-            },
-            child: Text(
-              AppLanguage.text('join'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   ROOM + MIC GLOW
-   ============================================================ */
-
-class RoomPage extends StatefulWidget {
-  final String title;
-  final String online;
-
-  late final String userId =
-      'party_user_${DateTime.now().millisecondsSinceEpoch}';
-
-  RoomPage({
-    super.key,
-    required this.title,
-    required this.online,
-  });
-
-  @override
   State<RoomPage> createState() => _RoomPageState();
 }
 
@@ -1607,91 +335,64 @@ class _RoomPageState extends State<RoomPage> {
 
   StreamSubscription<double>? soundLevelSubscription;
 
-  final messageController = TextEditingController();
+  final TextEditingController messageController =
+      TextEditingController();
+
   final List<String> messages = [];
 
-  Widget _buildMicButton() {
-    return GestureDetector(
-      onTap: toggleMic,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 58,
-        height: 58,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: micOn
-              ? Colors.white
-              : Colors.grey.shade800,
-          boxShadow: isSpeaking
-              ? [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.9),
-                    blurRadius: 22,
-                    spreadRadius: 7,
-                  ),
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.35),
-                    blurRadius: 40,
-                    spreadRadius: 12,
-                  ),
-                ]
-              : [],
-        ),
-        child: Icon(
-          micOn ? Icons.mic : Icons.mic_off,
-          color: micOn ? Colors.black : Colors.white,
-          size: 29,
-        ),
-      ),
-    );
-  }
-
-  void startMicGlow() {
+  @override
+  void dispose() {
     soundLevelSubscription?.cancel();
-
-    soundLevelSubscription = ZegoUIKit()
-        .getSoundLevelStream(widget.userId)
-        .listen((level) {
-      if (!micOn) return;
-
-      final speaking = level > 20;
-
-      if (speaking != isSpeaking && mounted) {
-        setState(() {
-          isSpeaking = speaking;
-        });
-      }
-    });
+    messageController.dispose();
+    super.dispose();
   }
 
   Future<void> toggleMic() async {
-    final next = !micOn;
+    setState(() {
+      micOn = !micOn;
 
-    if (mounted) {
-      setState(() {
-        micOn = next;
-
-        if (!next) {
-          isSpeaking = false;
-        }
-      });
-    }
+      if (!micOn) {
+        isSpeaking = false;
+      }
+    });
 
     try {
       await ZegoUIKit().turnMicrophoneOn(
-        next,
+        micOn,
         userID: widget.userId,
       );
-    } catch (e) {
-      debugPrint('Microphone change failed: $e');
-    }
 
-    if (next) {
-      startMicGlow();
-    } else {
-      await soundLevelSubscription?.cancel();
-      soundLevelSubscription = null;
+      if (micOn) {
+        startMicGlow(widget.userId);
+      } else {
+        await soundLevelSubscription?.cancel();
+        soundLevelSubscription = null;
+      }
+    } catch (e) {
+      debugPrint('Mic error: $e');
     }
+  }
+
+  void startMicGlow(String userId) {
+    soundLevelSubscription?.cancel();
+
+    soundLevelSubscription =
+        ZegoUIKit().getSoundLevelStream(userId).listen(
+      (level) {
+        if (!mounted || !micOn) return;
+
+        final speaking = level > 20;
+
+        if (speaking != isSpeaking) {
+          setState(() {
+            isSpeaking = speaking;
+          });
+        }
+      },
+      onError: (error) {
+        debugPrint('Sound level error: $error');
+      },
+    );
   }
 
   void sendMessage() {
@@ -1705,40 +406,186 @@ class _RoomPageState extends State<RoomPage> {
     });
   }
 
-  @override
-  void dispose() {
-    soundLevelSubscription?.cancel();
-    messageController.dispose();
-    super.dispose();
+  void showInviteFriendDialog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const RoomInviteFriendsPage(),
+      ),
+    );
+  }
+
+  Widget _buildMicButton() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 58,
+      height: 58,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: micOn
+            ? Colors.white
+            : Colors.grey.shade800,
+        boxShadow: isSpeaking
+            ? [
+                BoxShadow(
+                  color: Colors.white.withOpacity(.90),
+                  blurRadius: 22,
+                  spreadRadius: 7,
+                ),
+              ]
+            : [],
+      ),
+      child: IconButton(
+        onPressed: toggleMic,
+        icon: Icon(
+          micOn ? Icons.mic : Icons.mic_off,
+          color: micOn ? Colors.black : Colors.white,
+          size: 27,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final roomId = widget.title
-        .toLowerCase()
-        .replaceAll(
-          RegExp(r'[^a-z0-9]+'),
-          '_',
-        );
-
     return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.title),
+            Text(
+              widget.online,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.greenAccent,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            onPressed: showInviteFriendDialog,
+            icon: const Icon(Icons.person_add_alt_1),
+          ),
+        ],
+      ),
       body: Stack(
         children: [
-          ZegoUIKitPrebuiltLiveAudioRoom(
-            appID: zegoAppId,
-            appSign: zegoAppSign,
-            userID: widget.userId,
-            userName: 'Party User',
-            roomID: roomId,
-            config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
-          ),
-          Positioned(
-            bottom: 24,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: _buildMicButton(),
-            ),
+          Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircleAvatar(
+                        radius: 42,
+                        child: Icon(
+                          Icons.groups,
+                          size: 45,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Text(
+                        widget.title,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        widget.online,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              if (messages.isNotEmpty)
+                SizedBox(
+                  height: 130,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                    ),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.only(
+                            bottom: 6,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF191624),
+                            borderRadius:
+                                BorderRadius.circular(15),
+                          ),
+                          child: Text(messages[index]),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    12,
+                    8,
+                    12,
+                    12,
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            speakerOn = !speakerOn;
+                          });
+                        },
+                        icon: Icon(
+                          speakerOn
+                              ? Icons.volume_up
+                              : Icons.volume_off,
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: messageController,
+                          textInputAction:
+                              TextInputAction.send,
+                          onSubmitted: (_) => sendMessage(),
+                          decoration: InputDecoration(
+                            hintText: 'Type a message...',
+                            filled: true,
+                            fillColor:
+                                const Color(0xFF17151F),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(25),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildMicButton(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1755,23 +602,30 @@ class GamesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
+    final games = [
+      ['Ludo', Icons.casino],
+      ['Carrom', Icons.sports_handball],
+      ['8 Ball Pool', Icons.sports_baseball],
+      ['Quiz', Icons.quiz],
+      ['Bubble Shooter', Icons.bubble_chart],
+    ];
+
+    return ListView(
       padding: const EdgeInsets.all(18),
-      crossAxisCount: 2,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      children: const [
-        GameCard('Ludo', Icons.casino),
-        GameCard('Carrom', Icons.sports),
-        GameCard('8 Ball Pool', Icons.sports_bar),
-        GameCard('Quiz', Icons.quiz),
-        GameCard(
-          'Bubble Shooter',
-          Icons.bubble_chart,
+      children: [
+        Text(
+          AppLanguage.text('games'),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        GameCard(
-          'More Games',
-          Icons.apps,
+        const SizedBox(height: 18),
+        ...games.map(
+          (game) => GameCard(
+            title: game[0] as String,
+            icon: game[1] as IconData,
+          ),
         ),
       ],
     );
@@ -1782,44 +636,41 @@ class GameCard extends StatelessWidget {
   final String title;
   final IconData icon;
 
-  const GameCard(
-    this.title,
-    this.icon, {
+  const GameCard({
     super.key,
+    required this.title,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF29203E),
-            Color(0xFF3A1836),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(21),
+        color: const Color(0xFF15131F),
+        borderRadius: BorderRadius.circular(18),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
         children: [
-          Icon(
-            icon,
-            size: 45,
-            color: const Color(0xFFFFD15C),
+          CircleAvatar(
+            radius: 27,
+            child: Icon(icon),
           ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const SizedBox(height: 5),
-          Text(
-            AppLanguage.text('play_now'),
-            style: const TextStyle(
-              color: Colors.white54,
+          FilledButton(
+            onPressed: () {},
+            child: Text(
+              AppLanguage.text('play_now'),
             ),
           ),
         ],
@@ -1847,60 +698,53 @@ class WalletTab extends StatelessWidget {
             fontWeight: FontWeight.w900,
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 20),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF5522A1),
-                Color(0xFFB12C8C),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(24),
+            color: const Color(0xFF171421),
+            borderRadius: BorderRadius.circular(22),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Icon(
+                Icons.account_balance_wallet,
+                size: 55,
+              ),
+              const SizedBox(height: 14),
               Text(
                 AppLanguage.text('coins'),
+                style: const TextStyle(
+                  color: Colors.white60,
+                ),
               ),
+              const SizedBox(height: 5),
               const Text(
-                '12,580 🪙',
+                '12,580',
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 32,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
-                '2,450 💎 ${AppLanguage.text('diamonds')}',
+                '💎 2,450 ${AppLanguage.text('diamonds')}',
+                style: const TextStyle(
+                  fontSize: 17,
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 15),
-        FilledButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.add),
-          label: Text(
-            AppLanguage.text('recharge'),
-          ),
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    const TransactionHistoryPage(),
-              ),
-            );
-          },
-          icon: const Icon(Icons.history),
-          label: Text(
-            AppLanguage.text('transaction_history'),
+        const SizedBox(height: 18),
+        SizedBox(
+          height: 52,
+          child: FilledButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            label: Text(
+              AppLanguage.text('recharge'),
+            ),
           ),
         ),
       ],
@@ -1920,262 +764,15 @@ class ProfileTab extends StatefulWidget {
 }
 
 class _ProfileTabState extends State<ProfileTab> {
-  final avatarImages = const {
-    'avatar1': 'assets/avatar1_pakistan_female-2.png',
-    'avatar2': 'assets/avatar2_uae_male.png',
-    'avatar3': 'assets/avatar3_uk_male.png',
-    'avatar4': 'assets/avatar4_russia_female.png',
-    'avatar5': 'assets/avatar5_saudi_female.png',
-    'avatar6': 'assets/avatar6_turkey_male.png',
-    'avatar7': 'assets/avatar7_india_female.png',
-    'avatar8': 'assets/avatar8_usa_male.png',
-  };
-
-  @override
-  void initState() {
-    super.initState();
-
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      ProfileUnreadService.ensure(user.uid);
-    }
-  }
-
-  ImageProvider<Object>? _imageProvider(
-    Map<String, dynamic>? data,
-  ) {
-    final photoBase64 = data?['photoBase64'] as String?;
-    final photoURL = data?['photoURL'] as String?;
-    final avatar = data?['avatar'] as String?;
-
-    if (photoBase64 != null && photoBase64.isNotEmpty) {
-      try {
-        return MemoryImage(
-          base64Decode(photoBase64),
-        );
-      } catch (_) {}
-    }
-
-    if (photoURL != null && photoURL.isNotEmpty) {
-      return NetworkImage(photoURL);
-    }
-
-    if (avatar != null && avatarImages[avatar] != null) {
-      return AssetImage(avatarImages[avatar]!);
-    }
-
-    return null;
-  }
-
-  Future<void> _showPhotoZoom(
+  Future<void> changeUsername(
     BuildContext context,
-    ImageProvider<Object> image,
+    String currentName,
   ) async {
-    await showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
-      builder: (_) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.all(10),
-          child: InteractiveViewer(
-            minScale: 1,
-            maxScale: 5,
-            child: Image(
-              image: image,
-              fit: BoxFit.contain,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _pickGallery(
-    BuildContext context,
-    DocumentReference<Map<String, dynamic>> userDoc,
-  ) async {
-    final picker = ImagePicker();
-
-    final image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 20,
-      maxWidth: 256,
-      maxHeight: 256,
+    final controller = TextEditingController(
+      text: currentName,
     );
 
-    if (image == null) return;
-
-    final bytes = await image.readAsBytes();
-
-    if (bytes.length > 500000) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Photo size zyada hai. Choti photo select karein.',
-          ),
-        ),
-      );
-      return;
-    }
-
-    final encodedPhoto = base64Encode(bytes);
-
-    try {
-      await userDoc.set(
-        {
-          'photoBase64': encodedPhoto,
-          'photoURL': '',
-          'avatar': '',
-        },
-        SetOptions(merge: true),
-      );
-
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Profile photo save ho gayi 👍',
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Photo save nahi hui: $e',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _chooseAvatar(
-    BuildContext context,
-    DocumentReference<Map<String, dynamic>> userDoc,
-  ) async {
-    final avatars = avatarImages.keys.toList();
-
-    final selected = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) {
-        String? tempSelected;
-
-        return StatefulBuilder(
-          builder: (
-            context,
-            setDialogState,
-          ) {
-            return AlertDialog(
-              title: Text(
-                AppLanguage.text('choose_avatar'),
-              ),
-              content: GridView.builder(
-                shrinkWrap: true,
-                itemCount: avatars.length,
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                ),
-                itemBuilder: (context, index) {
-                  final avatar = avatars[index];
-
-                  return GestureDetector(
-                    onTap: () {
-                      setDialogState(() {
-                        tempSelected = avatar;
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: tempSelected == avatar
-                              ? Colors.white
-                              : Colors.grey,
-                          width:
-                              tempSelected == avatar ? 3 : 1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Image.asset(
-                        avatarImages[avatar]!,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: tempSelected == null
-                      ? null
-                      : () {
-                          Navigator.pop(
-                            dialogContext,
-                            tempSelected,
-                          );
-                        },
-                  child: Text(
-                    AppLanguage.text('save'),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (selected == null) return;
-
-    try {
-      await userDoc.set(
-        {
-          'avatar': selected,
-          'photoURL': '',
-          'photoBase64': '',
-        },
-        SetOptions(merge: true),
-      );
-
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Avatar save ho gaya 👍',
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Avatar save nahi hua: $e',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _changeUsername(
-    BuildContext context,
-    DocumentReference<Map<String, dynamic>> userDoc,
-  ) async {
-    final controller = TextEditingController();
-
-    await showDialog(
+    final result = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
@@ -2185,9 +782,8 @@ class _ProfileTabState extends State<ProfileTab> {
           content: TextField(
             controller: controller,
             maxLength: 20,
-            decoration: InputDecoration(
-              hintText: AppLanguage.text('username'),
-              helperText: '3–20 characters',
+            decoration: const InputDecoration(
+              hintText: '3–20 characters',
             ),
           ),
           actions: [
@@ -2199,95 +795,12 @@ class _ProfileTabState extends State<ProfileTab> {
                 AppLanguage.text('cancel'),
               ),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final newName = controller.text.trim();
-
-                if (newName.length < 3 ||
-                    newName.length > 20) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Username 3 se 20 characters ka hona chahiye.',
-                      ),
-                    ),
-                  );
-                  return;
-                }
-
-                try {
-                  final data =
-                      (await userDoc.get()).data();
-
-                  final lastChange =
-                      data?['lastNameChangeAt'];
-
-                  if (lastChange is Timestamp) {
-                    final difference = DateTime.now().difference(
-                      lastChange.toDate(),
-                    );
-
-                    if (difference < const Duration(hours: 24)) {
-                      final remaining = const Duration(hours: 24)
-                              .inMinutes -
-                          difference.inMinutes;
-
-                      final hours = remaining ~/ 60;
-                      final minutes = remaining % 60;
-
-                      if (!context.mounted) return;
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Username dobara change karne ke liye $hours hours $minutes minutes wait karein.',
-                          ),
-                        ),
-                      );
-                      return;
-                    }
-                  }
-
-                  await userDoc.set(
-                    {
-                      'name': newName,
-                      'lastNameChangeAt':
-                          FieldValue.serverTimestamp(),
-                    },
-                    SetOptions(merge: true),
-                  );
-
-                  final user =
-                      FirebaseAuth.instance.currentUser;
-
-                  if (user != null) {
-                    await user.updateDisplayName(newName);
-                  }
-
-                  if (!dialogContext.mounted) return;
-
-                  Navigator.pop(dialogContext);
-
-                  if (!context.mounted) return;
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Username save ho gaya 👍',
-                      ),
-                    ),
-                  );
-                } catch (e) {
-                  if (!context.mounted) return;
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Username save nahi hua: $e',
-                      ),
-                    ),
-                  );
-                }
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(
+                  dialogContext,
+                  controller.text.trim(),
+                );
               },
               child: Text(
                 AppLanguage.text('save'),
@@ -2299,83 +812,312 @@ class _ProfileTabState extends State<ProfileTab> {
     );
 
     controller.dispose();
-  }
 
-  Future<void> _openProfilePage(
-    BuildContext context,
-    String unreadKey,
-    Widget page,
-  ) async {
-    final user = FirebaseAuth.instance.currentUser;
+    if (result == null || result.isEmpty) return;
 
-    if (user != null) {
-      await ProfileUnreadService.markRead(
-        user.uid,
-        unreadKey,
+    if (result.length < 3 || result.length > 20) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Username 3 se 20 characters ka hona chahiye.',
+          ),
+        ),
       );
+      return;
     }
 
-    if (!context.mounted) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => page,
+    final userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
+
+    final snapshot = await userRef.get();
+
+    final lastChange =
+        snapshot.data()?['lastNameChangeAt'];
+
+    if (lastChange is Timestamp) {
+      final difference =
+          DateTime.now().difference(lastChange.toDate());
+
+      if (difference.inHours < 24) {
+        final remaining =
+            const Duration(hours: 24) - difference;
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Username dobara change karne ke liye '
+              '${remaining.inHours} ghante wait karein.',
+            ),
+          ),
+        );
+        return;
+      }
+    }
+
+    await userRef.set(
+      {
+        'name': result,
+        'lastNameChangeAt':
+            FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
+
+    await user.updateDisplayName(result);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Username successfully change ho gaya.',
+        ),
       ),
     );
   }
 
-  Widget _profileNavigationTile({
-    required BuildContext context,
-    required IconData icon,
-    required String titleKey,
-    required String unreadKey,
-    required int unread,
-    required Widget page,
-  }) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(
-        AppLanguage.text(titleKey),
+  Future<void> pickProfilePhoto() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final picker = ImagePicker();
+
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+      maxWidth: 900,
+    );
+
+    if (image == null) return;
+
+    final bytes = await image.readAsBytes();
+    final encodedPhoto = base64Encode(bytes);
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set(
+      {
+        'photoBase64': encodedPhoto,
+        'photoURL': '',
+        'avatar': '',
+        'updatedAt': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Profile photo update ho gayi.',
+        ),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (unread > 0)
-            Container(
-              constraints: const BoxConstraints(
-                minWidth: 22,
-                minHeight: 22,
+    );
+  }
+
+  Future<void> chooseAvatar() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final avatars = [
+      '😀',
+      '😎',
+      '🥳',
+      '🤩',
+      '😇',
+      '🦁',
+      '🐯',
+      '🐼',
+      '🦊',
+      '🐸',
+      '🐵',
+      '🐨',
+    ];
+
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) {
+        return GridView.builder(
+          padding: const EdgeInsets.all(20),
+          gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            mainAxisSpacing: 15,
+            crossAxisSpacing: 15,
+          ),
+          itemCount: avatars.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {
+                Navigator.pop(
+                  context,
+                  avatars[index],
+                );
+              },
+              child: Center(
+                child: Text(
+                  avatars[index],
+                  style: const TextStyle(
+                    fontSize: 42,
+                  ),
+                ),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 2,
+            );
+          },
+        );
+      },
+    );
+
+    if (selected == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set(
+      {
+        'avatar': selected,
+        'photoBase64': '',
+        'photoURL': '',
+        'updatedAt': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
+  }
+
+  void showProfileImage(
+    BuildContext context,
+    String? base64Photo,
+    String avatar,
+    String photoURL,
+  ) {
+    if (base64Photo != null && base64Photo.isNotEmpty) {
+      try {
+        final bytes = base64Decode(base64Photo);
+
+        showDialog(
+          context: context,
+          builder: (_) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: InteractiveViewer(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.memory(
+                    bytes,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                unread > 99 ? '99+' : '$unread',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+            );
+          },
+        );
+        return;
+      } catch (_) {}
+    }
+
+    if (photoURL.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: InteractiveViewer(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(
+                  photoURL,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
-          const SizedBox(width: 6),
-          const Icon(Icons.chevron_right),
-        ],
-      ),
-      onTap: () {
-        _openProfilePage(
-          context,
-          unreadKey,
-          page,
+          );
+        },
+      );
+      return;
+    }
+
+    if (avatar.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(35),
+              child: Text(
+                avatar,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 100,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Widget buildProfileAvatar(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) {
+    final base64Photo =
+        data['photoBase64'] as String? ?? '';
+
+    final photoURL =
+        data['photoURL'] as String? ?? '';
+
+    final avatar =
+        data['avatar'] as String? ?? '';
+
+    if (base64Photo.isNotEmpty) {
+      try {
+        return Image.memory(
+          base64Decode(base64Photo),
+          width: 86,
+          height: 86,
+          fit: BoxFit.cover,
         );
-      },
+      } catch (_) {}
+    }
+
+    if (photoURL.isNotEmpty) {
+      return Image.network(
+        photoURL,
+        width: 86,
+        height: 86,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) {
+          return const Icon(
+            Icons.person,
+            size: 45,
+          );
+        },
+      );
+    }
+
+    if (avatar.isNotEmpty) {
+      return Text(
+        avatar,
+        style: const TextStyle(
+          fontSize: 48,
+        ),
+      );
+    }
+
+    return const Icon(
+      Icons.person,
+      size: 45,
     );
   }
 
@@ -2384,10 +1126,8 @@ class _ProfileTabState extends State<ProfileTab> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return Center(
-        child: Text(
-          '${AppLanguage.text('login')} first',
-        ),
+      return const Center(
+        child: Text('Please login again.'),
       );
     }
 
@@ -2395,210 +1135,303 @@ class _ProfileTabState extends State<ProfileTab> {
         .collection('users')
         .doc(user.uid);
 
-    final unreadDoc =
-        ProfileUnreadService.ref(user.uid);
+    return StreamBuilder<
+        DocumentSnapshot<Map<String, dynamic>>>(
+      stream: userDoc.snapshots(),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.data() ?? {};
 
-    return ListView(
-      padding: const EdgeInsets.all(18),
-      children: [
-        Text(
-          AppLanguage.text('profile'),
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 22),
+        final name =
+            data['name'] as String? ??
+                user.displayName ??
+                'Party User';
 
-        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: userDoc.snapshots(),
-          builder: (context, snapshot) {
-            final data = snapshot.data?.data();
-            final image = _imageProvider(data);
+        final email =
+            data['email'] as String? ??
+                user.email ??
+                '';
 
-            return GestureDetector(
-              onTap: image == null
-                  ? null
-                  : () => _showPhotoZoom(
-                        context,
-                        image,
-                      ),
-              child: CircleAvatar(
-                radius: 52,
-                backgroundImage: image,
-                child: image == null
-                    ? const Icon(
-                        Icons.person,
-                        size: 52,
-                      )
-                    : null,
-              ),
-            );
-          },
-        ),
+        final base64Photo =
+            data['photoBase64'] as String? ?? '';
 
-        const SizedBox(height: 12),
+        final avatar =
+            data['avatar'] as String? ?? '';
 
-        ElevatedButton.icon(
-          onPressed: () => _pickGallery(
-            context,
-            userDoc,
-          ),
-          icon: const Icon(Icons.camera_alt),
-          label: Text(
-            AppLanguage.text(
-              'change_profile_photo',
-            ),
-          ),
-        ),
+        final photoURL =
+            data['photoURL'] as String? ?? '';
 
-        const SizedBox(height: 12),
-
-        ElevatedButton.icon(
-          onPressed: () => _chooseAvatar(
-            context,
-            userDoc,
-          ),
-          icon: const Icon(Icons.face),
-          label: Text(
-            AppLanguage.text('choose_avatar'),
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: userDoc.snapshots(),
-          builder: (context, snapshot) {
-            final data = snapshot.data?.data();
-
-            final name =
-                data?['name'] as String? ??
-                    user.displayName ??
-                    'PartyChat User';
-
-            return Column(
-              children: [
-                Text(
-                  '$name 👑',
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  AppLanguage.text('vip_level'),
-                  style: const TextStyle(
-                    color: Color(0xFFFFD15C),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-
-        const SizedBox(height: 20),
-
-        Center(
-          child: ElevatedButton.icon(
-            onPressed: () => _changeUsername(
-              context,
-              userDoc,
-            ),
-            icon: const Icon(Icons.edit),
-            label: Text(
-              AppLanguage.text('change_username'),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 20),
-
-        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: unreadDoc.snapshots(),
+        return StreamBuilder<
+            DocumentSnapshot<Map<String, dynamic>>>(
+          stream: ProfileUnreadService.ref(
+            user.uid,
+          ).snapshots(),
           builder: (context, unreadSnapshot) {
-            final unreadData =
+            final unread =
                 unreadSnapshot.data?.data() ?? {};
 
-            int count(String key) {
-              final value = unreadData[key];
-
-              if (value is int) return value;
-              if (value is num) return value.toInt();
-
-              return 0;
-            }
-
-            return Column(
+            return ListView(
+              padding: const EdgeInsets.all(18),
               children: [
-                _profileNavigationTile(
-                  context: context,
-                  icon: Icons.person_add,
-                  titleKey: 'friend_requests',
-                  unreadKey: 'friendRequests',
-                  unread: count('friendRequests'),
-                  page: const FriendRequestsPage(),
-                ),
-                _profileNavigationTile(
-                  context: context,
-                  icon: Icons.meeting_room,
-                  titleKey: 'room_invites',
-                  unreadKey: 'roomInvites',
-                  unread: count('roomInvites'),
-                  page: const RoomInvitesPage(),
-                ),
-                _profileNavigationTile(
-                  context: context,
-                  icon: Icons.message,
-                  titleKey: 'friend_messages',
-                  unreadKey: 'friendMessages',
-                  unread: count('friendMessages'),
-                  page: const FriendMessagesPage(),
-                ),
-                _profileNavigationTile(
-                  context: context,
-                  icon: Icons.card_giftcard,
-                  titleKey: 'gifts',
-                  unreadKey: 'gifts',
-                  unread: count('gifts'),
-                  page: const GiftsPage(),
-                ),
-                _profileNavigationTile(
-                  context: context,
-                  icon: Icons.notifications,
-                  titleKey: 'notifications',
-                  unreadKey: 'notifications',
-                  unread: count('notifications'),
-                  page: const NotificationsPage(),
-                ),
-                _profileNavigationTile(
-                  context: context,
-                  icon: Icons.card_giftcard,
-                  titleKey: 'my_gifts',
-                  unreadKey: 'myGifts',
-                  unread: count('myGifts'),
-                  page: const MyGiftsPage(),
-                ),
-                _profileNavigationTile(
-                  context: context,
-                  icon: Icons.people,
-                  titleKey: 'friends',
-                  unreadKey: 'friends',
-                  unread: count('friends'),
-                  page: const FriendsPage(),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showProfileImage(
+                          context,
+                          base64Photo,
+                          avatar,
+                          photoURL,
+                        );
+                      },
+                      child: CircleAvatar(
+                        radius: 43,
+                        child: ClipOval(
+                          child: buildProfileAvatar(
+                            context,
+                            data,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            email,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            AppLanguage.text('vip_level'),
+                            style: const TextStyle(
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
 
-                // Settings par unread badge nahi.
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: Text(
-                    AppLanguage.text('settings'),
+                const SizedBox(height: 18),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: pickProfilePhoto,
+                        icon: const Icon(
+                          Icons.photo_library,
+                        ),
+                        label: Text(
+                          AppLanguage.text(
+                            'change_profile_photo',
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton(
+                      onPressed: chooseAvatar,
+                      child: Text(
+                        AppLanguage.text(
+                          'choose_avatar',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      changeUsername(
+                        context,
+                        name,
+                      );
+                    },
+                    icon: const Icon(Icons.edit),
+                    label: Text(
+                      AppLanguage.text(
+                        'change_username',
+                      ),
+                    ),
                   ),
-                  trailing: const Icon(
-                    Icons.chevron_right,
+                ),
+
+                const SizedBox(height: 20),
+
+                ProfileMenuItem(
+                  icon: Icons.person_add_alt_1,
+                  title: AppLanguage.text(
+                    'friend_requests',
                   ),
+                  count: unread['friendRequests'] ?? 0,
+                  onTap: () {
+                    ProfileUnreadService.markRead(
+                      user.uid,
+                      'friendRequests',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const FriendRequestsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                ProfileMenuItem(
+                  icon: Icons.mail_outline,
+                  title: AppLanguage.text(
+                    'room_invites',
+                  ),
+                  count: unread['roomInvites'] ?? 0,
+                  onTap: () {
+                    ProfileUnreadService.markRead(
+                      user.uid,
+                      'roomInvites',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const RoomInvitesPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                ProfileMenuItem(
+                  icon: Icons.chat_outlined,
+                  title: AppLanguage.text(
+                    'friend_messages',
+                  ),
+                  count: unread['friendMessages'] ?? 0,
+                  onTap: () {
+                    ProfileUnreadService.markRead(
+                      user.uid,
+                      'friendMessages',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const FriendMessagesPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                ProfileMenuItem(
+                  icon: Icons.card_giftcard,
+                  title: AppLanguage.text('gifts'),
+                  count: unread['gifts'] ?? 0,
+                  onTap: () {
+                    ProfileUnreadService.markRead(
+                      user.uid,
+                      'gifts',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const GiftsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                ProfileMenuItem(
+                  icon: Icons.notifications_none,
+                  title: AppLanguage.text(
+                    'notifications',
+                  ),
+                  count: unread['notifications'] ?? 0,
+                  onTap: () {
+                    ProfileUnreadService.markRead(
+                      user.uid,
+                      'notifications',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const NotificationsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                ProfileMenuItem(
+                  icon: Icons.redeem,
+                  title: AppLanguage.text(
+                    'my_gifts',
+                  ),
+                  count: unread['myGifts'] ?? 0,
+                  onTap: () {
+                    ProfileUnreadService.markRead(
+                      user.uid,
+                      'myGifts',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const MyGiftsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                ProfileMenuItem(
+                  icon: Icons.people_outline,
+                  title: AppLanguage.text(
+                    'friends',
+                  ),
+                  count: unread['friends'] ?? 0,
+                  onTap: () {
+                    ProfileUnreadService.markRead(
+                      user.uid,
+                      'friends',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const FriendsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                ProfileMenuItem(
+                  icon: Icons.settings_outlined,
+                  title: AppLanguage.text('settings'),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -2612,1022 +1445,201 @@ class _ProfileTabState extends State<ProfileTab> {
               ],
             );
           },
-        ),
-
-        const SizedBox(height: 20),
-
-        // Coins/Diamonds profile se intentionally remove.
-        // Ye balances Wallet mein hain.
-
-        OutlinedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    const TransactionHistoryPage(),
-              ),
-            );
-          },
-          icon: const Icon(Icons.history),
-          label: Text(
-            AppLanguage.text(
-              'transaction_history',
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-/* ============================================================
-   FRIEND REQUESTS
-   ============================================================ */
+class ProfileMenuItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final dynamic count;
+  final VoidCallback onTap;
+
+  const ProfileMenuItem({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.count = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    int unreadCount = 0;
+
+    if (count is int) {
+      unreadCount = count;
+    } else if (count is num) {
+      unreadCount = count.toInt();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF15131F),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(icon),
+        title: Text(title),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (unreadCount > 0)
+              Container(
+                constraints: const BoxConstraints(
+                  minWidth: 20,
+                  minHeight: 20,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  unreadCount > 99
+                      ? '99+'
+                      : unreadCount.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            const SizedBox(width: 5),
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+// =========================
+// PROFILE PAGES
+// =========================
 
 class FriendRequestsPage extends StatelessWidget {
   const FriendRequestsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('friend_requests'),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'No friend requests yet.',
-        ),
-      ),
-    );
-  }
-}
+    final uid = FirebaseAuth.instance.currentUser?.uid;
 
-/* ============================================================
-   ROOM INVITES
-   ============================================================ */
-
-class RoomInvitesPage extends StatelessWidget {
-  const RoomInvitesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('room_invites'),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'No room invites yet.',
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   FRIEND MESSAGES
-   ============================================================ */
-
-class FriendMessagesPage extends StatelessWidget {
-  const FriendMessagesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('friend_messages'),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'No messages yet.',
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   GIFTS
-   ============================================================ */
-
-class GiftsPage extends StatelessWidget {
-  const GiftsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('gifts'),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'No gifts yet.',
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   MY GIFTS
-   ============================================================ */
-
-class MyGiftsPage extends StatelessWidget {
-  const MyGiftsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('my_gifts'),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'Your gifts will appear here.',
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   FRIENDS
-   ============================================================ */
-
-class FriendsPage extends StatelessWidget {
-  const FriendsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('friends'),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'No friends yet.',
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   SETTINGS
-   ============================================================ */
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('settings'),
-        ),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: Text(
-              AppLanguage.text('privacy'),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const PrivacyPage(),
-                ),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text(
-              AppLanguage.text('language'),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const LanguagePage(),
-                ),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: Text(
-              AppLanguage.text('account'),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AccountPage(),
-                ),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.block),
-            title: Text(
-              AppLanguage.text('blocked_users'),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const BlockedUsersPage(),
-                ),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.help_outline),
-            title: Text(
-              AppLanguage.text('help_center'),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const HelpCenterPage(),
-                ),
-              );
-            },
-          ),
-
-          const Divider(),
-
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: Text(
-              AppLanguage.text('logout'),
-            ),
-            onTap: () async {
-              try {
-                await FirebaseAuth.instance.signOut();
-              } catch (e) {
-                debugPrint(
-                  'Logout failed: $e',
-                );
-              }
-
-              if (!context.mounted) return;
-
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const WelcomePage(),
-                ),
-                (route) => false,
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   ACCOUNT
-   ============================================================ */
-
-class AccountPage extends StatelessWidget {
-  const AccountPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            AppLanguage.text('account'),
-          ),
-        ),
-        body: const Center(
-          child: Text(
-            'Please login first.',
-          ),
-        ),
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('account'),
-        ),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.email),
-            title: const Text('Email'),
-            subtitle: Text(
-              user.email ?? 'Not available',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showEmailDialog(
-                context,
-                user,
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.phone),
-            title: const Text('Mobile Number'),
-            subtitle: const Text('Not linked'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showComingSoon(
-                context,
-                'Mobile Number',
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.facebook),
-            title: const Text('Facebook'),
-            subtitle: const Text('Not connected'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showComingSoon(
-                context,
-                'Facebook',
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.alternate_email),
-            title: const Text('Twitter'),
-            subtitle: const Text('Not connected'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showComingSoon(
-                context,
-                'Twitter',
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.security),
-            title: const Text(
-              'Password & Security',
-            ),
-            subtitle: const Text(
-              'Manage your password and security',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showComingSoon(
-                context,
-                'Password & Security',
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.devices),
-            title: const Text(
-              'Login Devices',
-            ),
-            subtitle: const Text(
-              'Manage devices signed in to your account',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showComingSoon(
-                context,
-                'Login Devices',
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(
-              Icons.delete_forever,
-              color: Colors.red,
-            ),
-            title: const Text(
-              'Delete Account',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
+      appBar: AppBar(title: const Text('Friend Requests')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('friendRequests')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No friend requests',
+                style: TextStyle(color: Colors.white70),
               ),
-            ),
-            subtitle: const Text(
-              'Permanently delete your PartyChat account',
-            ),
-            onTap: () {
-              _showDeleteAccountDialog(
-                context,
-                user,
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+            );
+          }
 
-  static Future<void> _showEmailDialog(
-    BuildContext context,
-    User user,
-  ) async {
-    final controller = TextEditingController(
-      text: user.email ?? '',
-    );
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final data = doc.data();
 
-    await showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Email'),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () async {
-                final email =
-                    controller.text.trim();
+              final requesterUid =
+                  (data['fromUid'] ?? data['uid'] ?? doc.id).toString();
 
-                if (email.isEmpty) return;
+              final name =
+                  (data['fromName'] ?? data['name'] ?? 'Party User').toString();
 
-                try {
-                  await user.verifyBeforeUpdateEmail(
-                    email,
-                  );
+              final photo =
+                  (data['fromPhoto'] ?? data['photoURL'] ?? '').toString();
 
-                  if (!dialogContext.mounted) return;
-
-                  Navigator.pop(dialogContext);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Verification email sent. Please verify your new email.',
+              return Card(
+                color: const Color(0xFF15121F),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      _NetworkOrAvatar(
+                        photo: photo,
+                        name: name,
+                        radius: 25,
                       ),
-                    ),
-                  );
-                } catch (e) {
-                  if (!dialogContext.mounted) return;
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Could not change email: $e',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
+                      IconButton(
+                        tooltip: 'Accept',
+                        onPressed: () async {
+                          await PartyChatData.acceptFriendRequest(
+                            myUid: uid,
+                            otherUid: requesterUid,
+                          );
 
-    controller.dispose();
-  }
-
-  static void _showComingSoon(
-    BuildContext context,
-    String feature,
-  ) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$feature setup will be completed next.',
-        ),
-      ),
-    );
-  }
-
-  static Future<void> _showDeleteAccountDialog(
-    BuildContext context,
-    User user,
-  ) async {
-    final confirmController =
-        TextEditingController();
-
-    await showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text(
-            'Delete Account?',
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'This will permanently delete your PartyChat account. '
-                'This action cannot be undone.',
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: confirmController,
-                decoration: const InputDecoration(
-                  labelText: 'Type DELETE to confirm',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-              onPressed: () async {
-                if (confirmController.text.trim() !=
-                    'DELETE') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Please type DELETE to confirm.',
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Friend request accepted'),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.check_circle,
+                          color: Colors.greenAccent,
+                        ),
                       ),
-                    ),
-                  );
-                  return;
-                }
-
-                try {
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(user.uid)
-                      .delete();
-
-                  await user.delete();
-
-                  if (!dialogContext.mounted) return;
-
-                  Navigator.pop(dialogContext);
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          const WelcomePage(),
-                    ),
-                    (route) => false,
-                  );
-                } catch (e) {
-                  if (!dialogContext.mounted) return;
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Account deletion failed: $e',
+                      IconButton(
+                        tooltip: 'Reject',
+                        onPressed: () async {
+                          await PartyChatData.rejectFriendRequest(
+                            myUid: uid,
+                            otherUid: requesterUid,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.cancel,
+                          color: Colors.redAccent,
+                        ),
                       ),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-
-    confirmController.dispose();
-  }
-}
-
-/* ============================================================
-   PRIVACY
-   ============================================================ */
-
-class PrivacyPage extends StatefulWidget {
-  const PrivacyPage({super.key});
-
-  @override
-  State<PrivacyPage> createState() =>
-      _PrivacyPageState();
-}
-
-class _PrivacyPageState
-    extends State<PrivacyPage> {
-  User? get user =>
-      FirebaseAuth.instance.currentUser;
-
-  String profileVisibility = 'Everyone';
-  String photoVisibility = 'Everyone';
-  String messagePermission = 'Everyone';
-  String giftPermission = 'Everyone';
-
-  bool onlineStatus = true;
-  bool roomActivity = true;
-  bool privateAccount = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPrivacySettings();
-  }
-
-  Future<void> _loadPrivacySettings() async {
-    final currentUser = user;
-
-    if (currentUser == null) return;
-
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-
-      if (!doc.exists) return;
-
-      final data = doc.data()!;
-
-      if (!mounted) return;
-
-      setState(() {
-        profileVisibility =
-            data['profileVisibility'] ?? 'Everyone';
-
-        photoVisibility =
-            data['photoVisibility'] ?? 'Everyone';
-
-        messagePermission =
-            data['messagePermission'] ?? 'Everyone';
-
-        giftPermission =
-            data['giftPermission'] ?? 'Everyone';
-
-        onlineStatus =
-            data['onlineStatus'] ?? true;
-
-        roomActivity =
-            data['roomActivity'] ?? true;
-
-        privateAccount =
-            data['privateAccount'] ?? false;
-      });
-    } catch (e) {
-      debugPrint(
-        'Privacy load failed: $e',
-      );
-    }
-  }
-
-  Future<void> _saveField(
-    String field,
-    dynamic value,
-  ) async {
-    final currentUser = user;
-
-    if (currentUser == null) return;
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .set(
-      {field: value},
-      SetOptions(merge: true),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('privacy'),
-        ),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text(
-              'Who can view my profile',
-            ),
-            subtitle: Text(profileVisibility),
-            trailing: const Icon(
-              Icons.chevron_right,
-            ),
-            onTap: () {
-              _chooseOption(
-                context,
-                'Who can view my profile',
-                [
-                  'Everyone',
-                  'Friends Only',
-                  'Nobody',
-                ],
-                profileVisibility,
-                (value) async {
-                  setState(() {
-                    profileVisibility = value;
-                  });
-
-                  await _saveField(
-                    'profileVisibility',
-                    value,
-                  );
-                },
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo),
-            title: const Text(
-              'Who can view my profile photo',
-            ),
-            subtitle: Text(photoVisibility),
-            trailing: const Icon(
-              Icons.chevron_right,
-            ),
-            onTap: () {
-              _chooseOption(
-                context,
-                'Who can view my profile photo',
-                [
-                  'Everyone',
-                  'Friends Only',
-                  'Nobody',
-                ],
-                photoVisibility,
-                (value) async {
-                  setState(() {
-                    photoVisibility = value;
-                  });
-
-                  await _saveField(
-                    'photoVisibility',
-                    value,
-                  );
-                },
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.message),
-            title: const Text(
-              'Who can message me',
-            ),
-            subtitle: Text(messagePermission),
-            trailing: const Icon(
-              Icons.chevron_right,
-            ),
-            onTap: () {
-              _chooseOption(
-                context,
-                'Who can message me',
-                [
-                  'Everyone',
-                  'Friends Only',
-                  'Nobody',
-                ],
-                messagePermission,
-                (value) async {
-                  setState(() {
-                    messagePermission = value;
-                  });
-
-                  await _saveField(
-                    'messagePermission',
-                    value,
-                  );
-                },
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.card_giftcard,
-            ),
-            title: const Text(
-              'Who can send me gifts',
-            ),
-            subtitle: Text(giftPermission),
-            trailing: const Icon(
-              Icons.chevron_right,
-            ),
-            onTap: () {
-              _chooseOption(
-                context,
-                'Who can send me gifts',
-                [
-                  'Everyone',
-                  'Friends Only',
-                  'Nobody',
-                ],
-                giftPermission,
-                (value) async {
-                  setState(() {
-                    giftPermission = value;
-                  });
-
-                  await _saveField(
-                    'giftPermission',
-                    value,
-                  );
-                },
-              );
-            },
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.circle),
-            title: Text(
-              AppLanguage.text('online_status'),
-            ),
-            subtitle: const Text(
-              'Show when I am online',
-            ),
-            value: onlineStatus,
-            onChanged: (value) async {
-              setState(() {
-                onlineStatus = value;
-              });
-
-              await _saveField(
-                'onlineStatus',
-                value,
-              );
-            },
-          ),
-          SwitchListTile(
-            secondary: const Icon(
-              Icons.meeting_room,
-            ),
-            title: Text(
-              AppLanguage.text('room_activity'),
-            ),
-            subtitle: const Text(
-              'Show my room activity to others',
-            ),
-            value: roomActivity,
-            onChanged: (value) async {
-              setState(() {
-                roomActivity = value;
-              });
-
-              await _saveField(
-                'roomActivity',
-                value,
-              );
-            },
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.lock),
-            title: Text(
-              AppLanguage.text('private_account'),
-            ),
-            subtitle: const Text(
-              'Only approved people can interact with me',
-            ),
-            value: privateAccount,
-            onChanged: (value) async {
-              setState(() {
-                privateAccount = value;
-              });
-
-              await _saveField(
-                'privateAccount',
-                value,
-              );
-            },
-          ),
-
-          // Blocked Users intentionally removed.
-        ],
-      ),
-    );
-  }
-
-  void _chooseOption(
-    BuildContext context,
-    String title,
-    List<String> options,
-    String currentValue,
-    ValueChanged<String> onSelected,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    ],
                   ),
                 ),
-              ),
-              ...options.map(
-                (option) => ListTile(
-                  title: Text(option),
-                  trailing: option == currentValue
-                      ? const Icon(Icons.check)
-                      : null,
-                  onTap: () {
-                    onSelected(option);
-                    Navigator.pop(sheetContext);
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-/* ============================================================
-   LANGUAGE PAGE
-   ============================================================ */
-
-class LanguagePage extends StatelessWidget {
-  const LanguagePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('language'),
-        ),
-      ),
-      body: ValueListenableBuilder<String>(
-        valueListenable: AppLanguage.current,
-        builder: (context, selectedLanguage, child) {
-          return ListView.builder(
-            itemCount: AppLanguage.languages.length,
-            itemBuilder: (context, index) {
-              final language =
-                  AppLanguage.languages[index];
-
-              return ListTile(
-                title: Text(language),
-                trailing:
-                    language == selectedLanguage
-                        ? const Icon(Icons.check)
-                        : null,
-                onTap: () async {
-                  await AppLanguage.change(
-                    language,
-                  );
-                },
               );
             },
           );
@@ -3637,9 +1649,1013 @@ class LanguagePage extends StatelessWidget {
   }
 }
 
-/* ============================================================
-   NOTIFICATIONS
-   ============================================================ */
+
+// =========================
+// ROOM INVITES
+// =========================
+
+class RoomInvitesPage extends StatelessWidget {
+  const RoomInvitesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Room Invites')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('roomInvites')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No room invites',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final data = doc.data();
+
+              final roomId = (data['roomId'] ?? '').toString();
+              final roomName =
+                  (data['roomName'] ?? 'PartyChat Room').toString();
+              final fromName =
+                  (data['fromName'] ?? 'Party User').toString();
+
+              return Card(
+                color: const Color(0xFF15121F),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFF8D3DFF),
+                    child: Icon(
+                      Icons.meeting_room,
+                      color: Colors.white,
+                    ),
+                  ),
+                  title: Text(
+                    roomName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '$fromName invited you',
+                    style: const TextStyle(color: Colors.white60),
+                  ),
+                  trailing: ElevatedButton(
+                    onPressed: roomId.isEmpty
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => RoomPage(
+                                  title: roomName,
+                                  online: 0,
+                                ),
+                              ),
+                            );
+                          },
+                    child: const Text('Join'),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+// =========================
+// FRIEND MESSAGES
+// =========================
+
+class FriendMessagesPage extends StatelessWidget {
+  const FriendMessagesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Friend Messages')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('chats')
+            .orderBy('updatedAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No messages',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data();
+
+              final friendUid =
+                  (data['friendUid'] ?? data['otherUid'] ?? '').toString();
+
+              final name =
+                  (data['friendName'] ?? data['name'] ?? 'Party User')
+                      .toString();
+
+              final lastMessage =
+                  (data['lastMessage'] ?? '').toString();
+
+              final photo =
+                  (data['photoURL'] ?? data['photoUrl'] ?? '').toString();
+
+              return ListTile(
+                leading: _NetworkOrAvatar(
+                  photo: photo,
+                  name: name,
+                  radius: 24,
+                ),
+                title: Text(
+                  name,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                subtitle: Text(
+                  lastMessage,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white60),
+                ),
+                onTap: friendUid.isEmpty
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatPage(
+                              otherUid: friendUid,
+                              otherName: name,
+                              otherPhoto: photo,
+                            ),
+                          ),
+                        );
+                      },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+// =========================
+// GIFTS PAGE
+// =========================
+
+class GiftsPage extends StatelessWidget {
+  const GiftsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Gifts')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('gifts')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No gifts received',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data();
+
+              final fromName =
+                  (data['fromName'] ?? 'Party User').toString();
+
+              final gift =
+                  (data['giftName'] ?? data['gift'] ?? 'Gift').toString();
+
+              final amount =
+                  (data['amount'] ?? 0).toString();
+
+              return Card(
+                color: const Color(0xFF15121F),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFF8D3DFF),
+                    child: Icon(
+                      Icons.card_giftcard,
+                      color: Colors.white,
+                    ),
+                  ),
+                  title: Text(
+                    '$gift × $amount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'From $fromName',
+                    style: const TextStyle(color: Colors.white60),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+// =========================
+// MY GIFTS
+// =========================
+
+class MyGiftsPage extends StatelessWidget {
+  const MyGiftsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('My Gifts')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('sentGifts')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No gifts sent',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data();
+
+              final toName =
+                  (data['toName'] ?? 'Party User').toString();
+
+              final gift =
+                  (data['giftName'] ?? data['gift'] ?? 'Gift').toString();
+
+              final amount =
+                  (data['amount'] ?? 0).toString();
+
+              return Card(
+                color: const Color(0xFF15121F),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFF8D3DFF),
+                    child: Icon(
+                      Icons.card_giftcard,
+                      color: Colors.white,
+                    ),
+                  ),
+                  title: Text(
+                    '$gift × $amount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'To $toName',
+                    style: const TextStyle(color: Colors.white60),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+// =========================
+// FRIENDS PAGE
+// =========================
+
+class FriendsPage extends StatefulWidget {
+  const FriendsPage({super.key});
+
+  @override
+  State<FriendsPage> createState() => _FriendsPageState();
+}
+
+class _FriendsPageState extends State<FriendsPage> {
+  final searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Friends')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              controller: searchController,
+              onSubmitted: (_) => setState(() {}),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Search username',
+                hintStyle: const TextStyle(color: Colors.white54),
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  onPressed: () => setState(() {}),
+                  icon: const Icon(Icons.search),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .collection('friends')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+
+                if (docs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No friends yet',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  );
+                }
+
+                final query =
+                    searchController.text.trim().toLowerCase();
+
+                final filtered = docs.where((doc) {
+                  final data = doc.data();
+                  final name =
+                      (data['name'] ?? data['friendName'] ?? '')
+                          .toString()
+                          .toLowerCase();
+                  return query.isEmpty || name.contains(query);
+                }).toList();
+
+                return ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final doc = filtered[index];
+                    final data = doc.data();
+
+                    final friendUid =
+                        (data['friendUid'] ?? doc.id).toString();
+
+                    final name =
+                        (data['name'] ?? data['friendName'] ?? 'Party User')
+                            .toString();
+
+                    final photo =
+                        (data['photoURL'] ?? data['photoUrl'] ?? '')
+                            .toString();
+
+                    return ListTile(
+                      leading: _NetworkOrAvatar(
+                        photo: photo,
+                        name: name,
+                        radius: 25,
+                      ),
+                      title: Text(
+                        name,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.chat),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChatPage(
+                                    otherUid: friendUid,
+                                    otherName: name,
+                                    otherPhoto: photo,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.card_giftcard),
+                            onPressed: () {
+                              _showGiftDialog(
+                                context,
+                                friendUid,
+                                name,
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.block,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () async {
+                              await PartyChatData.blockUser(
+                                uid,
+                                friendUid,
+                              );
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(
+                                  const SnackBar(
+                                    content: Text('User blocked'),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showGiftDialog(
+    BuildContext context,
+    String recipientUid,
+    String recipientName,
+  ) async {
+    final amountController = TextEditingController(text: '10');
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Send Gift'),
+          content: TextField(
+            controller: amountController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Coins',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final amount =
+                    int.tryParse(amountController.text.trim()) ?? 0;
+
+                if (amount <= 0) return;
+
+                await PartyChatData.sendGift(
+                  recipientUid: recipientUid,
+                  recipientName: recipientName,
+                  amount: amount,
+                  giftName: 'Gift',
+                );
+
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                }
+              },
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+
+    amountController.dispose();
+  }
+}
+
+
+// =========================
+// CHAT PAGE
+// =========================
+
+class ChatPage extends StatefulWidget {
+  final String otherUid;
+  final String otherName;
+  final String otherPhoto;
+
+  const ChatPage({
+    super.key,
+    required this.otherUid,
+    required this.otherName,
+    this.otherPhoto = '',
+  });
+
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  final controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    final chatId = PartyChatData.chatId(uid, widget.otherUid);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            _NetworkOrAvatar(
+              photo: widget.otherPhoto,
+              name: widget.otherName,
+              radius: 18,
+            ),
+            const SizedBox(width: 10),
+            Text(widget.otherName),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('chats')
+                  .doc(chatId)
+                  .collection('messages')
+                  .orderBy('createdAt')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data();
+
+                    final fromUid =
+                        (data['fromUid'] ?? '').toString();
+
+                    final message =
+                        (data['message'] ?? '').toString();
+
+                    final mine = fromUid == uid;
+
+                    return Align(
+                      alignment: mine
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Container(
+                        margin:
+                            const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: mine
+                              ? const Color(0xFF8D3DFF)
+                              : const Color(0xFF201B2D),
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          message,
+                          style: const TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Message...',
+                      ),
+                      onSubmitted: (_) => _send(),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _send,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _send() async {
+    final text = controller.text.trim();
+
+    if (text.isEmpty) return;
+
+    controller.clear();
+
+    await PartyChatData.sendMessage(
+      recipientUid: widget.otherUid,
+      recipientName: widget.otherName,
+      message: text,
+    );
+  }
+}
+
+
+// =========================
+// NETWORK AVATAR
+// =========================
+
+class _NetworkOrAvatar extends StatelessWidget {
+  final String photo;
+  final String name;
+  final double radius;
+
+  const _NetworkOrAvatar({
+    required this.photo,
+    required this.name,
+    this.radius = 25,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (photo.isNotEmpty) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundImage: NetworkImage(photo),
+      );
+    }
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: const Color(0xFF8D3DFF),
+      child: Text(
+        name.isNotEmpty ? name[0].toUpperCase() : 'P',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+
+// =========================
+// ROOM INVITE FRIENDS
+// =========================
+
+class RoomInviteFriendsPage extends StatelessWidget {
+  final String roomId;
+  final String roomName;
+
+  const RoomInviteFriendsPage({
+    super.key,
+    required this.roomId,
+    required this.roomName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Invite Friends')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('friends')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No friends to invite',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data();
+
+              final friendUid =
+                  (data['friendUid'] ?? docs[index].id).toString();
+
+              final name =
+                  (data['name'] ?? data['friendName'] ?? 'Party User')
+                      .toString();
+
+              final photo =
+                  (data['photoURL'] ?? data['photoUrl'] ?? '').toString();
+
+              return ListTile(
+                leading: _NetworkOrAvatar(
+                  photo: photo,
+                  name: name,
+                  radius: 24,
+                ),
+                title: Text(
+                  name,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                trailing: ElevatedButton(
+                  onPressed: () async {
+                    await PartyChatData.sendRoomInvite(
+                      recipientUid: friendUid,
+                      roomId: roomId,
+                      roomName: roomName,
+                    );
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('$name invited'),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Invite'),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+// =========================
+// BLOCKED USERS
+// =========================
+
+class BlockedUsersPage extends StatelessWidget {
+  const BlockedUsersPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Blocked Users')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('blockedUsers')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No blocked users',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final data = doc.data();
+
+              final name =
+                  (data['name'] ?? 'Party User').toString();
+
+              final photo =
+                  (data['photoURL'] ?? '').toString();
+
+              return ListTile(
+                leading: _NetworkOrAvatar(
+                  photo: photo,
+                  name: name,
+                  radius: 24,
+                ),
+                title: Text(
+                  name,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                trailing: TextButton(
+                  onPressed: () async {
+                    await PartyChatData.unblockUser(
+                      uid,
+                      doc.id,
+                    );
+                  },
+                  child: const Text('Unblock'),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+// =========================
+// NOTIFICATIONS PAGE
+// =========================
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -3649,172 +2665,669 @@ class NotificationsPage extends StatefulWidget {
       _NotificationsPageState();
 }
 
-class _NotificationsPageState
-    extends State<NotificationsPage> {
-  bool messages = true;
-  bool announcements = true;
+class _NotificationsPageState extends State<NotificationsPage> {
+  bool messagesEnabled = true;
+  bool announcementsEnabled = true;
 
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Scaffold(
+        body: Center(child: Text('Login required')),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('notifications'),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
+      appBar: AppBar(title: const Text('Notifications')),
+      body: Column(
         children: [
-          const Text(
-            'Choose what you want to be notified about.',
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.grey,
+          SwitchListTile(
+            title: const Text(
+              'Messages',
+              style: TextStyle(color: Colors.white),
             ),
-          ),
-          const SizedBox(height: 20),
-          _notificationTile(
-            AppLanguage.text('messages'),
-            'Get notified when you receive a new message.',
-            messages,
-            (value) {
+            subtitle: const Text(
+              'Receive friend message notifications',
+              style: TextStyle(color: Colors.white60),
+            ),
+            value: messagesEnabled,
+            onChanged: (value) {
               setState(() {
-                messages = value;
+                messagesEnabled = value;
               });
             },
           ),
-          _notificationTile(
-            AppLanguage.text('announcements'),
-            'Get notified about important updates and events from PartyChat.',
-            announcements,
-            (value) {
+          SwitchListTile(
+            title: const Text(
+              'Announcements',
+              style: TextStyle(color: Colors.white),
+            ),
+            subtitle: const Text(
+              'Receive PartyChat announcements',
+              style: TextStyle(color: Colors.white60),
+            ),
+            value: announcementsEnabled,
+            onChanged: (value) {
               setState(() {
-                announcements = value;
+                announcementsEnabled = value;
               });
             },
+          ),
+          const Divider(),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .collection('notifications')
+                  .orderBy('createdAt', descending: true)
+                  .limit(100)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+
+                if (docs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No notifications',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final doc = docs[index];
+                    final data = doc.data();
+
+                    final title =
+                        (data['title'] ?? 'Notification').toString();
+
+                    final message =
+                        (data['message'] ?? '').toString();
+
+                    final isRead =
+                        data['isRead'] == true;
+
+                    return ListTile(
+                      tileColor: isRead
+                          ? null
+                          : const Color(0xFF191526),
+                      leading: Icon(
+                        isRead
+                            ? Icons.notifications_none
+                            : Icons.notifications_active,
+                        color: isRead
+                            ? Colors.white54
+                            : const Color(0xFFB56BFF),
+                      ),
+                      title: Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: isRead
+                              ? FontWeight.normal
+                              : FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        message,
+                        style: const TextStyle(
+                          color: Colors.white60,
+                        ),
+                      ),
+                      onTap: () async {
+                        await doc.reference.update({
+                          'isRead': true,
+                        });
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _notificationTile(
-    String title,
-    String subtitle,
-    bool value,
-    ValueChanged<bool> onChanged,
+
+// =========================
+// PARTYCHAT DATA / FIRESTORE
+// =========================
+
+class PartyChatData {
+  static final FirebaseFirestore db =
+      FirebaseFirestore.instance;
+
+  static Future<Map<String, dynamic>> userData(
+    String uid,
+  ) async {
+    final snap = await db.collection('users').doc(uid).get();
+    return snap.data() ?? {};
+  }
+
+  static String chatId(
+    String uid1,
+    String uid2,
   ) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8,
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 5),
-        child: Text(subtitle),
-      ),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
+    final ids = [uid1, uid2]..sort();
+    return '${ids[0]}_${ids[1]}';
+  }
+
+  static Future<bool> isBlockedEither(
+    String uid1,
+    String uid2,
+  ) async {
+    final a = await db
+        .collection('users')
+        .doc(uid1)
+        .collection('blockedUsers')
+        .doc(uid2)
+        .get();
+
+    if (a.exists) return true;
+
+    final b = await db
+        .collection('users')
+        .doc(uid2)
+        .collection('blockedUsers')
+        .doc(uid1)
+        .get();
+
+    return b.exists;
+  }
+
+  static Future<void> blockUser(
+    String myUid,
+    String otherUid,
+  ) async {
+    final other = await userData(otherUid);
+
+    await db
+        .collection('users')
+        .doc(myUid)
+        .collection('blockedUsers')
+        .doc(otherUid)
+        .set({
+      'uid': otherUid,
+      'name': other['name'] ?? 'Party User',
+      'photoURL': other['photoURL'] ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    await db
+        .collection('users')
+        .doc(myUid)
+        .collection('friends')
+        .doc(otherUid)
+        .delete();
+  }
+
+  static Future<void> unblockUser(
+    String myUid,
+    String otherUid,
+  ) async {
+    await db
+        .collection('users')
+        .doc(myUid)
+        .collection('blockedUsers')
+        .doc(otherUid)
+        .delete();
+  }
+
+  static Future<void> sendFriendRequest({
+    required String recipientUid,
+  }) async {
+    final current = FirebaseAuth.instance.currentUser;
+
+    if (current == null) return;
+    if (current.uid == recipientUid) return;
+
+    if (await isBlockedEither(current.uid, recipientUid)) {
+      return;
+    }
+
+    final me = await userData(current.uid);
+
+    await db
+        .collection('users')
+        .doc(recipientUid)
+        .collection('friendRequests')
+        .doc(current.uid)
+        .set({
+      'fromUid': current.uid,
+      'fromName': me['name'] ?? current.displayName ?? 'Party User',
+      'fromPhoto': me['photoURL'] ?? current.photoURL ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    await ProfileUnreadService.createNotification(
+      recipientUid: recipientUid,
+      badgeKey: 'friendRequests',
+      title: 'Friend Request',
+      message:
+          '${me['name'] ?? 'Someone'} sent you a friend request.',
+      actorUid: current.uid,
+      actorName: me['name'] ?? 'Party User',
+      actorPhoto: me['photoURL'] ?? '',
+    );
+  }
+
+  static Future<void> acceptFriendRequest({
+    required String myUid,
+    required String otherUid,
+  }) async {
+    final me = await userData(myUid);
+    final other = await userData(otherUid);
+
+    final batch = db.batch();
+
+    final myFriend = db
+        .collection('users')
+        .doc(myUid)
+        .collection('friends')
+        .doc(otherUid);
+
+    final otherFriend = db
+        .collection('users')
+        .doc(otherUid)
+        .collection('friends')
+        .doc(myUid);
+
+    batch.set(myFriend, {
+      'friendUid': otherUid,
+      'name': other['name'] ?? 'Party User',
+      'photoURL': other['photoURL'] ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    batch.set(otherFriend, {
+      'friendUid': myUid,
+      'name': me['name'] ?? 'Party User',
+      'photoURL': me['photoURL'] ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    batch.delete(
+      db
+          .collection('users')
+          .doc(myUid)
+          .collection('friendRequests')
+          .doc(otherUid),
+    );
+
+    await batch.commit();
+
+    await ProfileUnreadService.createNotification(
+      recipientUid: otherUid,
+      badgeKey: 'friends',
+      title: 'New Friend',
+      message: '${me['name'] ?? 'Party User'} accepted your request.',
+      actorUid: myUid,
+      actorName: me['name'] ?? 'Party User',
+      actorPhoto: me['photoURL'] ?? '',
+    );
+  }
+
+  static Future<void> rejectFriendRequest({
+    required String myUid,
+    required String otherUid,
+  }) async {
+    await db
+        .collection('users')
+        .doc(myUid)
+        .collection('friendRequests')
+        .doc(otherUid)
+        .delete();
+
+    await ProfileUnreadService.markCategoryRead(
+      myUid,
+      'friendRequests',
+    );
+  }
+
+  static Future<void> sendMessage({
+    required String recipientUid,
+    required String recipientName,
+    required String message,
+  }) async {
+    final current = FirebaseAuth.instance.currentUser;
+
+    if (current == null || message.trim().isEmpty) return;
+
+    if (await isBlockedEither(current.uid, recipientUid)) {
+      return;
+    }
+
+    final me = await userData(current.uid);
+    final id = chatId(current.uid, recipientUid);
+
+    final messageRef = db
+        .collection('chats')
+        .doc(id)
+        .collection('messages')
+        .doc();
+
+    final now = FieldValue.serverTimestamp();
+
+    await messageRef.set({
+      'fromUid': current.uid,
+      'toUid': recipientUid,
+      'message': message.trim(),
+      'createdAt': now,
+    });
+
+    await db
+        .collection('users')
+        .doc(current.uid)
+        .collection('chats')
+        .doc(id)
+        .set({
+      'friendUid': recipientUid,
+      'friendName': recipientName,
+      'lastMessage': message.trim(),
+      'updatedAt': now,
+    }, SetOptions(merge: true));
+
+    await db
+        .collection('users')
+        .doc(recipientUid)
+        .collection('chats')
+        .doc(id)
+        .set({
+      'friendUid': current.uid,
+      'friendName': me['name'] ?? 'Party User',
+      'lastMessage': message.trim(),
+      'updatedAt': now,
+    }, SetOptions(merge: true));
+
+    await ProfileUnreadService.createNotification(
+      recipientUid: recipientUid,
+      badgeKey: 'friendMessages',
+      title: 'New Message',
+      message:
+          '${me['name'] ?? 'Party User'} sent you a message.',
+      actorUid: current.uid,
+      actorName: me['name'] ?? 'Party User',
+      actorPhoto: me['photoURL'] ?? '',
+      chatId: id,
+    );
+  }
+
+  static Future<void> sendGift({
+    required String recipientUid,
+    required String recipientName,
+    required int amount,
+    required String giftName,
+  }) async {
+    final current = FirebaseAuth.instance.currentUser;
+
+    if (current == null || amount <= 0) return;
+
+    if (await isBlockedEither(current.uid, recipientUid)) {
+      return;
+    }
+
+    final me = await userData(current.uid);
+    final coins = (me['coins'] is num)
+        ? (me['coins'] as num).toInt()
+        : 0;
+
+    if (coins < amount) {
+      throw Exception('Not enough coins');
+    }
+
+    await db.collection('users').doc(current.uid).update({
+      'coins': coins - amount,
+    });
+
+    final giftData = {
+      'fromUid': current.uid,
+      'fromName': me['name'] ?? 'Party User',
+      'toUid': recipientUid,
+      'toName': recipientName,
+      'giftName': giftName,
+      'amount': amount,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
+
+    await db
+        .collection('users')
+        .doc(recipientUid)
+        .collection('gifts')
+        .add(giftData);
+
+    await db
+        .collection('users')
+        .doc(current.uid)
+        .collection('sentGifts')
+        .add(giftData);
+
+    await db.collection('users').doc(recipientUid).set({
+      'diamonds': FieldValue.increment(amount),
+    }, SetOptions(merge: true));
+
+    await db
+        .collection('users')
+        .doc(current.uid)
+        .collection('transactions')
+        .add({
+      'type': 'gift',
+      'amount': amount,
+      'description': 'Gift sent to $recipientName',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    await ProfileUnreadService.createNotification(
+      recipientUid: recipientUid,
+      badgeKey: 'gifts',
+      title: 'New Gift',
+      message:
+          '${me['name'] ?? 'Party User'} sent you $giftName.',
+      actorUid: current.uid,
+      actorName: me['name'] ?? 'Party User',
+      actorPhoto: me['photoURL'] ?? '',
+    );
+
+    await ProfileUnreadService.createNotification(
+      recipientUid: current.uid,
+      badgeKey: 'myGifts',
+      title: 'Gift Sent',
+      message:
+          'You sent $giftName to $recipientName.',
+      actorUid: recipientUid,
+      actorName: recipientName,
+    );
+  }
+
+  static Future<void> sendRoomInvite({
+    required String recipientUid,
+    required String roomId,
+    required String roomName,
+  }) async {
+    final current = FirebaseAuth.instance.currentUser;
+
+    if (current == null) return;
+
+    if (await isBlockedEither(current.uid, recipientUid)) {
+      return;
+    }
+
+    final me = await userData(current.uid);
+
+    await db
+        .collection('users')
+        .doc(recipientUid)
+        .collection('roomInvites')
+        .add({
+      'roomId': roomId,
+      'roomName': roomName,
+      'fromUid': current.uid,
+      'fromName': me['name'] ?? 'Party User',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    await ProfileUnreadService.createNotification(
+      recipientUid: recipientUid,
+      badgeKey: 'roomInvites',
+      title: 'Room Invite',
+      message:
+          '${me['name'] ?? 'Party User'} invited you to $roomName.',
+      actorUid: current.uid,
+      actorName: me['name'] ?? 'Party User',
+      actorPhoto: me['photoURL'] ?? '',
+      roomId: roomId,
     );
   }
 }
 
-/* ============================================================
-   BLOCKED USERS
-   ============================================================ */
 
-class BlockedUsersPage extends StatelessWidget {
-  const BlockedUsersPage({super.key});
+// =========================
+// UNREAD PROFILE BADGES
+// =========================
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('blocked_users'),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'Blocked users will appear here.',
-          textAlign: TextAlign.center,
-        ),
-      ),
+class ProfileUnreadService {
+  static final FirebaseFirestore db =
+      FirebaseFirestore.instance;
+
+  static const List<String> keys = [
+    'friendRequests',
+    'roomInvites',
+    'friendMessages',
+    'gifts',
+    'notifications',
+    'myGifts',
+    'friends',
+  ];
+
+  static DocumentReference<Map<String, dynamic>> stateRef(
+    String uid,
+  ) {
+    return db
+        .collection('users')
+        .doc(uid)
+        .collection('notificationState')
+        .doc('profile');
+  }
+
+  static Future<void> createNotification({
+    required String recipientUid,
+    required String badgeKey,
+    required String title,
+    required String message,
+    String? actorUid,
+    String? actorName,
+    String? actorPhoto,
+    String? roomId,
+    String? chatId,
+  }) async {
+    final notificationRef = db
+        .collection('users')
+        .doc(recipientUid)
+        .collection('notifications')
+        .doc();
+
+    final state = stateRef(recipientUid);
+
+    final data = <String, dynamic>{
+      'type': badgeKey,
+      'badgeKey': badgeKey,
+      'title': title,
+      'message': message,
+      'isRead': false,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
+
+    if (actorUid != null) {
+      data['actorUid'] = actorUid;
+    }
+
+    if (actorName != null) {
+      data['actorName'] = actorName;
+    }
+
+    if (actorPhoto != null) {
+      data['actorPhoto'] = actorPhoto;
+    }
+
+    if (roomId != null) {
+      data['roomId'] = roomId;
+    }
+
+    if (chatId != null) {
+      data['chatId'] = chatId;
+    }
+
+    final batch = db.batch();
+
+    batch.set(notificationRef, data);
+
+    batch.set(
+      state,
+      {
+        badgeKey: FieldValue.increment(1),
+      },
+      SetOptions(merge: true),
     );
+
+    await batch.commit();
+  }
+
+  static Future<void> markCategoryRead(
+    String uid,
+    String key,
+  ) async {
+    if (!keys.contains(key)) return;
+
+    await stateRef(uid).set(
+      {
+        key: 0,
+      },
+      SetOptions(merge: true),
+    );
+
+    final docs = await db
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .where('badgeKey', isEqualTo: key)
+        .where('isRead', isEqualTo: false)
+        .limit(100)
+        .get();
+
+    if (docs.docs.isEmpty) return;
+
+    final batch = db.batch();
+
+    for (final doc in docs.docs) {
+      batch.update(
+        doc.reference,
+        {
+          'isRead': true,
+        },
+      );
+    }
+
+    await batch.commit();
   }
 }
 
-/* ============================================================
-   HELP CENTER
-   ============================================================ */
 
-class HelpCenterPage extends StatelessWidget {
-  const HelpCenterPage({super.key});
+// =========================
+// END OF PARTYCHAT
+// =========================
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('help_center'),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: const [
-          ListTile(
-            leading: Icon(Icons.help_outline),
-            title: Text('PartyChat Help Center'),
-            subtitle: Text(
-              'Help and support features will be connected here.',
-            ),
-          ),
-          SizedBox(height: 10),
-          ListTile(
-            leading: Icon(Icons.support_agent),
-            title: Text('Contact Support'),
-            subtitle: Text(
-              'Support contact system will be added later.',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   TRANSACTION HISTORY
-   ============================================================ */
-
-class TransactionHistoryPage
-    extends StatelessWidget {
-  const TransactionHistoryPage({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text(
-            'transaction_history',
-          ),
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'No transactions yet.',
-        ),
-      ),
-    );
-  }
-}
+  
