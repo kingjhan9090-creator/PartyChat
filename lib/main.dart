@@ -101,7 +101,6 @@ class AppLanguage {
       'room_activity': 'Room Activity Visibility',
       'private_account': 'Private Account',
     },
-
     'Urdu': {
       'settings': 'سیٹنگز',
       'language': 'زبان',
@@ -156,7 +155,6 @@ class AppLanguage {
       'room_activity': 'روم ایکٹیویٹی',
       'private_account': 'پرائیویٹ اکاؤنٹ',
     },
-
     'Hindi': {
       'settings': 'सेटिंग्स',
       'language': 'भाषा',
@@ -211,7 +209,6 @@ class AppLanguage {
       'room_activity': 'रूम एक्टिविटी',
       'private_account': 'प्राइवेट अकाउंट',
     },
-
     'Arabic': {
       'settings': 'الإعدادات',
       'language': 'اللغة',
@@ -266,7 +263,6 @@ class AppLanguage {
       'room_activity': 'نشاط الغرفة',
       'private_account': 'حساب خاص',
     },
-
     'Bengali': {
       'settings': 'সেটিংস',
       'language': 'ভাষা',
@@ -321,7 +317,6 @@ class AppLanguage {
       'room_activity': 'রুম কার্যকলাপ',
       'private_account': 'প্রাইভেট অ্যাকাউন্ট',
     },
-
     'Turkish': {
       'settings': 'Ayarlar',
       'language': 'Dil',
@@ -376,7 +371,6 @@ class AppLanguage {
       'room_activity': 'Oda Aktivitesi',
       'private_account': 'Özel Hesap',
     },
-
     'Indonesian': {
       'settings': 'Pengaturan',
       'language': 'Bahasa',
@@ -431,7 +425,6 @@ class AppLanguage {
       'room_activity': 'Aktivitas Ruang',
       'private_account': 'Akun Privat',
     },
-
     'Spanish': {
       'settings': 'Ajustes',
       'language': 'Idioma',
@@ -486,7 +479,6 @@ class AppLanguage {
       'room_activity': 'Actividad de sala',
       'private_account': 'Cuenta privada',
     },
-
     'French': {
       'settings': 'Paramètres',
       'language': 'Langue',
@@ -541,7 +533,6 @@ class AppLanguage {
       'room_activity': 'Activité du salon',
       'private_account': 'Compte privé',
     },
-
     'Chinese': {
       'settings': '设置',
       'language': '语言',
@@ -606,7 +597,6 @@ class AppLanguage {
 
   static Future<void> load() async {
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) return;
 
     try {
@@ -632,7 +622,6 @@ class AppLanguage {
     current.value = language;
 
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) return;
 
     try {
@@ -645,6 +634,83 @@ class AppLanguage {
       );
     } catch (e) {
       debugPrint('Language save failed: $e');
+    }
+  }
+}
+
+/* ============================================================
+   PROFILE UNREAD SYSTEM
+   ============================================================ */
+
+class ProfileUnreadService {
+  static const List<String> keys = [
+    'friendRequests',
+    'roomInvites',
+    'friendMessages',
+    'gifts',
+    'notifications',
+    'myGifts',
+    'friends',
+  ];
+
+  static DocumentReference<Map<String, dynamic>> ref(
+    String uid,
+  ) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('notificationState')
+        .doc('profile');
+  }
+
+  static Future<void> ensure(String uid) async {
+    try {
+      final snapshot = await ref(uid).get();
+
+      if (!snapshot.exists) {
+        await ref(uid).set({
+          for (final key in keys) key: 0,
+        });
+      }
+    } catch (e) {
+      debugPrint('Unread state create failed: $e');
+    }
+  }
+
+  static Future<void> markRead(
+    String uid,
+    String key,
+  ) async {
+    if (!keys.contains(key)) return;
+
+    try {
+      await ref(uid).set(
+        {key: 0},
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      debugPrint('Unread mark read failed: $e');
+    }
+  }
+
+  // Future event system ke liye framework.
+  // Abhi kisi fake event mein call nahi kiya ja raha.
+  static Future<void> increment(
+    String uid,
+    String key, {
+    int by = 1,
+  }) async {
+    if (!keys.contains(key)) return;
+
+    try {
+      await ref(uid).set(
+        {
+          key: FieldValue.increment(by),
+        },
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      debugPrint('Unread increment failed: $e');
     }
   }
 }
@@ -721,10 +787,17 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
 
       final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        await AppLanguage.load();
+        await ProfileUnreadService.ensure(user.uid);
+      }
+
+      if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
@@ -738,38 +811,33 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircleAvatar(
-                  radius: 62,
-                  child: Icon(
-                    Icons.groups_rounded,
-                    size: 70,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'PartyChat',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  AppLanguage.text('chat_play_make_friends'),
-                ),
-              ],
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircleAvatar(
+              radius: 62,
+              child: Icon(
+                Icons.groups_rounded,
+                size: 70,
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 20),
+            const Text(
+              'PartyChat',
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              AppLanguage.text('chat_play_make_friends'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -783,84 +851,78 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return Scaffold(
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const Spacer(),
-                  const CircleAvatar(
-                    radius: 60,
-                    child: Icon(
-                      Icons.groups_rounded,
-                      size: 68,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  Text(
-                    AppLanguage.text('welcome_to_partychat'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    AppLanguage.text('chat_play_make_friends'),
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 17,
-                    ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: FilledButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginPage(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        AppLanguage.text('get_started'),
-                        style: const TextStyle(fontSize: 17),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginPage(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        AppLanguage.text('login'),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-                ],
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const Spacer(),
+              const CircleAvatar(
+                radius: 60,
+                child: Icon(
+                  Icons.groups_rounded,
+                  size: 68,
+                ),
               ),
-            ),
+              const SizedBox(height: 22),
+              Text(
+                AppLanguage.text('welcome_to_partychat'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                AppLanguage.text('chat_play_make_friends'),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 17,
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LoginPage(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    AppLanguage.text('get_started'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LoginPage(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    AppLanguage.text('login'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 25),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
@@ -868,7 +930,6 @@ class WelcomePage extends StatelessWidget {
 /* ============================================================
    LOGIN
    ============================================================ */
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -901,17 +962,19 @@ class _LoginPageState extends State<LoginPage> {
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Email aur password required hain.'),
+          content: Text(
+            'Email aur password required hain.',
+          ),
         ),
       );
       return;
     }
 
-    if (signup && (name.length < 3 || name.length > 12)) {
+    if (signup && (name.length < 3 || name.length > 20)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Username 3 se 12 characters ka hona chahiye.',
+            'Username 3 se 20 characters ka hona chahiye.',
           ),
         ),
       );
@@ -922,8 +985,8 @@ class _LoginPageState extends State<LoginPage> {
       UserCredential credential;
 
       if (signup) {
-        credential =
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        credential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
@@ -931,6 +994,8 @@ class _LoginPageState extends State<LoginPage> {
         final user = credential.user;
 
         if (user != null) {
+          await user.updateDisplayName(name);
+
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
@@ -938,6 +1003,7 @@ class _LoginPageState extends State<LoginPage> {
             {
               'name': name,
               'email': email,
+              'photoURL': '',
               'language': AppLanguage.current.value,
               'coins': 12580,
               'diamonds': 2450,
@@ -945,15 +1011,22 @@ class _LoginPageState extends State<LoginPage> {
             },
             SetOptions(merge: true),
           );
+
+          await ProfileUnreadService.ensure(user.uid);
         }
       } else {
-        credential =
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
+        credential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
           email: email,
           password: password,
         );
 
         await AppLanguage.load();
+
+        final user = credential.user;
+        if (user != null) {
+          await ProfileUnreadService.ensure(user.uid);
+        }
       }
 
       if (!mounted) return;
@@ -974,8 +1047,6 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
-
 
   Future<void> continueWithGoogle() async {
     try {
@@ -996,7 +1067,9 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+          await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
 
       final user = userCredential.user;
 
@@ -1008,7 +1081,7 @@ class _LoginPageState extends State<LoginPage> {
           {
             'name': user.displayName ?? '',
             'email': user.email ?? '',
-            'photoUrl': user.photoURL ?? '',
+            'photoURL': user.photoURL ?? '',
             'language': AppLanguage.current.value,
             'coins': 12580,
             'diamonds': 2450,
@@ -1016,6 +1089,8 @@ class _LoginPageState extends State<LoginPage> {
           },
           SetOptions(merge: true),
         );
+
+        await ProfileUnreadService.ensure(user.uid);
       }
 
       if (!mounted) return;
@@ -1037,267 +1112,183 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
-
-  
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return Scaffold(
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 30,
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 30,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 30),
+              const Icon(
+                Icons.chat_bubble_rounded,
+                size: 75,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              const SizedBox(height: 14),
+              const Text(
+                'PartyChat',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Welcome to PartyChat',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              Row(
                 children: [
-                  const SizedBox(height: 30),
-
-                  // PartyChat icon
-                  const Icon(
-                    Icons.chat_bubble_rounded,
-                    size: 75,
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // PartyChat name
-                  const Text(
-                    'PartyChat',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  const Text(
-                    'Welcome to PartyChat',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // Login / Sign Up
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: () {
-                            setState(() {
-                              signup = false;
-                            });
-                          },
-                          child: const Text('Login'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              signup = true;
-                            });
-                          },
-                          child: const Text('Sign Up'),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Google
-                  SizedBox(
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: continueWithGoogle,
-                      icon: const Icon(
-                        Icons.g_mobiledata,
-                        size: 30,
-                      ),
-                      label: const Text(
-                        'Continue with Google',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Facebook
-                  SizedBox(
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Facebook baad mein connect karenge.
-                      },
-                      icon: const Icon(
-                        Icons.facebook,
-                      ),
-                      label: const Text(
-                        'Continue with Facebook',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Twitter / X
-                  SizedBox(
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Twitter/X baad mein connect karenge.
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                      ),
-                      label: const Text(
-                        'Continue with Twitter / X',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Mobile Number
-                  SizedBox(
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Mobile login baad mein connect karenge.
-                      },
-                      icon: const Icon(
-                        Icons.phone_android,
-                      ),
-                      label: const Text(
-                        'Continue with Mobile Number',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Email / Password section
-                  if (signup)
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: AppLanguage.text('username'),
-                        prefixIcon: const Icon(
-                          Icons.person,
-                        ),
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-
-                  if (signup)
-                    const SizedBox(height: 14),
-
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: AppLanguage.text('email'),
-                      prefixIcon: const Icon(
-                        Icons.email,
-                      ),
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  TextField(
-                    controller: passwordController,
-                    obscureText: obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: AppLanguage.text('password'),
-                      prefixIcon: const Icon(
-                        Icons.lock,
-                      ),
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            obscurePassword = !obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  SizedBox(
-                    height: 52,
+                  Expanded(
                     child: FilledButton(
-                      onPressed: continueToApp,
-                      child: Text(
-                        signup
-                            ? AppLanguage.text('create_account')
-                            : AppLanguage.text('login'),
-                      ),
+                      onPressed: () {
+                        setState(() {
+                          signup = false;
+                        });
+                      },
+                      child: const Text('Login'),
                     ),
                   ),
-
-                  const SizedBox(height: 12),
-
-                  // Create New Account
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        signup = true;
-                      });
-                    },
-                    child: const Text(
-                      'Create New Account',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          signup = true;
+                        });
+                      },
+                      child: const Text('Sign Up'),
                     ),
                   ),
-
-                  const SizedBox(height: 10),
                 ],
               ),
-            ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: continueWithGoogle,
+                  icon: const Icon(
+                    Icons.g_mobiledata,
+                    size: 30,
+                  ),
+                  label: const Text(
+                    'Continue with Google',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.facebook),
+                  label: const Text(
+                    'Continue with Facebook',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.close),
+                  label: const Text(
+                    'Continue with Twitter / X',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.phone_android),
+                  label: const Text(
+                    'Continue with Mobile Number',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (signup)
+                TextField(
+                  controller: nameController,
+                  maxLength: 20,
+                  decoration: InputDecoration(
+                    labelText: AppLanguage.text('username'),
+                    prefixIcon: const Icon(Icons.person),
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              if (signup) const SizedBox(height: 14),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: AppLanguage.text('email'),
+                  prefixIcon: const Icon(Icons.email),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: passwordController,
+                obscureText: obscurePassword,
+                decoration: InputDecoration(
+                  labelText: AppLanguage.text('password'),
+                  prefixIcon: const Icon(Icons.lock),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        obscurePassword = !obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                height: 52,
+                child: FilledButton(
+                  onPressed: continueToApp,
+                  child: Text(
+                    signup
+                        ? AppLanguage.text('create_account')
+                        : AppLanguage.text('login'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    signup = true;
+                  });
+                },
+                child: const Text(
+                  'Create New Account',
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
-
-
-
 
 /* ============================================================
    MAIN PAGE
@@ -1323,51 +1314,49 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return Scaffold(
-          body: SafeArea(
-            child: pages[selected],
+    return Scaffold(
+      body: SafeArea(
+        child: pages[selected],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: selected,
+        onDestinationSelected: (value) {
+          setState(() {
+            selected = value;
+          });
+        },
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: AppLanguage.text('home'),
           ),
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: selected,
-            onDestinationSelected: (value) {
-              setState(() {
-                selected = value;
-              });
-            },
-            destinations: [
-              NavigationDestination(
-                icon: const Icon(Icons.home_outlined),
-                selectedIcon: const Icon(Icons.home),
-                label: AppLanguage.text('home'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.forum_outlined),
-                selectedIcon: const Icon(Icons.forum),
-                label: AppLanguage.text('rooms'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.sports_esports_outlined),
-                selectedIcon: const Icon(Icons.sports_esports),
-                label: AppLanguage.text('games'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.account_balance_wallet_outlined),
-                selectedIcon:
-                    const Icon(Icons.account_balance_wallet),
-                label: AppLanguage.text('wallet'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.person_outline),
-                selectedIcon: const Icon(Icons.person),
-                label: AppLanguage.text('profile'),
-              ),
-            ],
+          NavigationDestination(
+            icon: const Icon(Icons.forum_outlined),
+            selectedIcon: const Icon(Icons.forum),
+            label: AppLanguage.text('rooms'),
           ),
-        );
-      },
+          NavigationDestination(
+            icon: const Icon(Icons.sports_esports_outlined),
+            selectedIcon: const Icon(Icons.sports_esports),
+            label: AppLanguage.text('games'),
+          ),
+          NavigationDestination(
+            icon: const Icon(
+              Icons.account_balance_wallet_outlined,
+            ),
+            selectedIcon: const Icon(
+              Icons.account_balance_wallet,
+            ),
+            label: AppLanguage.text('wallet'),
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
+            label: AppLanguage.text('profile'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1381,103 +1370,96 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return ListView(
-          padding: const EdgeInsets.all(18),
+    return ListView(
+      padding: const EdgeInsets.all(18),
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 25,
-                  child: Icon(Icons.person),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Hello, Party User 👋',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        AppLanguage.text('welcome_back'),
-                        style: const TextStyle(
-                          color: Colors.white54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.notifications_none),
-              ],
+            const CircleAvatar(
+              radius: 25,
+              child: Icon(Icons.person),
             ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF7130B7),
-                    Color(0xFFB22C8D),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(24),
-              ),
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    AppLanguage.text('your_balance'),
-                  ),
-                  const SizedBox(height: 5),
                   const Text(
-                    '12,580 🪙',
+                    'Hello, Party User 👋',
                     style: TextStyle(
-                      fontSize: 27,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '💎 2,450 ${AppLanguage.text('diamonds')}',
+                    AppLanguage.text('welcome_back'),
+                    style: const TextStyle(
+                      color: Colors.white54,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              AppLanguage.text('popular_rooms'),
-              style: const TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const RoomTile(
-              'Friends Forever 💜',
-              '2.4K online',
-              Icons.people,
-            ),
-            const RoomTile(
-              'Gaming Zone 🎮',
-              '1.8K online',
-              Icons.games,
-            ),
-            const RoomTile(
-              'Music Lovers 🎵',
-              '1.2K online',
-              Icons.music_note,
-            ),
+            const Icon(Icons.notifications_none),
           ],
-        );
-      },
+        ),
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF7130B7),
+                Color(0xFFB22C8D),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLanguage.text('your_balance'),
+              ),
+              const SizedBox(height: 5),
+              const Text(
+                '12,580 🪙',
+                style: TextStyle(
+                  fontSize: 27,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                '💎 2,450 ${AppLanguage.text('diamonds')}',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          AppLanguage.text('popular_rooms'),
+          style: const TextStyle(
+            fontSize: 21,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        const RoomTile(
+          'Friends Forever 💜',
+          '2.4K online',
+          Icons.people,
+        ),
+        const RoomTile(
+          'Gaming Zone 🎮',
+          '1.8K online',
+          Icons.games,
+        ),
+        const RoomTile(
+          'Music Lovers 🎵',
+          '1.2K online',
+          Icons.music_note,
+        ),
+      ],
     );
   }
 }
@@ -1491,43 +1473,38 @@ class RoomsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return ListView(
-          padding: const EdgeInsets.all(18),
-          children: [
-            Text(
-              AppLanguage.text('chat_rooms'),
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 18),
-            const RoomTile(
-              'Friends Forever 💜',
-              '2.4K online',
-              Icons.people,
-            ),
-            const RoomTile(
-              'Gaming Zone 🎮',
-              '1.8K online',
-              Icons.games,
-            ),
-            const RoomTile(
-              'Music Lovers 🎵',
-              '1.2K online',
-              Icons.music_note,
-            ),
-            const RoomTile(
-              'Fun Room 😊',
-              '980 online',
-              Icons.celebration,
-            ),
-          ],
-        );
-      },
+    return ListView(
+      padding: const EdgeInsets.all(18),
+      children: [
+        Text(
+          AppLanguage.text('chat_rooms'),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 18),
+        const RoomTile(
+          'Friends Forever 💜',
+          '2.4K online',
+          Icons.people,
+        ),
+        const RoomTile(
+          'Gaming Zone 🎮',
+          '1.8K online',
+          Icons.games,
+        ),
+        const RoomTile(
+          'Music Lovers 🎵',
+          '1.2K online',
+          Icons.music_note,
+        ),
+        const RoomTile(
+          'Fun Room 😊',
+          '980 online',
+          Icons.celebration,
+        ),
+      ],
     );
   }
 }
@@ -1562,8 +1539,7 @@ class RoomTile extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
@@ -1627,15 +1603,11 @@ class RoomPage extends StatefulWidget {
 class _RoomPageState extends State<RoomPage> {
   bool micOn = false;
   bool isSpeaking = false;
-
-  StreamSubscription<double>?
-      soundLevelSubscription;
-
   bool speakerOn = true;
 
-  final messageController =
-      TextEditingController();
+  StreamSubscription<double>? soundLevelSubscription;
 
+  final messageController = TextEditingController();
   final List<String> messages = [];
 
   Widget _buildMicButton() {
@@ -1653,14 +1625,12 @@ class _RoomPageState extends State<RoomPage> {
           boxShadow: isSpeaking
               ? [
                   BoxShadow(
-                    color:
-                        Colors.white.withOpacity(0.9),
+                    color: Colors.white.withOpacity(0.9),
                     blurRadius: 22,
                     spreadRadius: 7,
                   ),
                   BoxShadow(
-                    color:
-                        Colors.white.withOpacity(0.35),
+                    color: Colors.white.withOpacity(0.35),
                     blurRadius: 40,
                     spreadRadius: 12,
                   ),
@@ -1669,15 +1639,14 @@ class _RoomPageState extends State<RoomPage> {
         ),
         child: Icon(
           micOn ? Icons.mic : Icons.mic_off,
-          color:
-              micOn ? Colors.black : Colors.white,
+          color: micOn ? Colors.black : Colors.white,
           size: 29,
         ),
       ),
     );
   }
 
-  void startMicGlow(String userId) {
+  void startMicGlow() {
     soundLevelSubscription?.cancel();
 
     soundLevelSubscription = ZegoUIKit()
@@ -1695,28 +1664,38 @@ class _RoomPageState extends State<RoomPage> {
     });
   }
 
-  void toggleMic() {
-    micOn = !micOn;
+  Future<void> toggleMic() async {
+    final next = !micOn;
 
-    ZegoUIKit().turnMicrophoneOn(
-      micOn,
-      userID: widget.userId,
-    );
-
-    if (micOn) {
-      startMicGlow(widget.userId);
-    } else {
-      soundLevelSubscription?.cancel();
-
+    if (mounted) {
       setState(() {
-        isSpeaking = false;
+        micOn = next;
+
+        if (!next) {
+          isSpeaking = false;
+        }
       });
+    }
+
+    try {
+      await ZegoUIKit().turnMicrophoneOn(
+        next,
+        userID: widget.userId,
+      );
+    } catch (e) {
+      debugPrint('Microphone change failed: $e');
+    }
+
+    if (next) {
+      startMicGlow();
+    } else {
+      await soundLevelSubscription?.cancel();
+      soundLevelSubscription = null;
     }
   }
 
   void sendMessage() {
-    final text =
-        messageController.text.trim();
+    final text = messageController.text.trim();
 
     if (text.isEmpty) return;
 
@@ -1735,7 +1714,7 @@ class _RoomPageState extends State<RoomPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String roomId = widget.title
+    final roomId = widget.title
         .toLowerCase()
         .replaceAll(
           RegExp(r'[^a-z0-9]+'),
@@ -1751,9 +1730,7 @@ class _RoomPageState extends State<RoomPage> {
             userID: widget.userId,
             userName: 'Party User',
             roomID: roomId,
-            config:
-                ZegoUIKitPrebuiltLiveAudioRoomConfig
-                    .host(),
+            config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
           ),
           Positioned(
             bottom: 24,
@@ -1778,30 +1755,25 @@ class GamesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return GridView.count(
-          padding: const EdgeInsets.all(18),
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          children: const [
-            GameCard('Ludo', Icons.casino),
-            GameCard('Carrom', Icons.sports),
-            GameCard('8 Ball Pool', Icons.sports_bar),
-            GameCard('Quiz', Icons.quiz),
-            GameCard(
-              'Bubble Shooter',
-              Icons.bubble_chart,
-            ),
-            GameCard(
-              'More Games',
-              Icons.apps,
-            ),
-          ],
-        );
-      },
+    return GridView.count(
+      padding: const EdgeInsets.all(18),
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      children: const [
+        GameCard('Ludo', Icons.casino),
+        GameCard('Carrom', Icons.sports),
+        GameCard('8 Ball Pool', Icons.sports_bar),
+        GameCard('Quiz', Icons.quiz),
+        GameCard(
+          'Bubble Shooter',
+          Icons.bubble_chart,
+        ),
+        GameCard(
+          'More Games',
+          Icons.apps,
+        ),
+      ],
     );
   }
 }
@@ -1829,8 +1801,7 @@ class GameCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(21),
       ),
       child: Column(
-        mainAxisAlignment:
-            MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
@@ -1866,82 +1837,73 @@ class WalletTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return ListView(
-          padding: const EdgeInsets.all(18),
-          children: [
-            Text(
-              AppLanguage.text('my_wallet'),
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-              ),
+    return ListView(
+      padding: const EdgeInsets.all(18),
+      children: [
+        Text(
+          AppLanguage.text('my_wallet'),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 18),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF5522A1),
+                Color(0xFFB12C8C),
+              ],
             ),
-            const SizedBox(height: 18),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF5522A1),
-                    Color(0xFFB12C8C),
-                  ],
-                ),
-                borderRadius:
-                    BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLanguage.text('coins'),
               ),
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLanguage.text('coins'),
-                  ),
-                  const Text(
-                    '12,580 🪙',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '2,450 💎 ${AppLanguage.text('diamonds')}',
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-            FilledButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add),
-              label: Text(
-                AppLanguage.text('recharge'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const TransactionHistoryPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.history),
-              label: Text(
-                AppLanguage.text(
-                  'transaction_history',
+              const Text(
+                '12,580 🪙',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-            ),
-          ],
-        );
-      },
+              const SizedBox(height: 8),
+              Text(
+                '2,450 💎 ${AppLanguage.text('diamonds')}',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 15),
+        FilledButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.add),
+          label: Text(
+            AppLanguage.text('recharge'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    const TransactionHistoryPage(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.history),
+          label: Text(
+            AppLanguage.text('transaction_history'),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1950,13 +1912,476 @@ class WalletTab extends StatelessWidget {
    PROFILE
    ============================================================ */
 
-class ProfileTab extends StatelessWidget {
+class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
 
   @override
+  State<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends State<ProfileTab> {
+  final avatarImages = const {
+    'avatar1': 'assets/avatar1_pakistan_female-2.png',
+    'avatar2': 'assets/avatar2_uae_male.png',
+    'avatar3': 'assets/avatar3_uk_male.png',
+    'avatar4': 'assets/avatar4_russia_female.png',
+    'avatar5': 'assets/avatar5_saudi_female.png',
+    'avatar6': 'assets/avatar6_turkey_male.png',
+    'avatar7': 'assets/avatar7_india_female.png',
+    'avatar8': 'assets/avatar8_usa_male.png',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      ProfileUnreadService.ensure(user.uid);
+    }
+  }
+
+  ImageProvider<Object>? _imageProvider(
+    Map<String, dynamic>? data,
+  ) {
+    final photoBase64 = data?['photoBase64'] as String?;
+    final photoURL = data?['photoURL'] as String?;
+    final avatar = data?['avatar'] as String?;
+
+    if (photoBase64 != null && photoBase64.isNotEmpty) {
+      try {
+        return MemoryImage(
+          base64Decode(photoBase64),
+        );
+      } catch (_) {}
+    }
+
+    if (photoURL != null && photoURL.isNotEmpty) {
+      return NetworkImage(photoURL);
+    }
+
+    if (avatar != null && avatarImages[avatar] != null) {
+      return AssetImage(avatarImages[avatar]!);
+    }
+
+    return null;
+  }
+
+  Future<void> _showPhotoZoom(
+    BuildContext context,
+    ImageProvider<Object> image,
+  ) async {
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (_) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(10),
+          child: InteractiveViewer(
+            minScale: 1,
+            maxScale: 5,
+            child: Image(
+              image: image,
+              fit: BoxFit.contain,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickGallery(
+    BuildContext context,
+    DocumentReference<Map<String, dynamic>> userDoc,
+  ) async {
+    final picker = ImagePicker();
+
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 20,
+      maxWidth: 256,
+      maxHeight: 256,
+    );
+
+    if (image == null) return;
+
+    final bytes = await image.readAsBytes();
+
+    if (bytes.length > 500000) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Photo size zyada hai. Choti photo select karein.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final encodedPhoto = base64Encode(bytes);
+
+    try {
+      await userDoc.set(
+        {
+          'photoBase64': encodedPhoto,
+          'photoURL': '',
+          'avatar': '',
+        },
+        SetOptions(merge: true),
+      );
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Profile photo save ho gayi 👍',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Photo save nahi hui: $e',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _chooseAvatar(
+    BuildContext context,
+    DocumentReference<Map<String, dynamic>> userDoc,
+  ) async {
+    final avatars = avatarImages.keys.toList();
+
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        String? tempSelected;
+
+        return StatefulBuilder(
+          builder: (
+            context,
+            setDialogState,
+          ) {
+            return AlertDialog(
+              title: Text(
+                AppLanguage.text('choose_avatar'),
+              ),
+              content: GridView.builder(
+                shrinkWrap: true,
+                itemCount: avatars.length,
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                ),
+                itemBuilder: (context, index) {
+                  final avatar = avatars[index];
+
+                  return GestureDetector(
+                    onTap: () {
+                      setDialogState(() {
+                        tempSelected = avatar;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: tempSelected == avatar
+                              ? Colors.white
+                              : Colors.grey,
+                          width:
+                              tempSelected == avatar ? 3 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(
+                        avatarImages[avatar]!,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: tempSelected == null
+                      ? null
+                      : () {
+                          Navigator.pop(
+                            dialogContext,
+                            tempSelected,
+                          );
+                        },
+                  child: Text(
+                    AppLanguage.text('save'),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (selected == null) return;
+
+    try {
+      await userDoc.set(
+        {
+          'avatar': selected,
+          'photoURL': '',
+          'photoBase64': '',
+        },
+        SetOptions(merge: true),
+      );
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Avatar save ho gaya 👍',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Avatar save nahi hua: $e',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _changeUsername(
+    BuildContext context,
+    DocumentReference<Map<String, dynamic>> userDoc,
+  ) async {
+    final controller = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(
+            AppLanguage.text('change_username'),
+          ),
+          content: TextField(
+            controller: controller,
+            maxLength: 20,
+            decoration: InputDecoration(
+              hintText: AppLanguage.text('username'),
+              helperText: '3–20 characters',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: Text(
+                AppLanguage.text('cancel'),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final newName = controller.text.trim();
+
+                if (newName.length < 3 ||
+                    newName.length > 20) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Username 3 se 20 characters ka hona chahiye.',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  final data =
+                      (await userDoc.get()).data();
+
+                  final lastChange =
+                      data?['lastNameChangeAt'];
+
+                  if (lastChange is Timestamp) {
+                    final difference = DateTime.now().difference(
+                      lastChange.toDate(),
+                    );
+
+                    if (difference < const Duration(hours: 24)) {
+                      final remaining = const Duration(hours: 24)
+                              .inMinutes -
+                          difference.inMinutes;
+
+                      final hours = remaining ~/ 60;
+                      final minutes = remaining % 60;
+
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Username dobara change karne ke liye $hours hours $minutes minutes wait karein.',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                  }
+
+                  await userDoc.set(
+                    {
+                      'name': newName,
+                      'lastNameChangeAt':
+                          FieldValue.serverTimestamp(),
+                    },
+                    SetOptions(merge: true),
+                  );
+
+                  final user =
+                      FirebaseAuth.instance.currentUser;
+
+                  if (user != null) {
+                    await user.updateDisplayName(newName);
+                  }
+
+                  if (!dialogContext.mounted) return;
+
+                  Navigator.pop(dialogContext);
+
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Username save ho gaya 👍',
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Username save nahi hua: $e',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: Text(
+                AppLanguage.text('save'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+  }
+
+  Future<void> _openProfilePage(
+    BuildContext context,
+    String unreadKey,
+    Widget page,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      await ProfileUnreadService.markRead(
+        user.uid,
+        unreadKey,
+      );
+    }
+
+    if (!context.mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => page,
+      ),
+    );
+  }
+
+  Widget _profileNavigationTile({
+    required BuildContext context,
+    required IconData icon,
+    required String titleKey,
+    required String unreadKey,
+    required int unread,
+    required Widget page,
+  }) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(
+        AppLanguage.text(titleKey),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (unread > 0)
+            Container(
+              constraints: const BoxConstraints(
+                minWidth: 22,
+                minHeight: 22,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 2,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                unread > 99 ? '99+' : '$unread',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          const SizedBox(width: 6),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+      onTap: () {
+        _openProfilePage(
+          context,
+          unreadKey,
+          page,
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final user =
-        FirebaseAuth.instance.currentUser;
+    final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
       return Center(
@@ -1966,768 +2391,252 @@ class ProfileTab extends StatelessWidget {
       );
     }
 
-    final userDoc = FirebaseFirestore
-        .instance
+    final userDoc = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid);
 
-    final avatarImages = {
-      'avatar1':
-          'assets/avatar1_pakistan_female-2.png',
-      'avatar2':
-          'assets/avatar2_uae_male.png',
-      'avatar3':
-          'assets/avatar3_uk_male.png',
-      'avatar4':
-          'assets/avatar4_russia_female.png',
-      'avatar5':
-          'assets/avatar5_saudi_female.png',
-      'avatar6':
-          'assets/avatar6_turkey_male.png',
-      'avatar7':
-          'assets/avatar7_india_female.png',
-      'avatar8':
-          'assets/avatar8_usa_male.png',
-    };
+    final unreadDoc =
+        ProfileUnreadService.ref(user.uid);
 
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return ListView(
-          padding: const EdgeInsets.all(18),
-          children: [
-            Text(
-              AppLanguage.text('profile'),
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 22),
+    return ListView(
+      padding: const EdgeInsets.all(18),
+      children: [
+        Text(
+          AppLanguage.text('profile'),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 22),
 
-            Center(
-              child: StreamBuilder<
-                  DocumentSnapshot<
-                      Map<String, dynamic>>>(
-                stream: userDoc.snapshots(),
-                builder: (context, snapshot) {
-                  final data =
-                      snapshot.data?.data();
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: userDoc.snapshots(),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.data();
+            final image = _imageProvider(data);
 
-                  final photoURL =
-                      data?['photoURL']
-                          as String?;
-
-                  final photoBase64 =
-                      data?['photoBase64']
-                          as String?;
-
-                  final avatar =
-                      data?['avatar']
-                          as String?;
-
-                  ImageProvider<Object>?
-                      profileImage;
-
-                  if (photoBase64 != null &&
-                      photoBase64.isNotEmpty) {
-                    try {
-                      profileImage =
-                          MemoryImage(
-                        base64Decode(
-                          photoBase64,
-                        ),
-                      );
-                    } catch (_) {}
-                  }
-
-                  if (profileImage == null &&
-                      photoURL != null &&
-                      photoURL.isNotEmpty) {
-                    profileImage =
-                        NetworkImage(photoURL);
-                  }
-
-                  if (profileImage == null &&
-                      avatar != null &&
-                      avatarImages[avatar] !=
-                          null) {
-                    profileImage =
-                        AssetImage(
-                      avatarImages[avatar]!,
-                    );
-                  }
-
-                  return CircleAvatar(
-                    radius: 52,
-                    backgroundImage:
-                        profileImage,
-                    child: profileImage == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 52,
-                          )
-                        : null,
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            ElevatedButton.icon(
-              onPressed: () async {
-                final picker =
-                    ImagePicker();
-
-                final image =
-                    await picker.pickImage(
-                  source:
-                      ImageSource.gallery,
-                  imageQuality: 20,
-                  maxWidth: 256,
-                  maxHeight: 256,
-                );
-
-                if (image == null) return;
-
-                final bytes =
-                    await image.readAsBytes();
-
-                if (bytes.length > 500000) {
-                  if (!context.mounted) {
-                    return;
-                  }
-
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Photo size zyada hai. Choti photo select karein.',
-                      ),
-                    ),
-                  );
-
-                  return;
-                }
-
-                final encodedPhoto =
-                    base64Encode(bytes);
-
-                try {
-                  await userDoc.set(
-                    {
-                      'photoBase64':
-                          encodedPhoto,
-                      'photoURL': '',
-                      'avatar': '',
-                    },
-                    SetOptions(
-                      merge: true,
-                    ),
-                  );
-
-                  if (!context.mounted) {
-                    return;
-                  }
-
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Profile photo save ho gayi 👍',
-                      ),
-                    ),
-                  );
-                } catch (e) {
-                  if (!context.mounted) {
-                    return;
-                  }
-
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Photo save nahi hui: $e',
-                      ),
-                    ),
-                  );
-                }
-              },
-              icon:
-                  const Icon(Icons.camera_alt),
-              label: Text(
-                AppLanguage.text(
-                  'change_profile_photo',
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            ElevatedButton.icon(
-              onPressed: () async {
-                final avatars = [
-                  'avatar1',
-                  'avatar2',
-                  'avatar3',
-                  'avatar4',
-                  'avatar5',
-                  'avatar6',
-                  'avatar7',
-                  'avatar8',
-                ];
-
-                final selected =
-                    await showDialog<String>(
-                  context: context,
-                  builder:
-                      (dialogContext) {
-                    String? tempSelected;
-
-                    return StatefulBuilder(
-                      builder: (
+            return GestureDetector(
+              onTap: image == null
+                  ? null
+                  : () => _showPhotoZoom(
                         context,
-                        setDialogState,
-                      ) {
-                        return AlertDialog(
-                          title: Text(
-                            AppLanguage.text(
-                              'choose_avatar',
-                            ),
-                          ),
-                          content:
-                              GridView.builder(
-                            shrinkWrap: true,
-                            itemCount:
-                                avatars.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  4,
-                              crossAxisSpacing:
-                                  8,
-                              mainAxisSpacing:
-                                  8,
-                            ),
-                            itemBuilder:
-                                (context,
-                                    index) {
-                              final avatar =
-                                  avatars[index];
+                        image,
+                      ),
+              child: CircleAvatar(
+                radius: 52,
+                backgroundImage: image,
+                child: image == null
+                    ? const Icon(
+                        Icons.person,
+                        size: 52,
+                      )
+                    : null,
+              ),
+            );
+          },
+        ),
 
-                              return GestureDetector(
-                                onTap: () {
-                                  setDialogState(
-                                    () {
-                                      tempSelected =
-                                          avatar;
-                                    },
-                                  );
-                                },
-                                child:
-                                    Container(
-                                  padding:
-                                      const EdgeInsets.all(
-                                    4,
-                                  ),
-                                  decoration:
-                                      BoxDecoration(
-                                    border:
-                                        Border.all(
-                                      color: tempSelected ==
-                                              avatar
-                                          ? Colors
-                                              .white
-                                          : Colors
-                                              .grey,
-                                      width: tempSelected ==
-                                              avatar
-                                          ? 3
-                                          : 1,
-                                    ),
-                                    borderRadius:
-                                        BorderRadius
-                                            .circular(
-                                      8,
-                                    ),
-                                  ),
-                                  child:
-                                      Image.asset(
-                                    avatarImages[
-                                        avatar]!,
-                                    fit: BoxFit
-                                        .contain,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          actions: [
-                            ElevatedButton(
-                              onPressed:
-                                  tempSelected ==
-                                          null
-                                      ? null
-                                      : () {
-                                          Navigator.pop(
-                                            dialogContext,
-                                            tempSelected,
-                                          );
-                                        },
-                              child: Text(
-                                AppLanguage.text(
-                                  'save',
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+        const SizedBox(height: 12),
+
+        ElevatedButton.icon(
+          onPressed: () => _pickGallery(
+            context,
+            userDoc,
+          ),
+          icon: const Icon(Icons.camera_alt),
+          label: Text(
+            AppLanguage.text(
+              'change_profile_photo',
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        ElevatedButton.icon(
+          onPressed: () => _chooseAvatar(
+            context,
+            userDoc,
+          ),
+          icon: const Icon(Icons.face),
+          label: Text(
+            AppLanguage.text('choose_avatar'),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: userDoc.snapshots(),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.data();
+
+            final name =
+                data?['name'] as String? ??
+                    user.displayName ??
+                    'PartyChat User';
+
+            return Column(
+              children: [
+                Text(
+                  '$name 👑',
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  AppLanguage.text('vip_level'),
+                  style: const TextStyle(
+                    color: Color(0xFFFFD15C),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        Center(
+          child: ElevatedButton.icon(
+            onPressed: () => _changeUsername(
+              context,
+              userDoc,
+            ),
+            icon: const Icon(Icons.edit),
+            label: Text(
+              AppLanguage.text('change_username'),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: unreadDoc.snapshots(),
+          builder: (context, unreadSnapshot) {
+            final unreadData =
+                unreadSnapshot.data?.data() ?? {};
+
+            int count(String key) {
+              final value = unreadData[key];
+
+              if (value is int) return value;
+              if (value is num) return value.toInt();
+
+              return 0;
+            }
+
+            return Column(
+              children: [
+                _profileNavigationTile(
+                  context: context,
+                  icon: Icons.person_add,
+                  titleKey: 'friend_requests',
+                  unreadKey: 'friendRequests',
+                  unread: count('friendRequests'),
+                  page: const FriendRequestsPage(),
+                ),
+                _profileNavigationTile(
+                  context: context,
+                  icon: Icons.meeting_room,
+                  titleKey: 'room_invites',
+                  unreadKey: 'roomInvites',
+                  unread: count('roomInvites'),
+                  page: const RoomInvitesPage(),
+                ),
+                _profileNavigationTile(
+                  context: context,
+                  icon: Icons.message,
+                  titleKey: 'friend_messages',
+                  unreadKey: 'friendMessages',
+                  unread: count('friendMessages'),
+                  page: const FriendMessagesPage(),
+                ),
+                _profileNavigationTile(
+                  context: context,
+                  icon: Icons.card_giftcard,
+                  titleKey: 'gifts',
+                  unreadKey: 'gifts',
+                  unread: count('gifts'),
+                  page: const GiftsPage(),
+                ),
+                _profileNavigationTile(
+                  context: context,
+                  icon: Icons.notifications,
+                  titleKey: 'notifications',
+                  unreadKey: 'notifications',
+                  unread: count('notifications'),
+                  page: const NotificationsPage(),
+                ),
+                _profileNavigationTile(
+                  context: context,
+                  icon: Icons.card_giftcard,
+                  titleKey: 'my_gifts',
+                  unreadKey: 'myGifts',
+                  unread: count('myGifts'),
+                  page: const MyGiftsPage(),
+                ),
+                _profileNavigationTile(
+                  context: context,
+                  icon: Icons.people,
+                  titleKey: 'friends',
+                  unreadKey: 'friends',
+                  unread: count('friends'),
+                  page: const FriendsPage(),
+                ),
+
+                // Settings par unread badge nahi.
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: Text(
+                    AppLanguage.text('settings'),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const SettingsPage(),
+                      ),
                     );
                   },
-                );
-
-                if (selected == null) {
-                  return;
-                }
-
-                try {
-                  await userDoc.set(
-                    {
-                      'avatar': selected,
-                      'photoURL': '',
-                      'photoBase64': '',
-                    },
-                    SetOptions(
-                      merge: true,
-                    ),
-                  );
-
-                  if (!context.mounted) {
-                    return;
-                  }
-
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Avatar save ho gaya 👍',
-                      ),
-                    ),
-                  );
-                } catch (e) {
-                  if (!context.mounted) {
-                    return;
-                  }
-
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Avatar save nahi hua: $e',
-                      ),
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.face),
-              label: Text(
-                AppLanguage.text(
-                  'choose_avatar',
                 ),
-              ),
-            ),
+              ],
+            );
+          },
+        ),
 
-            const SizedBox(height: 12),
+        const SizedBox(height: 20),
 
-            Center(
-              child: StreamBuilder<
-                  DocumentSnapshot<
-                      Map<String, dynamic>>>(
-                stream: userDoc.snapshots(),
-                builder: (context, snapshot) {
-                  final data =
-                      snapshot.data?.data();
+        // Coins/Diamonds profile se intentionally remove.
+        // Ye balances Wallet mein hain.
 
-                  final name =
-                      data?['name']
-                              as String? ??
-                          'PartyChat User';
-
-                  return Text(
-                    '$name 👑',
-                    style: const TextStyle(
-                      fontSize: 21,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 4),
-
-            Center(
-              child: Text(
-                AppLanguage.text('vip_level'),
-                style: const TextStyle(
-                  color:
-                      Color(0xFFFFD15C),
-                  fontWeight:
-                      FontWeight.bold,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  final controller =
-                      TextEditingController();
-
-                  showDialog(
-                    context: context,
-                    builder:
-                        (dialogContext) {
-                      return AlertDialog(
-                        title: Text(
-                          AppLanguage.text(
-                            'change_username',
-                          ),
-                        ),
-                        content: TextField(
-                          controller:
-                              controller,
-                          maxLength: 12,
-                          decoration:
-                              InputDecoration(
-                            hintText:
-                                AppLanguage.text(
-                              'username',
-                            ),
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(
-                                dialogContext,
-                              );
-                            },
-                            child: Text(
-                              AppLanguage.text(
-                                'cancel',
-                              ),
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              final newName =
-                                  controller
-                                      .text
-                                      .trim();
-
-                              if (newName.length <
-                                      3 ||
-                                  newName.length >
-                                      12) {
-                                ScaffoldMessenger
-                                        .of(
-                                      context,
-                                    )
-                                    .showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Username 3 se 12 characters ka hona chahiye.',
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              try {
-                                final data =
-                                    (await userDoc
-                                            .get())
-                                        .data();
-
-                                final lastChange =
-                                    data?[
-                                        'lastNameChangeAt'];
-
-                                if (lastChange
-                                    is Timestamp) {
-                                  final difference =
-                                      DateTime.now()
-                                          .difference(
-                                    lastChange
-                                        .toDate(),
-                                  );
-
-                                  if (difference
-                                          .inHours <
-                                      24) {
-                                    final remaining =
-                                        24 -
-                                            difference
-                                                .inHours;
-
-                                    if (!context
-                                        .mounted) {
-                                      return;
-                                    }
-
-                                    ScaffoldMessenger
-                                            .of(
-                                          context,
-                                        )
-                                        .showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Username dobara change karne ke liye $remaining hours wait karein.',
-                                        ),
-                                      ),
-                                    );
-
-                                    return;
-                                  }
-                                }
-
-                                await userDoc.set(
-                                  {
-                                    'name':
-                                        newName,
-                                    'lastNameChangeAt':
-                                        FieldValue
-                                            .serverTimestamp(),
-                                  },
-                                  SetOptions(
-                                    merge: true,
-                                  ),
-                                );
-
-                                if (!dialogContext
-                                    .mounted) {
-                                  return;
-                                }
-
-                                Navigator.pop(
-                                  dialogContext,
-                                );
-
-                                if (!context.mounted) {
-                                  return;
-                                }
-
-                                ScaffoldMessenger
-                                        .of(
-                                      context,
-                                    )
-                                    .showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Username save ho gaya 👍',
-                                    ),
-                                  ),
-                                );
-                              } catch (e) {
-                                if (!context
-                                    .mounted) {
-                                  return;
-                                }
-
-                                ScaffoldMessenger
-                                        .of(
-                                      context,
-                                    )
-                                    .showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Username save nahi hua: $e',
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            child: Text(
-                              AppLanguage.text(
-                                'save',
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                icon:
-                    const Icon(Icons.edit),
-                label: Text(
-                  AppLanguage.text(
-                    'change_username',
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _profileNavigationTile(
+        OutlinedButton.icon(
+          onPressed: () {
+            Navigator.push(
               context,
-              Icons.person_add,
-              'friend_requests',
-              const FriendRequestsPage(),
-            ),
-
-            _profileNavigationTile(
-              context,
-              Icons.meeting_room,
-              'room_invites',
-              const RoomInvitesPage(),
-            ),
-
-            _profileNavigationTile(
-              context,
-              Icons.message,
-              'friend_messages',
-              const FriendMessagesPage(),
-            ),
-
-            _profileNavigationTile(
-              context,
-              Icons.card_giftcard,
-              'gifts',
-              const GiftsPage(),
-            ),
-
-            _profileNavigationTile(
-              context,
-              Icons.notifications,
-              'notifications',
-              const NotificationsPage(),
-            ),
-
-            _profileNavigationTile(
-              context,
-              Icons.card_giftcard,
-              'my_gifts',
-              const MyGiftsPage(),
-            ),
-
-            _profileNavigationTile(
-              context,
-              Icons.people,
-              'friends',
-              const FriendsPage(),
-            ),
-
-            _profileNavigationTile(
-              context,
-              Icons.settings,
-              'settings',
-              const SettingsPage(),
-            ),
-
-            const SizedBox(height: 20),
-
-            Container(
-              padding:
-                  const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(20),
-                color:
-                    const Color(0xFF15121F),
+              MaterialPageRoute(
+                builder: (_) =>
+                    const TransactionHistoryPage(),
               ),
-              child: Column(
-                children: [
-                  Text(
-                    AppLanguage.text('coins'),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    '12,580 🪙',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight:
-                          FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '2,450 💎 ${AppLanguage.text('diamonds')}',
-                  ),
-                ],
-              ),
+            );
+          },
+          icon: const Icon(Icons.history),
+          label: Text(
+            AppLanguage.text(
+              'transaction_history',
             ),
-
-            const SizedBox(height: 15),
-
-            FilledButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add),
-              label: Text(
-                AppLanguage.text(
-                  'recharge',
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            OutlinedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const TransactionHistoryPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.history),
-              label: Text(
-                AppLanguage.text(
-                  'transaction_history',
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _profileNavigationTile(
-    BuildContext context,
-    IconData icon,
-    String key,
-    Widget page,
-  ) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(
-        AppLanguage.text(key),
-      ),
-      trailing:
-          const Icon(Icons.chevron_right),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => page,
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }
@@ -2744,15 +2653,12 @@ class FriendRequestsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLanguage.text(
-            'friend_requests',
-          ),
+          AppLanguage.text('friend_requests'),
         ),
       ),
       body: const Center(
         child: Text(
           'No friend requests yet.',
-          style: TextStyle(fontSize: 16),
         ),
       ),
     );
@@ -2771,15 +2677,12 @@ class RoomInvitesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLanguage.text(
-            'room_invites',
-          ),
+          AppLanguage.text('room_invites'),
         ),
       ),
       body: const Center(
         child: Text(
           'No room invites yet.',
-          style: TextStyle(fontSize: 16),
         ),
       ),
     );
@@ -2798,15 +2701,12 @@ class FriendMessagesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLanguage.text(
-            'friend_messages',
-          ),
+          AppLanguage.text('friend_messages'),
         ),
       ),
       body: const Center(
         child: Text(
           'No messages yet.',
-          style: TextStyle(fontSize: 16),
         ),
       ),
     );
@@ -2831,7 +2731,6 @@ class GiftsPage extends StatelessWidget {
       body: const Center(
         child: Text(
           'No gifts yet.',
-          style: TextStyle(fontSize: 16),
         ),
       ),
     );
@@ -2856,7 +2755,6 @@ class MyGiftsPage extends StatelessWidget {
       body: const Center(
         child: Text(
           'Your gifts will appear here.',
-          style: TextStyle(fontSize: 16),
         ),
       ),
     );
@@ -2881,7 +2779,6 @@ class FriendsPage extends StatelessWidget {
       body: const Center(
         child: Text(
           'No friends yet.',
-          style: TextStyle(fontSize: 16),
         ),
       ),
     );
@@ -2897,134 +2794,132 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return Scaffold(
-          appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('settings'),
+        ),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.lock),
             title: Text(
-              AppLanguage.text('settings'),
+              AppLanguage.text('privacy'),
             ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PrivacyPage(),
+                ),
+              );
+            },
           ),
-          body: ListView(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.notifications),
-                title: Text(
-                  AppLanguage.text('notifications'),
+
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(
+              AppLanguage.text('language'),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LanguagePage(),
                 ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const NotificationsPage(),
-                    ),
-                  );
-                },
-              ),
-
-              ListTile(
-                leading: const Icon(Icons.lock),
-                title: Text(
-                  AppLanguage.text('privacy'),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PrivacyPage(),
-                    ),
-                  );
-                },
-              ),
-
-              ListTile(
-                leading: const Icon(Icons.language),
-                title: Text(
-                  AppLanguage.text('language'),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const LanguagePage(),
-                    ),
-                  );
-                },
-              ),
-
-              // ACCOUNT
-              ListTile(
-                leading: const Icon(Icons.person),
-                title: Text(
-                  AppLanguage.text('account'),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AccountPage(),
-                    ),
-                  );
-                },
-              ),
-
-              ListTile(
-                leading: const Icon(Icons.block),
-                title: Text(
-                  AppLanguage.text('blocked_users'),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
-              ),
-
-              ListTile(
-                leading: const Icon(Icons.help_outline),
-                title: Text(
-                  AppLanguage.text('help_center'),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
-              ),
-
-              const Divider(),
-
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: Text(
-                  AppLanguage.text('logout'),
-                ),
-                onTap: () async {
-                  await FirebaseAuth.instance.signOut();
-
-                  if (!context.mounted) return;
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const WelcomePage(),
-                    ),
-                    (route) => false,
-                  );
-                },
-              ),
-            ],
+              );
+            },
           ),
-        );
-      },
+
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: Text(
+              AppLanguage.text('account'),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AccountPage(),
+                ),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.block),
+            title: Text(
+              AppLanguage.text('blocked_users'),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const BlockedUsersPage(),
+                ),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: Text(
+              AppLanguage.text('help_center'),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const HelpCenterPage(),
+                ),
+              );
+            },
+          ),
+
+          const Divider(),
+
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: Text(
+              AppLanguage.text('logout'),
+            ),
+            onTap: () async {
+              try {
+                await FirebaseAuth.instance.signOut();
+              } catch (e) {
+                debugPrint(
+                  'Logout failed: $e',
+                );
+              }
+
+              if (!context.mounted) return;
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const WelcomePage(),
+                ),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
 
-
-
-
-
-
+/* ============================================================
+   ACCOUNT
+   ============================================================ */
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
@@ -3036,17 +2931,23 @@ class AccountPage extends StatelessWidget {
     if (user == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Account'),
+          title: Text(
+            AppLanguage.text('account'),
+          ),
         ),
         body: const Center(
-          child: Text('Please login first.'),
+          child: Text(
+            'Please login first.',
+          ),
         ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account'),
+        title: Text(
+          AppLanguage.text('account'),
+        ),
       ),
       body: ListView(
         children: [
@@ -3058,43 +2959,53 @@ class AccountPage extends StatelessWidget {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              _showEmailDialog(context, user);
+              _showEmailDialog(
+                context,
+                user,
+              );
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.phone),
             title: const Text('Mobile Number'),
             subtitle: const Text('Not linked'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              _showComingSoon(context, 'Mobile Number');
+              _showComingSoon(
+                context,
+                'Mobile Number',
+              );
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.facebook),
             title: const Text('Facebook'),
             subtitle: const Text('Not connected'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              _showComingSoon(context, 'Facebook');
+              _showComingSoon(
+                context,
+                'Facebook',
+              );
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.alternate_email),
             title: const Text('Twitter'),
             subtitle: const Text('Not connected'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              _showComingSoon(context, 'Twitter');
+              _showComingSoon(
+                context,
+                'Twitter',
+              );
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.security),
-            title: const Text('Password & Security'),
+            title: const Text(
+              'Password & Security',
+            ),
             subtitle: const Text(
               'Manage your password and security',
             ),
@@ -3106,10 +3017,11 @@ class AccountPage extends StatelessWidget {
               );
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.devices),
-            title: const Text('Login Devices'),
+            title: const Text(
+              'Login Devices',
+            ),
             subtitle: const Text(
               'Manage devices signed in to your account',
             ),
@@ -3121,9 +3033,7 @@ class AccountPage extends StatelessWidget {
               );
             },
           ),
-
           const Divider(),
-
           ListTile(
             leading: const Icon(
               Icons.delete_forever,
@@ -3140,7 +3050,10 @@ class AccountPage extends StatelessWidget {
               'Permanently delete your PartyChat account',
             ),
             onTap: () {
-              _showDeleteAccountDialog(context, user);
+              _showDeleteAccountDialog(
+                context,
+                user,
+              );
             },
           ),
         ],
@@ -3178,12 +3091,15 @@ class AccountPage extends StatelessWidget {
             ),
             FilledButton(
               onPressed: () async {
-                final email = controller.text.trim();
+                final email =
+                    controller.text.trim();
 
                 if (email.isEmpty) return;
 
                 try {
-                  await user.verifyBeforeUpdateEmail(email);
+                  await user.verifyBeforeUpdateEmail(
+                    email,
+                  );
 
                   if (!dialogContext.mounted) return;
 
@@ -3235,13 +3151,16 @@ class AccountPage extends StatelessWidget {
     BuildContext context,
     User user,
   ) async {
-    final confirmController = TextEditingController();
+    final confirmController =
+        TextEditingController();
 
     await showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Delete Account?'),
+          title: const Text(
+            'Delete Account?',
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3271,7 +3190,8 @@ class AccountPage extends StatelessWidget {
                 backgroundColor: Colors.red,
               ),
               onPressed: () async {
-                if (confirmController.text.trim() != 'DELETE') {
+                if (confirmController.text.trim() !=
+                    'DELETE') {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
@@ -3297,7 +3217,8 @@ class AccountPage extends StatelessWidget {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WelcomePage(),
+                      builder: (_) =>
+                          const WelcomePage(),
                     ),
                     (route) => false,
                   );
@@ -3324,9 +3245,6 @@ class AccountPage extends StatelessWidget {
   }
 }
 
-
-
-
 /* ============================================================
    PRIVACY
    ============================================================ */
@@ -3341,8 +3259,8 @@ class PrivacyPage extends StatefulWidget {
 
 class _PrivacyPageState
     extends State<PrivacyPage> {
-  String get userId =>
-      FirebaseAuth.instance.currentUser!.uid;
+  User? get user =>
+      FirebaseAuth.instance.currentUser;
 
   String profileVisibility = 'Everyone';
   String photoVisibility = 'Everyone';
@@ -3360,11 +3278,14 @@ class _PrivacyPageState
   }
 
   Future<void> _loadPrivacySettings() async {
+    final currentUser = user;
+
+    if (currentUser == null) return;
+
     try {
-      final doc = await FirebaseFirestore
-          .instance
+      final doc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(userId)
+          .doc(currentUser.uid)
           .get();
 
       if (!doc.exists) return;
@@ -3375,20 +3296,16 @@ class _PrivacyPageState
 
       setState(() {
         profileVisibility =
-            data['profileVisibility'] ??
-                'Everyone';
+            data['profileVisibility'] ?? 'Everyone';
 
         photoVisibility =
-            data['photoVisibility'] ??
-                'Everyone';
+            data['photoVisibility'] ?? 'Everyone';
 
         messagePermission =
-            data['messagePermission'] ??
-                'Everyone';
+            data['messagePermission'] ?? 'Everyone';
 
         giftPermission =
-            data['giftPermission'] ??
-                'Everyone';
+            data['giftPermission'] ?? 'Everyone';
 
         onlineStatus =
             data['onlineStatus'] ?? true;
@@ -3410,9 +3327,13 @@ class _PrivacyPageState
     String field,
     dynamic value,
   ) async {
+    final currentUser = user;
+
+    if (currentUser == null) return;
+
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(userId)
+        .doc(currentUser.uid)
         .set(
       {field: value},
       SetOptions(merge: true),
@@ -3421,247 +3342,215 @@ class _PrivacyPageState
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              AppLanguage.text('privacy'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('privacy'),
+        ),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text(
+              'Who can view my profile',
             ),
+            subtitle: Text(profileVisibility),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can view my profile',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                profileVisibility,
+                (value) async {
+                  setState(() {
+                    profileVisibility = value;
+                  });
+
+                  await _saveField(
+                    'profileVisibility',
+                    value,
+                  );
+                },
+              );
+            },
           ),
-          body: ListView(
-            children: [
-              ListTile(
-                leading:
-                    const Icon(Icons.person),
-                title: const Text(
-                  'Who can view my profile',
-                ),
-                subtitle:
-                    Text(profileVisibility),
-                trailing:
-                    const Icon(Icons.chevron_right),
-                onTap: () {
-                  _chooseOption(
-                    'Who can view my profile',
-                    [
-                      'Everyone',
-                      'Friends Only',
-                      'Nobody',
-                    ],
-                    profileVisibility,
-                    (value) async {
-                      setState(() {
-                        profileVisibility =
-                            value;
-                      });
-
-                      await _saveField(
-                        'profileVisibility',
-                        value,
-                      );
-                    },
-                  );
-                },
-              ),
-
-              ListTile(
-                leading:
-                    const Icon(Icons.photo),
-                title: const Text(
-                  'Who can view my profile photo',
-                ),
-                subtitle:
-                    Text(photoVisibility),
-                trailing:
-                    const Icon(Icons.chevron_right),
-                onTap: () {
-                  _chooseOption(
-                    'Who can view my profile photo',
-                    [
-                      'Everyone',
-                      'Friends Only',
-                      'Nobody',
-                    ],
-                    photoVisibility,
-                    (value) async {
-                      setState(() {
-                        photoVisibility =
-                            value;
-                      });
-
-                      await _saveField(
-                        'photoVisibility',
-                        value,
-                      );
-                    },
-                  );
-                },
-              ),
-
-              ListTile(
-                leading:
-                    const Icon(Icons.message),
-                title: const Text(
-                  'Who can message me',
-                ),
-                subtitle:
-                    Text(messagePermission),
-                trailing:
-                    const Icon(Icons.chevron_right),
-                onTap: () {
-                  _chooseOption(
-                    'Who can message me',
-                    [
-                      'Everyone',
-                      'Friends Only',
-                      'Nobody',
-                    ],
-                    messagePermission,
-                    (value) async {
-                      setState(() {
-                        messagePermission =
-                            value;
-                      });
-
-                      await _saveField(
-                        'messagePermission',
-                        value,
-                      );
-                    },
-                  );
-                },
-              ),
-
-              ListTile(
-                leading: const Icon(
-                  Icons.card_giftcard,
-                ),
-                title: const Text(
-                  'Who can send me gifts',
-                ),
-                subtitle:
-                    Text(giftPermission),
-                trailing:
-                    const Icon(Icons.chevron_right),
-                onTap: () {
-                  _chooseOption(
-                    'Who can send me gifts',
-                    [
-                      'Everyone',
-                      'Friends Only',
-                      'Nobody',
-                    ],
-                    giftPermission,
-                    (value) async {
-                      setState(() {
-                        giftPermission =
-                            value;
-                      });
-
-                      await _saveField(
-                        'giftPermission',
-                        value,
-                      );
-                    },
-                  );
-                },
-              ),
-
-              SwitchListTile(
-                secondary:
-                    const Icon(Icons.circle),
-                title: Text(
-                  AppLanguage.text(
-                    'online_status',
-                  ),
-                ),
-                subtitle: const Text(
-                  'Show when I am online',
-                ),
-                value: onlineStatus,
-                onChanged: (value) async {
+          ListTile(
+            leading: const Icon(Icons.photo),
+            title: const Text(
+              'Who can view my profile photo',
+            ),
+            subtitle: Text(photoVisibility),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can view my profile photo',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                photoVisibility,
+                (value) async {
                   setState(() {
-                    onlineStatus = value;
+                    photoVisibility = value;
                   });
 
                   await _saveField(
-                    'onlineStatus',
+                    'photoVisibility',
                     value,
                   );
                 },
-              ),
-
-              SwitchListTile(
-                secondary: const Icon(
-                  Icons.meeting_room,
-                ),
-                title: Text(
-                  AppLanguage.text(
-                    'room_activity',
-                  ),
-                ),
-                subtitle: const Text(
-                  'Show my room activity to others',
-                ),
-                value: roomActivity,
-                onChanged: (value) async {
-                  setState(() {
-                    roomActivity = value;
-                  });
-
-                  await _saveField(
-                    'roomActivity',
-                    value,
-                  );
-                },
-              ),
-
-              SwitchListTile(
-                secondary:
-                    const Icon(Icons.lock),
-                title: Text(
-                  AppLanguage.text(
-                    'private_account',
-                  ),
-                ),
-                subtitle: const Text(
-                  'Only approved people can interact with me',
-                ),
-                value: privateAccount,
-                onChanged: (value) async {
-                  setState(() {
-                    privateAccount = value;
-                  });
-
-                  await _saveField(
-                    'privateAccount',
-                    value,
-                  );
-                },
-              ),
-
-              ListTile(
-                leading:
-                    const Icon(Icons.block),
-                title: Text(
-                  AppLanguage.text(
-                    'blocked_users',
-                  ),
-                ),
-                trailing:
-                    const Icon(Icons.chevron_right),
-                onTap: () {},
-              ),
-            ],
+              );
+            },
           ),
-        );
-      },
+          ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text(
+              'Who can message me',
+            ),
+            subtitle: Text(messagePermission),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can message me',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                messagePermission,
+                (value) async {
+                  setState(() {
+                    messagePermission = value;
+                  });
+
+                  await _saveField(
+                    'messagePermission',
+                    value,
+                  );
+                },
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.card_giftcard,
+            ),
+            title: const Text(
+              'Who can send me gifts',
+            ),
+            subtitle: Text(giftPermission),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can send me gifts',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                giftPermission,
+                (value) async {
+                  setState(() {
+                    giftPermission = value;
+                  });
+
+                  await _saveField(
+                    'giftPermission',
+                    value,
+                  );
+                },
+              );
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.circle),
+            title: Text(
+              AppLanguage.text('online_status'),
+            ),
+            subtitle: const Text(
+              'Show when I am online',
+            ),
+            value: onlineStatus,
+            onChanged: (value) async {
+              setState(() {
+                onlineStatus = value;
+              });
+
+              await _saveField(
+                'onlineStatus',
+                value,
+              );
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(
+              Icons.meeting_room,
+            ),
+            title: Text(
+              AppLanguage.text('room_activity'),
+            ),
+            subtitle: const Text(
+              'Show my room activity to others',
+            ),
+            value: roomActivity,
+            onChanged: (value) async {
+              setState(() {
+                roomActivity = value;
+              });
+
+              await _saveField(
+                'roomActivity',
+                value,
+              );
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.lock),
+            title: Text(
+              AppLanguage.text('private_account'),
+            ),
+            subtitle: const Text(
+              'Only approved people can interact with me',
+            ),
+            value: privateAccount,
+            onChanged: (value) async {
+              setState(() {
+                privateAccount = value;
+              });
+
+              await _saveField(
+                'privateAccount',
+                value,
+              );
+            },
+          ),
+
+          // Blocked Users intentionally removed.
+        ],
+      ),
     );
   }
 
   void _chooseOption(
+    BuildContext context,
     String title,
     List<String> options,
     String currentValue,
@@ -3669,33 +3558,30 @@ class _PrivacyPageState
   ) {
     showModalBottomSheet(
       context: context,
-      builder: (context) {
+      builder: (sheetContext) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Text(
                   title,
                   style: const TextStyle(
                     fontSize: 18,
-                    fontWeight:
-                        FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               ...options.map(
                 (option) => ListTile(
                   title: Text(option),
-                  trailing: option ==
-                          currentValue
+                  trailing: option == currentValue
                       ? const Icon(Icons.check)
                       : null,
                   onTap: () {
                     onSelected(option);
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                   },
                 ),
               ),
@@ -3711,30 +3597,22 @@ class _PrivacyPageState
    LANGUAGE PAGE
    ============================================================ */
 
-class LanguagePage extends StatefulWidget {
+class LanguagePage extends StatelessWidget {
   const LanguagePage({super.key});
 
   @override
-  State<LanguagePage> createState() =>
-      _LanguagePageState();
-}
-
-class _LanguagePageState
-    extends State<LanguagePage> {
-  @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, selectedLanguage, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              AppLanguage.text('language'),
-            ),
-          ),
-          body: ListView.builder(
-            itemCount:
-                AppLanguage.languages.length,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('language'),
+        ),
+      ),
+      body: ValueListenableBuilder<String>(
+        valueListenable: AppLanguage.current,
+        builder: (context, selectedLanguage, child) {
+          return ListView.builder(
+            itemCount: AppLanguage.languages.length,
             itemBuilder: (context, index) {
               final language =
                   AppLanguage.languages[index];
@@ -3749,16 +3627,12 @@ class _LanguagePageState
                   await AppLanguage.change(
                     language,
                   );
-
-                  if (!mounted) return;
-
-                  setState(() {});
                 },
               );
             },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -3782,57 +3656,45 @@ class _NotificationsPageState
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppLanguage.current,
-      builder: (context, language, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              AppLanguage.text(
-                'notifications',
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('notifications'),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const Text(
+            'Choose what you want to be notified about.',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey,
             ),
           ),
-          body: ListView(
-            padding:
-                const EdgeInsets.all(20),
-            children: [
-              const Text(
-                'Choose what you want to be notified about.',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 20),
-              _notificationTile(
-                AppLanguage.text(
-                  'messages',
-                ),
-                'Get notified when you receive a new message.',
-                messages,
-                (value) {
-                  setState(() {
-                    messages = value;
-                  });
-                },
-              ),
-              _notificationTile(
-                AppLanguage.text(
-                  'announcements',
-                ),
-                'Get notified about important updates and events from PartyChat.',
-                announcements,
-                (value) {
-                  setState(() {
-                    announcements = value;
-                  });
-                },
-              ),
-            ],
+          const SizedBox(height: 20),
+          _notificationTile(
+            AppLanguage.text('messages'),
+            'Get notified when you receive a new message.',
+            messages,
+            (value) {
+              setState(() {
+                messages = value;
+              });
+            },
           ),
-        );
-      },
+          _notificationTile(
+            AppLanguage.text('announcements'),
+            'Get notified about important updates and events from PartyChat.',
+            announcements,
+            (value) {
+              setState(() {
+                announcements = value;
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -3843,8 +3705,7 @@ class _NotificationsPageState
     ValueChanged<bool> onChanged,
   ) {
     return ListTile(
-      contentPadding:
-          const EdgeInsets.symmetric(
+      contentPadding: const EdgeInsets.symmetric(
         vertical: 8,
       ),
       title: Text(
@@ -3854,13 +3715,76 @@ class _NotificationsPageState
         ),
       ),
       subtitle: Padding(
-        padding:
-            const EdgeInsets.only(top: 5),
+        padding: const EdgeInsets.only(top: 5),
         child: Text(subtitle),
       ),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   BLOCKED USERS
+   ============================================================ */
+
+class BlockedUsersPage extends StatelessWidget {
+  const BlockedUsersPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('blocked_users'),
+        ),
+      ),
+      body: const Center(
+        child: Text(
+          'Blocked users will appear here.',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   HELP CENTER
+   ============================================================ */
+
+class HelpCenterPage extends StatelessWidget {
+  const HelpCenterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('help_center'),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: const [
+          ListTile(
+            leading: Icon(Icons.help_outline),
+            title: Text('PartyChat Help Center'),
+            subtitle: Text(
+              'Help and support features will be connected here.',
+            ),
+          ),
+          SizedBox(height: 10),
+          ListTile(
+            leading: Icon(Icons.support_agent),
+            title: Text('Contact Support'),
+            subtitle: Text(
+              'Support contact system will be added later.',
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -3889,7 +3813,6 @@ class TransactionHistoryPage
       body: const Center(
         child: Text(
           'No transactions yet.',
-          style: TextStyle(fontSize: 16),
         ),
       ),
     );
