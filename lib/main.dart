@@ -680,7 +680,6 @@ class _PartyChatAppState extends State<PartyChatApp> {
     AppLanguage.current.removeListener(_languageChanged);  
     super.dispose();  
   }  
-  
 @override
 Widget build(BuildContext context) {
   return ValueListenableBuilder<String>(
@@ -691,26 +690,12 @@ Widget build(BuildContext context) {
         title: 'PartyChat',
         theme: ThemeData(
           brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF05030A),
+          scaffoldBackgroundColor: const Color(0xFF08070F),
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF7B2CFF),
+            seedColor: const Color(0xFF8D3DFF),
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF080510),
-            foregroundColor: Colors.white,
-          ),
-          navigationBarTheme: NavigationBarThemeData(
-            backgroundColor: const Color(0xFF080510),
-            indicatorColor: const Color(0xFF7B2CFF),
-          ),
-          filledButtonTheme: FilledButtonThemeData(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF7B2CFF),
-              foregroundColor: Colors.white,
-            ),
-          ),
         ),
         home: const SplashPage(),
       );
