@@ -681,29 +681,42 @@ class _PartyChatAppState extends State<PartyChatApp> {
     super.dispose();  
   }  
   
-  @override  
-  Widget build(BuildContext context) {  
-    return ValueListenableBuilder<String>(  
-      valueListenable: AppLanguage.current,  
-      builder: (context, language, child) {  
-        return MaterialApp(  
-          debugShowCheckedModeBanner: false,  
-          title: 'PartyChat',  
-          theme: ThemeData(  
-            brightness: Brightness.dark,  
-            scaffoldBackgroundColor: const Color(0xFF08070F),  
-            colorScheme: ColorScheme.fromSeed(  
-              seedColor: const Color(0xFF8D3DFF),  
-              brightness: Brightness.dark,  
-            ),  
-            useMaterial3: true,  
-          ),  
-          home: const SplashPage(),  
-        );  
-      },  
-    );  
-  }  
-}  
+@override
+Widget build(BuildContext context) {
+  return ValueListenableBuilder<String>(
+    valueListenable: AppLanguage.current,
+    builder: (context, language, child) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'PartyChat',
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: const Color(0xFF05030A),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF7B2CFF),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF080510),
+            foregroundColor: Colors.white,
+          ),
+          navigationBarTheme: NavigationBarThemeData(
+            backgroundColor: const Color(0xFF080510),
+            indicatorColor: const Color(0xFF7B2CFF),
+          ),
+          filledButtonTheme: FilledButtonThemeData(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF7B2CFF),
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ),
+        home: const SplashPage(),
+      );
+    },
+  );
+}
   
 /* ============================================================  
    SPLASH  
