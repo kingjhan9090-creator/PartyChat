@@ -2646,30 +2646,92 @@ class ProfileTab extends StatelessWidget {
     );  
   }  
   
-  Widget _profileNavigationTile(  
-    BuildContext context,  
-    IconData icon,  
-    String key,  
-    Widget page,  
-  ) {  
-    return ListTile(  
-      leading: Icon(icon),  
-      title: Text(  
-        AppLanguage.text(key),  
-      ),  
-      trailing:  
-          const Icon(Icons.chevron_right),  
-      onTap: () {  
-        Navigator.push(  
-          context,  
-          MaterialPageRoute(  
-            builder: (_) => page,  
-          ),  
-        );  
-      },  
-    );  
-  }  
-}  
+  Widget _profileNavigationTile(
+  BuildContext context,
+  IconData icon,
+  String key,
+  Widget page,
+) {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(
+        AppLanguage.text(key),
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => page,
+          ),
+        );
+      },
+    );
+  }
+
+  return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('notificationState')
+        .doc('profile')
+        .snapshots(),
+    builder: (context, snapshot) {
+      final data = snapshot.data?.data();
+
+      final count = (data?[key] as num?)?.toInt() ?? 0;
+
+      return ListTile(
+        leading: Icon(icon),
+        title: Text(
+          AppLanguage.text(key),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (count > 0)
+              Container(
+                constraints: const BoxConstraints(
+                  minWidth: 20,
+                  minHeight: 20,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  count > 99 ? '99+' : '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => page,
+            ),
+          );
+        },
+      );
+    },
+  );
+}
   
 /* ============================================================  
    FRIEND REQUESTS  
