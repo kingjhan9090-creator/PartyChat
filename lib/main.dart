@@ -2872,26 +2872,200 @@ class MyGiftsPage extends StatelessWidget {
    FRIENDS  
    ============================================================ */  
   
-class FriendsPage extends StatelessWidget {  
-  const FriendsPage({super.key});  
-  
-  @override  
-  Widget build(BuildContext context) {  
-    return Scaffold(  
-      appBar: AppBar(  
-        title: Text(  
-          AppLanguage.text('friends'),  
-        ),  
-      ),  
-      body: const Center(  
-        child: Text(  
-          'No friends yet.',  
-          style: TextStyle(fontSize: 16),  
-        ),  
-      ),  
-    );  
-  }  
-}  
+class FriendsPage extends StatelessWidget {
+  const FriendsPage({super.key});
+
+  Future<void> _sendFriendRequest(
+    BuildContext context,
+    String friendUid,
+    String friendName,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null || user.uid == friendUid) return;
+
+    try {
+      final myDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final myData = myDoc.data() ?? {};
+      final myName = (myData['name'] ?? user.email ?? 'PartyChat User')
+          .toString();
+
+      final requestRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(friendUid)
+          .collection('friendRequests')
+          .doc(user.uid);
+
+      await requestRef.set({
+        'uid': user.uid,
+        'name': myName,
+        'email': user.email ?? '',
+        'photoURL': myData['photoURL'] ?? '',
+        'avatar': myData['avatar'] ?? '',
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      await ProfileUnreadService.createNotification(
+        uid: friendUid,
+        badgeKey: 'friendRequests',
+        title: 'New Friend Request',
+        message: '$myName sent you a friend request.',
+        actorUid: user.uid,
+        actorName: myName,
+        actorPhoto: (myData['photoURL'] ?? '').toString(),
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Friend request sent to $friendName',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Friend request send nahi ho saki: $e',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            AppLanguage.text('friends'),
+          ),
+        ),
+        body: const Center(
+          child: Text('Login first'),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('friends'),
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Users load nahi ho rahe.',
+                style: const TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          final users = snapshot.data?.docs ?? [];
+
+          final otherUsers = users
+              .where((doc) => doc.id != user.uid)
+              .toList();
+
+          if (otherUsers.isEmpty) {
+            return const Center(
+              child: Text(
+                'No other users yet.',
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: otherUsers.length,
+            itemBuilder: (context, index) {
+              final doc = otherUsers[index];
+              final data = doc.data();
+
+              final name =
+                  (data['name'] ?? data['email'] ?? 'PartyChat User')
+                      .toString();
+
+              final photoURL =
+                  (data['photoURL'] ?? '').toString();
+
+              final avatar =
+                  (data['avatar'] ?? '').toString();
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    radius: 25,
+                    backgroundImage: photoURL.isNotEmpty
+                        ? NetworkImage(photoURL)
+                        : null,
+                    child: photoURL.isEmpty
+                        ? Text(
+                            name.isNotEmpty
+                                ? name[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
+                  ),
+                  title: Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'PartyChat user',
+                  ),
+                  trailing: ElevatedButton(
+                    onPressed: () {
+                      _sendFriendRequest(
+                        context,
+                        doc.id,
+                        name,
+                      );
+                    },
+                    child: const Text(
+                      'Add Friend',
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
   
 /* ============================================================  
    SETTINGS  
