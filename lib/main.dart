@@ -1945,6 +1945,102 @@ class WalletTab extends StatelessWidget {
     );  
   }  
 }  
+
+
+
+
+class ProfileUnreadService {
+  static const List<String> profileKeys = [
+    'friendRequests',
+    'roomInvites',
+    'friendMessages',
+    'gifts',
+    'notifications',
+    'myGifts',
+    'friends',
+  ];
+
+  static DocumentReference<Map<String, dynamic>> _stateRef(
+    String uid,
+  ) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('notificationState')
+        .doc('profile');
+  }
+
+  static Future<void> increment(
+    String uid,
+    String key, {
+    int by = 1,
+  }) async {
+    if (!profileKeys.contains(key)) return;
+
+    await _stateRef(uid).set(
+      {
+        key: FieldValue.increment(by),
+      },
+      SetOptions(merge: true),
+    );
+  }
+
+  static Future<void> markRead(
+    String uid,
+    String key,
+  ) async {
+    if (!profileKeys.contains(key)) return;
+
+    await _stateRef(uid).set(
+      {
+        key: 0,
+      },
+      SetOptions(merge: true),
+    );
+  }
+
+  static Future<void> createNotification({
+    required String uid,
+    required String badgeKey,
+    required String title,
+    required String message,
+    String? actorUid,
+    String? actorName,
+    String? actorPhoto,
+    String? roomId,
+    String? chatId,
+  }) async {
+    if (!profileKeys.contains(badgeKey)) return;
+
+    final notificationRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .doc();
+
+    await notificationRef.set({
+      'type': badgeKey,
+      'badgeKey': badgeKey,
+      'title': title,
+      'message': message,
+      'isRead': false,
+      'createdAt': FieldValue.serverTimestamp(),
+      if (actorUid != null) 'actorUid': actorUid,
+      if (actorName != null) 'actorName': actorName,
+      if (actorPhoto != null) 'actorPhoto': actorPhoto,
+      if (roomId != null) 'roomId': roomId,
+      if (chatId != null) 'chatId': chatId,
+    });
+
+    await increment(
+      uid,
+      badgeKey,
+    );
+  }
+}
+
+
+
   
 /* ============================================================  
    PROFILE  
