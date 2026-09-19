@@ -2639,68 +2639,7 @@ class ProfileTab extends StatelessWidget {
   
             const SizedBox(height: 20),  
   
-            Container(  
-              padding:  
-                  const EdgeInsets.all(18),  
-              decoration: BoxDecoration(  
-                borderRadius:  
-                    BorderRadius.circular(20),  
-                color:  
-                    const Color(0xFF15121F),  
-              ),  
-              child: Column(  
-                children: [  
-                  Text(  
-                    AppLanguage.text('coins'),  
-                  ),  
-                  const SizedBox(height: 6),  
-                  const Text(  
-                    '12,580 🪙',  
-                    style: TextStyle(  
-                      fontSize: 28,  
-                      fontWeight:  
-                          FontWeight.w900,  
-                    ),  
-                  ),  
-                  const SizedBox(height: 6),  
-                  Text(  
-                    '2,450 💎 ${AppLanguage.text('diamonds')}',  
-                  ),  
-                ],  
-              ),  
-            ),  
-  
-            const SizedBox(height: 15),  
-  
-            FilledButton.icon(  
-              onPressed: () {},  
-              icon: const Icon(Icons.add),  
-              label: Text(  
-                AppLanguage.text(  
-                  'recharge',  
-                ),  
-              ),  
-            ),  
-  
-            const SizedBox(height: 8),  
-  
-            OutlinedButton.icon(  
-              onPressed: () {  
-                Navigator.push(  
-                  context,  
-                  MaterialPageRoute(  
-                    builder: (_) =>  
-                        const TransactionHistoryPage(),  
-                  ),  
-                );  
-              },  
-              icon: const Icon(Icons.history),  
-              label: Text(  
-                AppLanguage.text(  
-                  'transaction_history',  
-                ),  
-              ),  
-            ),  
+            
           ],  
         );  
       },  
