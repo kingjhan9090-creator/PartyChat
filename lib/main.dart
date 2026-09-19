@@ -2732,6 +2732,10 @@ class ProfileTab extends StatelessWidget {
     },
   );
 }
+
+}
+
+
   
 /* ============================================================  
    FRIEND REQUESTS  
