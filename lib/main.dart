@@ -3864,10 +3864,11 @@ class AccountPage extends StatelessWidget {
 
                   Navigator.pop(dialogContext);
 
-                  Navigator.pushAndRemoveUntil(
+                                    Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                       builder: (_) =>
                           const WelcomePage(),
                     ),
-Preview truncated for large file
+                    (route) => false,
+                  );
