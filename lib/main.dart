@@ -2869,6 +2869,7 @@ class _ProfileTabState extends State<ProfileTab> {
     ),
   ],
 );
+                },
               ),
               const SizedBox(height: 14),
               Wrap(spacing: 10, runSpacing: 10, alignment: WrapAlignment.center, children: [
