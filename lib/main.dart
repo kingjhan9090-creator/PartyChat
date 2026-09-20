@@ -72,7 +72,7 @@ class AppLanguage {
       'welcome': 'Welcome',
       'welcome_back': 'Welcome back',
       'chat_rooms': 'Chat Rooms',
-      'popular_rooms': 'Popular Rooms 🔥',
+      'popular_rooms': 'Popular Rooms ðŸ”¥',
       'your_balance': 'Your Balance',
       'diamonds': 'Diamonds',
       'online': 'online',
@@ -88,7 +88,7 @@ class AppLanguage {
       'coins': 'Coins',
       'recharge': 'Recharge',
       'welcome_to_partychat': 'Welcome to PartyChat',
-      'chat_play_make_friends': 'Chat • Play • Make Friends',
+      'chat_play_make_friends': 'Chat â€¢ Play â€¢ Make Friends',
       'change_profile_photo': 'Change Profile Photo',
       'choose_avatar': 'Choose Avatar',
       'change_username': 'Change Username',
@@ -102,220 +102,220 @@ class AppLanguage {
       'private_account': 'Private Account',
     },
     'Urdu': {
-      'settings': 'سیٹنگز',
-      'language': 'زبان',
-      'privacy': 'پرائیویسی',
-      'notifications': 'نوٹیفکیشنز',
-      'messages': 'پیغامات',
-      'announcements': 'اعلانات',
-      'friends': 'دوست',
-      'gifts': 'تحائف',
-      'blocked_users': 'بلاک صارفین',
-      'home': 'ہوم',
-      'rooms': 'رومز',
-      'games': 'گیمز',
-      'wallet': 'والیٹ',
-      'profile': 'پروفائل',
-      'join': 'شامل ہوں',
-      'login': 'لاگ اِن',
-      'create_account': 'اکاؤنٹ بنائیں',
-      'get_started': 'شروع کریں',
-      'username': 'یوزرنیم',
-      'email': 'ای میل',
-      'password': 'پاس ورڈ',
-      'welcome': 'خوش آمدید',
-      'welcome_back': 'دوبارہ خوش آمدید',
-      'chat_rooms': 'چیٹ رومز',
-      'popular_rooms': 'مقبول رومز 🔥',
-      'your_balance': 'آپ کا بیلنس',
-      'diamonds': 'ڈائمنڈز',
-      'online': 'آن لائن',
-      'account': 'اکاؤنٹ',
-      'help_center': 'ہیلپ سینٹر',
-      'logout': 'لاگ آؤٹ',
-      'privacy_settings': 'پرائیویسی',
-      'friend_requests': 'دوستی کی درخواستیں',
-      'room_invites': 'روم دعوتیں',
-      'friend_messages': 'دوستوں کے پیغامات',
-      'my_gifts': 'میرے تحائف',
-      'transaction_history': 'ٹرانزیکشن ہسٹری',
-      'coins': 'کوائنز',
-      'recharge': 'ریچارج',
-      'welcome_to_partychat': 'PartyChat میں خوش آمدید',
-      'chat_play_make_friends': 'چیٹ • کھیلیں • دوست بنائیں',
-      'change_profile_photo': 'پروفائل فوٹو تبدیل کریں',
-      'choose_avatar': 'اوتار منتخب کریں',
-      'change_username': 'یوزرنیم تبدیل کریں',
-      'save': 'محفوظ کریں',
-      'cancel': 'منسوخ',
-      'play_now': 'ابھی کھیلیں',
-      'my_wallet': 'میرا والیٹ',
-      'vip_level': 'VIP لیول 3',
-      'online_status': 'آن لائن اسٹیٹس',
-      'room_activity': 'روم ایکٹیویٹی',
-      'private_account': 'پرائیویٹ اکاؤنٹ',
+      'settings': 'Ø³ÛŒÙ¹Ù†Ú¯Ø²',
+      'language': 'Ø²Ø¨Ø§Ù†',
+      'privacy': 'Ù¾Ø±Ø§Ø¦ÛŒÙˆÛŒØ³ÛŒ',
+      'notifications': 'Ù†ÙˆÙ¹ÛŒÙÚ©ÛŒØ´Ù†Ø²',
+      'messages': 'Ù¾ÛŒØºØ§Ù…Ø§Øª',
+      'announcements': 'Ø§Ø¹Ù„Ø§Ù†Ø§Øª',
+      'friends': 'Ø¯ÙˆØ³Øª',
+      'gifts': 'ØªØ­Ø§Ø¦Ù',
+      'blocked_users': 'Ø¨Ù„Ø§Ú© ØµØ§Ø±ÙÛŒÙ†',
+      'home': 'ÛÙˆÙ…',
+      'rooms': 'Ø±ÙˆÙ…Ø²',
+      'games': 'Ú¯ÛŒÙ…Ø²',
+      'wallet': 'ÙˆØ§Ù„ÛŒÙ¹',
+      'profile': 'Ù¾Ø±ÙˆÙØ§Ø¦Ù„',
+      'join': 'Ø´Ø§Ù…Ù„ ÛÙˆÚº',
+      'login': 'Ù„Ø§Ú¯ Ø§ÙÙ†',
+      'create_account': 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ù†Ø§Ø¦ÛŒÚº',
+      'get_started': 'Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº',
+      'username': 'ÛŒÙˆØ²Ø±Ù†ÛŒÙ…',
+      'email': 'Ø§ÛŒ Ù…ÛŒÙ„',
+      'password': 'Ù¾Ø§Ø³ ÙˆØ±Úˆ',
+      'welcome': 'Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯',
+      'welcome_back': 'Ø¯ÙˆØ¨Ø§Ø±Û Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯',
+      'chat_rooms': 'Ú†ÛŒÙ¹ Ø±ÙˆÙ…Ø²',
+      'popular_rooms': 'Ù…Ù‚Ø¨ÙˆÙ„ Ø±ÙˆÙ…Ø² ðŸ”¥',
+      'your_balance': 'Ø¢Ù¾ Ú©Ø§ Ø¨ÛŒÙ„Ù†Ø³',
+      'diamonds': 'ÚˆØ§Ø¦Ù…Ù†ÚˆØ²',
+      'online': 'Ø¢Ù† Ù„Ø§Ø¦Ù†',
+      'account': 'Ø§Ú©Ø§Ø¤Ù†Ù¹',
+      'help_center': 'ÛÛŒÙ„Ù¾ Ø³ÛŒÙ†Ù¹Ø±',
+      'logout': 'Ù„Ø§Ú¯ Ø¢Ø¤Ù¹',
+      'privacy_settings': 'Ù¾Ø±Ø§Ø¦ÛŒÙˆÛŒØ³ÛŒ',
+      'friend_requests': 'Ø¯ÙˆØ³ØªÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒÚº',
+      'room_invites': 'Ø±ÙˆÙ… Ø¯Ø¹ÙˆØªÛŒÚº',
+      'friend_messages': 'Ø¯ÙˆØ³ØªÙˆÚº Ú©Û’ Ù¾ÛŒØºØ§Ù…Ø§Øª',
+      'my_gifts': 'Ù…ÛŒØ±Û’ ØªØ­Ø§Ø¦Ù',
+      'transaction_history': 'Ù¹Ø±Ø§Ù†Ø²ÛŒÚ©Ø´Ù† ÛØ³Ù¹Ø±ÛŒ',
+      'coins': 'Ú©ÙˆØ§Ø¦Ù†Ø²',
+      'recharge': 'Ø±ÛŒÚ†Ø§Ø±Ø¬',
+      'welcome_to_partychat': 'PartyChat Ù…ÛŒÚº Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯',
+      'chat_play_make_friends': 'Ú†ÛŒÙ¹ â€¢ Ú©Ú¾ÛŒÙ„ÛŒÚº â€¢ Ø¯ÙˆØ³Øª Ø¨Ù†Ø§Ø¦ÛŒÚº',
+      'change_profile_photo': 'Ù¾Ø±ÙˆÙØ§Ø¦Ù„ ÙÙˆÙ¹Ùˆ ØªØ¨Ø¯ÛŒÙ„ Ú©Ø±ÛŒÚº',
+      'choose_avatar': 'Ø§ÙˆØªØ§Ø± Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº',
+      'change_username': 'ÛŒÙˆØ²Ø±Ù†ÛŒÙ… ØªØ¨Ø¯ÛŒÙ„ Ú©Ø±ÛŒÚº',
+      'save': 'Ù…Ø­ÙÙˆØ¸ Ú©Ø±ÛŒÚº',
+      'cancel': 'Ù…Ù†Ø³ÙˆØ®',
+      'play_now': 'Ø§Ø¨Ú¾ÛŒ Ú©Ú¾ÛŒÙ„ÛŒÚº',
+      'my_wallet': 'Ù…ÛŒØ±Ø§ ÙˆØ§Ù„ÛŒÙ¹',
+      'vip_level': 'VIP Ù„ÛŒÙˆÙ„ 3',
+      'online_status': 'Ø¢Ù† Ù„Ø§Ø¦Ù† Ø§Ø³Ù¹ÛŒÙ¹Ø³',
+      'room_activity': 'Ø±ÙˆÙ… Ø§ÛŒÚ©Ù¹ÛŒÙˆÛŒÙ¹ÛŒ',
+      'private_account': 'Ù¾Ø±Ø§Ø¦ÛŒÙˆÛŒÙ¹ Ø§Ú©Ø§Ø¤Ù†Ù¹',
     },
     'Hindi': {
-      'settings': 'सेटिंग्स',
-      'language': 'भाषा',
-      'privacy': 'प्राइवेसी',
-      'notifications': 'नोटिफिकेशन',
-      'messages': 'मैसेज',
-      'announcements': 'घोषणाएं',
-      'friends': 'दोस्त',
-      'gifts': 'गिफ्ट्स',
-      'blocked_users': 'ब्लॉक किए गए यूज़र्स',
-      'home': 'होम',
-      'rooms': 'रूम्स',
-      'games': 'गेम्स',
-      'wallet': 'वॉलेट',
-      'profile': 'प्रोफाइल',
-      'join': 'जुड़ें',
-      'login': 'लॉगिन',
-      'create_account': 'अकाउंट बनाएं',
-      'get_started': 'शुरू करें',
-      'username': 'यूज़रनेम',
-      'email': 'ईमेल',
-      'password': 'पासवर्ड',
-      'welcome': 'स्वागत है',
-      'welcome_back': 'वापसी पर स्वागत है',
-      'chat_rooms': 'चैट रूम्स',
-      'popular_rooms': 'लोकप्रिय रूम्स 🔥',
-      'your_balance': 'आपका बैलेंस',
-      'diamonds': 'डायमंड्स',
-      'online': 'ऑनलाइन',
-      'account': 'अकाउंट',
-      'help_center': 'हेल्प सेंटर',
-      'logout': 'लॉगआउट',
-      'privacy_settings': 'प्राइवेसी',
-      'friend_requests': 'फ्रेंड रिक्वेस्ट',
-      'room_invites': 'रूम इनवाइट',
-      'friend_messages': 'फ्रेंड मैसेज',
-      'my_gifts': 'मेरे गिफ्ट्स',
-      'transaction_history': 'ट्रांजैक्शन हिस्ट्री',
-      'coins': 'कॉइन्स',
-      'recharge': 'रिचार्ज',
-      'welcome_to_partychat': 'PartyChat में आपका स्वागत है',
-      'chat_play_make_friends': 'चैट • खेलें • दोस्त बनाएं',
-      'change_profile_photo': 'प्रोफाइल फोटो बदलें',
-      'choose_avatar': 'अवतार चुनें',
-      'change_username': 'यूज़रनेम बदलें',
-      'save': 'सेव',
-      'cancel': 'कैंसल',
-      'play_now': 'अभी खेलें',
-      'my_wallet': 'मेरा वॉलेट',
-      'vip_level': 'VIP लेवल 3',
-      'online_status': 'ऑनलाइन स्टेटस',
-      'room_activity': 'रूम एक्टिविटी',
-      'private_account': 'प्राइवेट अकाउंट',
+      'settings': 'à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸',
+      'language': 'à¤­à¤¾à¤·à¤¾',
+      'privacy': 'à¤ªà¥à¤°à¤¾à¤‡à¤µà¥‡à¤¸à¥€',
+      'notifications': 'à¤¨à¥‹à¤Ÿà¤¿à¤«à¤¿à¤•à¥‡à¤¶à¤¨',
+      'messages': 'à¤®à¥ˆà¤¸à¥‡à¤œ',
+      'announcements': 'à¤˜à¥‹à¤·à¤£à¤¾à¤à¤‚',
+      'friends': 'à¤¦à¥‹à¤¸à¥à¤¤',
+      'gifts': 'à¤—à¤¿à¤«à¥à¤Ÿà¥à¤¸',
+      'blocked_users': 'à¤¬à¥à¤²à¥‰à¤• à¤•à¤¿à¤ à¤—à¤ à¤¯à¥‚à¤œà¤¼à¤°à¥à¤¸',
+      'home': 'à¤¹à¥‹à¤®',
+      'rooms': 'à¤°à¥‚à¤®à¥à¤¸',
+      'games': 'à¤—à¥‡à¤®à¥à¤¸',
+      'wallet': 'à¤µà¥‰à¤²à¥‡à¤Ÿ',
+      'profile': 'à¤ªà¥à¤°à¥‹à¤«à¤¾à¤‡à¤²',
+      'join': 'à¤œà¥à¤¡à¤¼à¥‡à¤‚',
+      'login': 'à¤²à¥‰à¤—à¤¿à¤¨',
+      'create_account': 'à¤…à¤•à¤¾à¤‰à¤‚à¤Ÿ à¤¬à¤¨à¤¾à¤à¤‚',
+      'get_started': 'à¤¶à¥à¤°à¥‚ à¤•à¤°à¥‡à¤‚',
+      'username': 'à¤¯à¥‚à¤œà¤¼à¤°à¤¨à¥‡à¤®',
+      'email': 'à¤ˆà¤®à¥‡à¤²',
+      'password': 'à¤ªà¤¾à¤¸à¤µà¤°à¥à¤¡',
+      'welcome': 'à¤¸à¥à¤µà¤¾à¤—à¤¤ à¤¹à¥ˆ',
+      'welcome_back': 'à¤µà¤¾à¤ªà¤¸à¥€ à¤ªà¤° à¤¸à¥à¤µà¤¾à¤—à¤¤ à¤¹à¥ˆ',
+      'chat_rooms': 'à¤šà¥ˆà¤Ÿ à¤°à¥‚à¤®à¥à¤¸',
+      'popular_rooms': 'à¤²à¥‹à¤•à¤ªà¥à¤°à¤¿à¤¯ à¤°à¥‚à¤®à¥à¤¸ ðŸ”¥',
+      'your_balance': 'à¤†à¤ªà¤•à¤¾ à¤¬à¥ˆà¤²à¥‡à¤‚à¤¸',
+      'diamonds': 'à¤¡à¤¾à¤¯à¤®à¤‚à¤¡à¥à¤¸',
+      'online': 'à¤‘à¤¨à¤²à¤¾à¤‡à¤¨',
+      'account': 'à¤…à¤•à¤¾à¤‰à¤‚à¤Ÿ',
+      'help_center': 'à¤¹à¥‡à¤²à¥à¤ª à¤¸à¥‡à¤‚à¤Ÿà¤°',
+      'logout': 'à¤²à¥‰à¤—à¤†à¤‰à¤Ÿ',
+      'privacy_settings': 'à¤ªà¥à¤°à¤¾à¤‡à¤µà¥‡à¤¸à¥€',
+      'friend_requests': 'à¤«à¥à¤°à¥‡à¤‚à¤¡ à¤°à¤¿à¤•à¥à¤µà¥‡à¤¸à¥à¤Ÿ',
+      'room_invites': 'à¤°à¥‚à¤® à¤‡à¤¨à¤µà¤¾à¤‡à¤Ÿ',
+      'friend_messages': 'à¤«à¥à¤°à¥‡à¤‚à¤¡ à¤®à¥ˆà¤¸à¥‡à¤œ',
+      'my_gifts': 'à¤®à¥‡à¤°à¥‡ à¤—à¤¿à¤«à¥à¤Ÿà¥à¤¸',
+      'transaction_history': 'à¤Ÿà¥à¤°à¤¾à¤‚à¤œà¥ˆà¤•à¥à¤¶à¤¨ à¤¹à¤¿à¤¸à¥à¤Ÿà¥à¤°à¥€',
+      'coins': 'à¤•à¥‰à¤‡à¤¨à¥à¤¸',
+      'recharge': 'à¤°à¤¿à¤šà¤¾à¤°à¥à¤œ',
+      'welcome_to_partychat': 'PartyChat à¤®à¥‡à¤‚ à¤†à¤ªà¤•à¤¾ à¤¸à¥à¤µà¤¾à¤—à¤¤ à¤¹à¥ˆ',
+      'chat_play_make_friends': 'à¤šà¥ˆà¤Ÿ â€¢ à¤–à¥‡à¤²à¥‡à¤‚ â€¢ à¤¦à¥‹à¤¸à¥à¤¤ à¤¬à¤¨à¤¾à¤à¤‚',
+      'change_profile_photo': 'à¤ªà¥à¤°à¥‹à¤«à¤¾à¤‡à¤² à¤«à¥‹à¤Ÿà¥‹ à¤¬à¤¦à¤²à¥‡à¤‚',
+      'choose_avatar': 'à¤…à¤µà¤¤à¤¾à¤° à¤šà¥à¤¨à¥‡à¤‚',
+      'change_username': 'à¤¯à¥‚à¤œà¤¼à¤°à¤¨à¥‡à¤® à¤¬à¤¦à¤²à¥‡à¤‚',
+      'save': 'à¤¸à¥‡à¤µ',
+      'cancel': 'à¤•à¥ˆà¤‚à¤¸à¤²',
+      'play_now': 'à¤…à¤­à¥€ à¤–à¥‡à¤²à¥‡à¤‚',
+      'my_wallet': 'à¤®à¥‡à¤°à¤¾ à¤µà¥‰à¤²à¥‡à¤Ÿ',
+      'vip_level': 'VIP à¤²à¥‡à¤µà¤² 3',
+      'online_status': 'à¤‘à¤¨à¤²à¤¾à¤‡à¤¨ à¤¸à¥à¤Ÿà¥‡à¤Ÿà¤¸',
+      'room_activity': 'à¤°à¥‚à¤® à¤à¤•à¥à¤Ÿà¤¿à¤µà¤¿à¤Ÿà¥€',
+      'private_account': 'à¤ªà¥à¤°à¤¾à¤‡à¤µà¥‡à¤Ÿ à¤…à¤•à¤¾à¤‰à¤‚à¤Ÿ',
     },
     'Arabic': {
-      'settings': 'الإعدادات',
-      'language': 'اللغة',
-      'privacy': 'الخصوصية',
-      'notifications': 'الإشعارات',
-      'messages': 'الرسائل',
-      'announcements': 'الإعلانات',
-      'friends': 'الأصدقاء',
-      'gifts': 'الهدايا',
-      'blocked_users': 'المستخدمون المحظورون',
-      'home': 'الرئيسية',
-      'rooms': 'الغرف',
-      'games': 'الألعاب',
-      'wallet': 'المحفظة',
-      'profile': 'الملف الشخصي',
-      'join': 'انضمام',
-      'login': 'تسجيل الدخول',
-      'create_account': 'إنشاء حساب',
-      'get_started': 'ابدأ',
-      'username': 'اسم المستخدم',
-      'email': 'البريد الإلكتروني',
-      'password': 'كلمة المرور',
-      'welcome': 'مرحباً',
-      'welcome_back': 'مرحباً بعودتك',
-      'chat_rooms': 'غرف الدردشة',
-      'popular_rooms': 'الغرف الشائعة 🔥',
-      'your_balance': 'رصيدك',
-      'diamonds': 'الماس',
-      'online': 'متصل',
-      'account': 'الحساب',
-      'help_center': 'مركز المساعدة',
-      'logout': 'تسجيل الخروج',
-      'privacy_settings': 'الخصوصية',
-      'friend_requests': 'طلبات الصداقة',
-      'room_invites': 'دعوات الغرف',
-      'friend_messages': 'رسائل الأصدقاء',
-      'my_gifts': 'هداياي',
-      'transaction_history': 'سجل المعاملات',
-      'coins': 'العملات',
-      'recharge': 'إعادة الشحن',
-      'welcome_to_partychat': 'مرحباً بك في PartyChat',
-      'chat_play_make_friends': 'دردش • العب • كوّن صداقات',
-      'change_profile_photo': 'تغيير صورة الملف الشخصي',
-      'choose_avatar': 'اختر الصورة الرمزية',
-      'change_username': 'تغيير اسم المستخدم',
-      'save': 'حفظ',
-      'cancel': 'إلغاء',
-      'play_now': 'العب الآن',
-      'my_wallet': 'محفظتي',
-      'vip_level': 'VIP المستوى 3',
-      'online_status': 'حالة الاتصال',
-      'room_activity': 'نشاط الغرفة',
-      'private_account': 'حساب خاص',
+      'settings': 'Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª',
+      'language': 'Ø§Ù„Ù„ØºØ©',
+      'privacy': 'Ø§Ù„Ø®ØµÙˆØµÙŠØ©',
+      'notifications': 'Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª',
+      'messages': 'Ø§Ù„Ø±Ø³Ø§Ø¦Ù„',
+      'announcements': 'Ø§Ù„Ø¥Ø¹Ù„Ø§Ù†Ø§Øª',
+      'friends': 'Ø§Ù„Ø£ØµØ¯Ù‚Ø§Ø¡',
+      'gifts': 'Ø§Ù„Ù‡Ø¯Ø§ÙŠØ§',
+      'blocked_users': 'Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙˆÙ† Ø§Ù„Ù…Ø­Ø¸ÙˆØ±ÙˆÙ†',
+      'home': 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©',
+      'rooms': 'Ø§Ù„ØºØ±Ù',
+      'games': 'Ø§Ù„Ø£Ù„Ø¹Ø§Ø¨',
+      'wallet': 'Ø§Ù„Ù…Ø­ÙØ¸Ø©',
+      'profile': 'Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ',
+      'join': 'Ø§Ù†Ø¶Ù…Ø§Ù…',
+      'login': 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„',
+      'create_account': 'Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨',
+      'get_started': 'Ø§Ø¨Ø¯Ø£',
+      'username': 'Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+      'email': 'Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+      'password': 'ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±',
+      'welcome': 'Ù…Ø±Ø­Ø¨Ø§Ù‹',
+      'welcome_back': 'Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ø¹ÙˆØ¯ØªÙƒ',
+      'chat_rooms': 'ØºØ±Ù Ø§Ù„Ø¯Ø±Ø¯Ø´Ø©',
+      'popular_rooms': 'Ø§Ù„ØºØ±Ù Ø§Ù„Ø´Ø§Ø¦Ø¹Ø© ðŸ”¥',
+      'your_balance': 'Ø±ØµÙŠØ¯Ùƒ',
+      'diamonds': 'Ø§Ù„Ù…Ø§Ø³',
+      'online': 'Ù…ØªØµÙ„',
+      'account': 'Ø§Ù„Ø­Ø³Ø§Ø¨',
+      'help_center': 'Ù…Ø±ÙƒØ² Ø§Ù„Ù…Ø³Ø§Ø¹Ø¯Ø©',
+      'logout': 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬',
+      'privacy_settings': 'Ø§Ù„Ø®ØµÙˆØµÙŠØ©',
+      'friend_requests': 'Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØµØ¯Ø§Ù‚Ø©',
+      'room_invites': 'Ø¯Ø¹ÙˆØ§Øª Ø§Ù„ØºØ±Ù',
+      'friend_messages': 'Ø±Ø³Ø§Ø¦Ù„ Ø§Ù„Ø£ØµØ¯Ù‚Ø§Ø¡',
+      'my_gifts': 'Ù‡Ø¯Ø§ÙŠØ§ÙŠ',
+      'transaction_history': 'Ø³Ø¬Ù„ Ø§Ù„Ù…Ø¹Ø§Ù…Ù„Ø§Øª',
+      'coins': 'Ø§Ù„Ø¹Ù…Ù„Ø§Øª',
+      'recharge': 'Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ø´Ø­Ù†',
+      'welcome_to_partychat': 'Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ùƒ ÙÙŠ PartyChat',
+      'chat_play_make_friends': 'Ø¯Ø±Ø¯Ø´ â€¢ Ø§Ù„Ø¹Ø¨ â€¢ ÙƒÙˆÙ‘Ù† ØµØ¯Ø§Ù‚Ø§Øª',
+      'change_profile_photo': 'ØªØºÙŠÙŠØ± ØµÙˆØ±Ø© Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ',
+      'choose_avatar': 'Ø§Ø®ØªØ± Ø§Ù„ØµÙˆØ±Ø© Ø§Ù„Ø±Ù…Ø²ÙŠØ©',
+      'change_username': 'ØªØºÙŠÙŠØ± Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+      'save': 'Ø­ÙØ¸',
+      'cancel': 'Ø¥Ù„ØºØ§Ø¡',
+      'play_now': 'Ø§Ù„Ø¹Ø¨ Ø§Ù„Ø¢Ù†',
+      'my_wallet': 'Ù…Ø­ÙØ¸ØªÙŠ',
+      'vip_level': 'VIP Ø§Ù„Ù…Ø³ØªÙˆÙ‰ 3',
+      'online_status': 'Ø­Ø§Ù„Ø© Ø§Ù„Ø§ØªØµØ§Ù„',
+      'room_activity': 'Ù†Ø´Ø§Ø· Ø§Ù„ØºØ±ÙØ©',
+      'private_account': 'Ø­Ø³Ø§Ø¨ Ø®Ø§Øµ',
     },
     'Bengali': {
-      'settings': 'সেটিংস',
-      'language': 'ভাষা',
-      'privacy': 'গোপনীয়তা',
-      'notifications': 'নোটিফিকেশন',
-      'messages': 'বার্তা',
-      'announcements': 'ঘোষণা',
-      'friends': 'বন্ধুরা',
-      'gifts': 'উপহার',
-      'blocked_users': 'ব্লক করা ব্যবহারকারী',
-      'home': 'হোম',
-      'rooms': 'রুম',
-      'games': 'গেমস',
-      'wallet': 'ওয়ালেট',
-      'profile': 'প্রোফাইল',
-      'join': 'যোগ দিন',
-      'login': 'লগইন',
-      'create_account': 'অ্যাকাউন্ট তৈরি করুন',
-      'get_started': 'শুরু করুন',
-      'username': 'ইউজারনেম',
-      'email': 'ইমেইল',
-      'password': 'পাসওয়ার্ড',
-      'welcome': 'স্বাগতম',
-      'welcome_back': 'আবার স্বাগতম',
-      'chat_rooms': 'চ্যাট রুম',
-      'popular_rooms': 'জনপ্রিয় রুম 🔥',
-      'your_balance': 'আপনার ব্যালেন্স',
-      'diamonds': 'ডায়মন্ড',
-      'online': 'অনলাইন',
-      'account': 'অ্যাকাউন্ট',
-      'help_center': 'হেল্প সেন্টার',
-      'logout': 'লগআউট',
-      'privacy_settings': 'গোপনীয়তা',
-      'friend_requests': 'বন্ধুত্বের অনুরোধ',
-      'room_invites': 'রুম আমন্ত্রণ',
-      'friend_messages': 'বন্ধুর বার্তা',
-      'my_gifts': 'আমার উপহার',
-      'transaction_history': 'লেনদেনের ইতিহাস',
-      'coins': 'কয়েন',
-      'recharge': 'রিচার্জ',
-      'welcome_to_partychat': 'PartyChat-এ স্বাগতম',
-      'chat_play_make_friends': 'চ্যাট • খেলুন • বন্ধু বানান',
-      'change_profile_photo': 'প্রোফাইল ছবি পরিবর্তন করুন',
-      'choose_avatar': 'অ্যাভাটার নির্বাচন করুন',
-      'change_username': 'ইউজারনেম পরিবর্তন করুন',
-      'save': 'সংরক্ষণ',
-      'cancel': 'বাতিল',
-      'play_now': 'এখন খেলুন',
-      'my_wallet': 'আমার ওয়ালেট',
-      'vip_level': 'VIP লেভেল 3',
-      'online_status': 'অনলাইন স্ট্যাটাস',
-      'room_activity': 'রুম কার্যকলাপ',
-      'private_account': 'প্রাইভেট অ্যাকাউন্ট',
+      'settings': 'à¦¸à§‡à¦Ÿà¦¿à¦‚à¦¸',
+      'language': 'à¦­à¦¾à¦·à¦¾',
+      'privacy': 'à¦—à§‹à¦ªà¦¨à§€à¦¯à¦¼à¦¤à¦¾',
+      'notifications': 'à¦¨à§‹à¦Ÿà¦¿à¦«à¦¿à¦•à§‡à¦¶à¦¨',
+      'messages': 'à¦¬à¦¾à¦°à§à¦¤à¦¾',
+      'announcements': 'à¦˜à§‹à¦·à¦£à¦¾',
+      'friends': 'à¦¬à¦¨à§à¦§à§à¦°à¦¾',
+      'gifts': 'à¦‰à¦ªà¦¹à¦¾à¦°',
+      'blocked_users': 'à¦¬à§à¦²à¦• à¦•à¦°à¦¾ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦°à¦•à¦¾à¦°à§€',
+      'home': 'à¦¹à§‹à¦®',
+      'rooms': 'à¦°à§à¦®',
+      'games': 'à¦—à§‡à¦®à¦¸',
+      'wallet': 'à¦“à¦¯à¦¼à¦¾à¦²à§‡à¦Ÿ',
+      'profile': 'à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦²',
+      'join': 'à¦¯à§‹à¦— à¦¦à¦¿à¦¨',
+      'login': 'à¦²à¦—à¦‡à¦¨',
+      'create_account': 'à¦…à§à¦¯à¦¾à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦¤à§ˆà¦°à¦¿ à¦•à¦°à§à¦¨',
+      'get_started': 'à¦¶à§à¦°à§ à¦•à¦°à§à¦¨',
+      'username': 'à¦‡à¦‰à¦œà¦¾à¦°à¦¨à§‡à¦®',
+      'email': 'à¦‡à¦®à§‡à¦‡à¦²',
+      'password': 'à¦ªà¦¾à¦¸à¦“à¦¯à¦¼à¦¾à¦°à§à¦¡',
+      'welcome': 'à¦¸à§à¦¬à¦¾à¦—à¦¤à¦®',
+      'welcome_back': 'à¦†à¦¬à¦¾à¦° à¦¸à§à¦¬à¦¾à¦—à¦¤à¦®',
+      'chat_rooms': 'à¦šà§à¦¯à¦¾à¦Ÿ à¦°à§à¦®',
+      'popular_rooms': 'à¦œà¦¨à¦ªà§à¦°à¦¿à¦¯à¦¼ à¦°à§à¦® ðŸ”¥',
+      'your_balance': 'à¦†à¦ªà¦¨à¦¾à¦° à¦¬à§à¦¯à¦¾à¦²à§‡à¦¨à§à¦¸',
+      'diamonds': 'à¦¡à¦¾à¦¯à¦¼à¦®à¦¨à§à¦¡',
+      'online': 'à¦…à¦¨à¦²à¦¾à¦‡à¦¨',
+      'account': 'à¦…à§à¦¯à¦¾à¦•à¦¾à¦‰à¦¨à§à¦Ÿ',
+      'help_center': 'à¦¹à§‡à¦²à§à¦ª à¦¸à§‡à¦¨à§à¦Ÿà¦¾à¦°',
+      'logout': 'à¦²à¦—à¦†à¦‰à¦Ÿ',
+      'privacy_settings': 'à¦—à§‹à¦ªà¦¨à§€à¦¯à¦¼à¦¤à¦¾',
+      'friend_requests': 'à¦¬à¦¨à§à¦§à§à¦¤à§à¦¬à§‡à¦° à¦…à¦¨à§à¦°à§‹à¦§',
+      'room_invites': 'à¦°à§à¦® à¦†à¦®à¦¨à§à¦¤à§à¦°à¦£',
+      'friend_messages': 'à¦¬à¦¨à§à¦§à§à¦° à¦¬à¦¾à¦°à§à¦¤à¦¾',
+      'my_gifts': 'à¦†à¦®à¦¾à¦° à¦‰à¦ªà¦¹à¦¾à¦°',
+      'transaction_history': 'à¦²à§‡à¦¨à¦¦à§‡à¦¨à§‡à¦° à¦‡à¦¤à¦¿à¦¹à¦¾à¦¸',
+      'coins': 'à¦•à¦¯à¦¼à§‡à¦¨',
+      'recharge': 'à¦°à¦¿à¦šà¦¾à¦°à§à¦œ',
+      'welcome_to_partychat': 'PartyChat-à¦ à¦¸à§à¦¬à¦¾à¦—à¦¤à¦®',
+      'chat_play_make_friends': 'à¦šà§à¦¯à¦¾à¦Ÿ â€¢ à¦–à§‡à¦²à§à¦¨ â€¢ à¦¬à¦¨à§à¦§à§ à¦¬à¦¾à¦¨à¦¾à¦¨',
+      'change_profile_photo': 'à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦›à¦¬à¦¿ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦•à¦°à§à¦¨',
+      'choose_avatar': 'à¦…à§à¦¯à¦¾à¦­à¦¾à¦Ÿà¦¾à¦° à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à§à¦¨',
+      'change_username': 'à¦‡à¦‰à¦œà¦¾à¦°à¦¨à§‡à¦® à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦•à¦°à§à¦¨',
+      'save': 'à¦¸à¦‚à¦°à¦•à§à¦·à¦£',
+      'cancel': 'à¦¬à¦¾à¦¤à¦¿à¦²',
+      'play_now': 'à¦à¦–à¦¨ à¦–à§‡à¦²à§à¦¨',
+      'my_wallet': 'à¦†à¦®à¦¾à¦° à¦“à¦¯à¦¼à¦¾à¦²à§‡à¦Ÿ',
+      'vip_level': 'VIP à¦²à§‡à¦­à§‡à¦² 3',
+      'online_status': 'à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸',
+      'room_activity': 'à¦°à§à¦® à¦•à¦¾à¦°à§à¦¯à¦•à¦²à¦¾à¦ª',
+      'private_account': 'à¦ªà§à¦°à¦¾à¦‡à¦­à§‡à¦Ÿ à¦…à§à¦¯à¦¾à¦•à¦¾à¦‰à¦¨à§à¦Ÿ',
     },
     'Turkish': {
       'settings': 'Ayarlar',
@@ -324,52 +324,52 @@ class AppLanguage {
       'notifications': 'Bildirimler',
       'messages': 'Mesajlar',
       'announcements': 'Duyurular',
-      'friends': 'Arkadaşlar',
+      'friends': 'ArkadaÅŸlar',
       'gifts': 'Hediyeler',
-      'blocked_users': 'Engellenen Kullanıcılar',
+      'blocked_users': 'Engellenen KullanÄ±cÄ±lar',
       'home': 'Ana Sayfa',
       'rooms': 'Odalar',
       'games': 'Oyunlar',
-      'wallet': 'Cüzdan',
+      'wallet': 'CÃ¼zdan',
       'profile': 'Profil',
-      'join': 'Katıl',
-      'login': 'Giriş',
-      'create_account': 'Hesap Oluştur',
-      'get_started': 'Başla',
-      'username': 'Kullanıcı Adı',
+      'join': 'KatÄ±l',
+      'login': 'GiriÅŸ',
+      'create_account': 'Hesap OluÅŸtur',
+      'get_started': 'BaÅŸla',
+      'username': 'KullanÄ±cÄ± AdÄ±',
       'email': 'E-posta',
-      'password': 'Şifre',
-      'welcome': 'Hoş Geldiniz',
-      'welcome_back': 'Tekrar hoş geldiniz',
-      'chat_rooms': 'Sohbet Odaları',
-      'popular_rooms': 'Popüler Odalar 🔥',
+      'password': 'Åžifre',
+      'welcome': 'HoÅŸ Geldiniz',
+      'welcome_back': 'Tekrar hoÅŸ geldiniz',
+      'chat_rooms': 'Sohbet OdalarÄ±',
+      'popular_rooms': 'PopÃ¼ler Odalar ðŸ”¥',
       'your_balance': 'Bakiyeniz',
       'diamonds': 'Elmaslar',
-      'online': 'çevrimiçi',
+      'online': 'Ã§evrimiÃ§i',
       'account': 'Hesap',
-      'help_center': 'Yardım Merkezi',
-      'logout': 'Çıkış',
+      'help_center': 'YardÄ±m Merkezi',
+      'logout': 'Ã‡Ä±kÄ±ÅŸ',
       'privacy_settings': 'Gizlilik',
-      'friend_requests': 'Arkadaşlık İstekleri',
+      'friend_requests': 'ArkadaÅŸlÄ±k Ä°stekleri',
       'room_invites': 'Oda Davetleri',
-      'friend_messages': 'Arkadaş Mesajları',
+      'friend_messages': 'ArkadaÅŸ MesajlarÄ±',
       'my_gifts': 'Hediyelerim',
-      'transaction_history': 'İşlem Geçmişi',
+      'transaction_history': 'Ä°ÅŸlem GeÃ§miÅŸi',
       'coins': 'Paralar',
-      'recharge': 'Yükle',
-      'welcome_to_partychat': 'PartyChat\'e Hoş Geldiniz',
-      'chat_play_make_friends': 'Sohbet • Oyna • Arkadaş Edin',
-      'change_profile_photo': 'Profil Fotoğrafını Değiştir',
-      'choose_avatar': 'Avatar Seç',
-      'change_username': 'Kullanıcı Adını Değiştir',
+      'recharge': 'YÃ¼kle',
+      'welcome_to_partychat': 'PartyChat\'e HoÅŸ Geldiniz',
+      'chat_play_make_friends': 'Sohbet â€¢ Oyna â€¢ ArkadaÅŸ Edin',
+      'change_profile_photo': 'Profil FotoÄŸrafÄ±nÄ± DeÄŸiÅŸtir',
+      'choose_avatar': 'Avatar SeÃ§',
+      'change_username': 'KullanÄ±cÄ± AdÄ±nÄ± DeÄŸiÅŸtir',
       'save': 'Kaydet',
-      'cancel': 'İptal',
-      'play_now': 'Şimdi Oyna',
-      'my_wallet': 'Cüzdanım',
+      'cancel': 'Ä°ptal',
+      'play_now': 'Åžimdi Oyna',
+      'my_wallet': 'CÃ¼zdanÄ±m',
       'vip_level': 'VIP Seviye 3',
-      'online_status': 'Çevrimiçi Durumu',
+      'online_status': 'Ã‡evrimiÃ§i Durumu',
       'room_activity': 'Oda Aktivitesi',
-      'private_account': 'Özel Hesap',
+      'private_account': 'Ã–zel Hesap',
     },
     'Indonesian': {
       'settings': 'Pengaturan',
@@ -396,7 +396,7 @@ class AppLanguage {
       'welcome': 'Selamat Datang',
       'welcome_back': 'Selamat datang kembali',
       'chat_rooms': 'Ruang Chat',
-      'popular_rooms': 'Ruang Populer 🔥',
+      'popular_rooms': 'Ruang Populer ðŸ”¥',
       'your_balance': 'Saldo Anda',
       'diamonds': 'Berlian',
       'online': 'online',
@@ -412,7 +412,7 @@ class AppLanguage {
       'coins': 'Koin',
       'recharge': 'Isi Ulang',
       'welcome_to_partychat': 'Selamat Datang di PartyChat',
-      'chat_play_make_friends': 'Chat • Main • Cari Teman',
+      'chat_play_make_friends': 'Chat â€¢ Main â€¢ Cari Teman',
       'change_profile_photo': 'Ubah Foto Profil',
       'choose_avatar': 'Pilih Avatar',
       'change_username': 'Ubah Nama Pengguna',
@@ -441,22 +441,22 @@ class AppLanguage {
       'wallet': 'Billetera',
       'profile': 'Perfil',
       'join': 'Unirse',
-      'login': 'Iniciar sesión',
+      'login': 'Iniciar sesiÃ³n',
       'create_account': 'Crear cuenta',
       'get_started': 'Comenzar',
       'username': 'Nombre de usuario',
-      'email': 'Correo electrónico',
-      'password': 'Contraseña',
+      'email': 'Correo electrÃ³nico',
+      'password': 'ContraseÃ±a',
       'welcome': 'Bienvenido',
       'welcome_back': 'Bienvenido de nuevo',
       'chat_rooms': 'Salas de chat',
-      'popular_rooms': 'Salas populares 🔥',
+      'popular_rooms': 'Salas populares ðŸ”¥',
       'your_balance': 'Tu saldo',
       'diamonds': 'Diamantes',
-      'online': 'en línea',
+      'online': 'en lÃ­nea',
       'account': 'Cuenta',
       'help_center': 'Centro de ayuda',
-      'logout': 'Cerrar sesión',
+      'logout': 'Cerrar sesiÃ³n',
       'privacy_settings': 'Privacidad',
       'friend_requests': 'Solicitudes de amistad',
       'room_invites': 'Invitaciones de sala',
@@ -466,7 +466,7 @@ class AppLanguage {
       'coins': 'Monedas',
       'recharge': 'Recargar',
       'welcome_to_partychat': 'Bienvenido a PartyChat',
-      'chat_play_make_friends': 'Chatea • Juega • Haz amigos',
+      'chat_play_make_friends': 'Chatea â€¢ Juega â€¢ Haz amigos',
       'change_profile_photo': 'Cambiar foto de perfil',
       'choose_avatar': 'Elegir avatar',
       'change_username': 'Cambiar nombre de usuario',
@@ -475,20 +475,20 @@ class AppLanguage {
       'play_now': 'Jugar ahora',
       'my_wallet': 'Mi billetera',
       'vip_level': 'Nivel VIP 3',
-      'online_status': 'Estado en línea',
+      'online_status': 'Estado en lÃ­nea',
       'room_activity': 'Actividad de sala',
       'private_account': 'Cuenta privada',
     },
     'French': {
-      'settings': 'Paramètres',
+      'settings': 'ParamÃ¨tres',
       'language': 'Langue',
-      'privacy': 'Confidentialité',
+      'privacy': 'ConfidentialitÃ©',
       'notifications': 'Notifications',
       'messages': 'Messages',
       'announcements': 'Annonces',
       'friends': 'Amis',
       'gifts': 'Cadeaux',
-      'blocked_users': 'Utilisateurs bloqués',
+      'blocked_users': 'Utilisateurs bloquÃ©s',
       'home': 'Accueil',
       'rooms': 'Salons',
       'games': 'Jeux',
@@ -496,96 +496,96 @@ class AppLanguage {
       'profile': 'Profil',
       'join': 'Rejoindre',
       'login': 'Connexion',
-      'create_account': 'Créer un compte',
+      'create_account': 'CrÃ©er un compte',
       'get_started': 'Commencer',
-      'username': 'Nom d’utilisateur',
+      'username': 'Nom dâ€™utilisateur',
       'email': 'E-mail',
       'password': 'Mot de passe',
       'welcome': 'Bienvenue',
       'welcome_back': 'Bon retour',
       'chat_rooms': 'Salons de discussion',
-      'popular_rooms': 'Salons populaires 🔥',
+      'popular_rooms': 'Salons populaires ðŸ”¥',
       'your_balance': 'Votre solde',
       'diamonds': 'Diamants',
       'online': 'en ligne',
       'account': 'Compte',
-      'help_center': 'Centre d’aide',
-      'logout': 'Déconnexion',
-      'privacy_settings': 'Confidentialité',
-      'friend_requests': 'Demandes d’amis',
+      'help_center': 'Centre dâ€™aide',
+      'logout': 'DÃ©connexion',
+      'privacy_settings': 'ConfidentialitÃ©',
+      'friend_requests': 'Demandes dâ€™amis',
       'room_invites': 'Invitations de salon',
       'friend_messages': 'Messages des amis',
       'my_gifts': 'Mes cadeaux',
       'transaction_history': 'Historique des transactions',
-      'coins': 'Pièces',
+      'coins': 'PiÃ¨ces',
       'recharge': 'Recharger',
       'welcome_to_partychat': 'Bienvenue sur PartyChat',
-      'chat_play_make_friends': 'Discutez • Jouez • Faites des amis',
+      'chat_play_make_friends': 'Discutez â€¢ Jouez â€¢ Faites des amis',
       'change_profile_photo': 'Changer la photo de profil',
       'choose_avatar': 'Choisir un avatar',
-      'change_username': 'Changer le nom d’utilisateur',
+      'change_username': 'Changer le nom dâ€™utilisateur',
       'save': 'Enregistrer',
       'cancel': 'Annuler',
       'play_now': 'Jouer maintenant',
       'my_wallet': 'Mon portefeuille',
       'vip_level': 'Niveau VIP 3',
       'online_status': 'Statut en ligne',
-      'room_activity': 'Activité du salon',
-      'private_account': 'Compte privé',
+      'room_activity': 'ActivitÃ© du salon',
+      'private_account': 'Compte privÃ©',
     },
     'Chinese': {
-      'settings': '设置',
-      'language': '语言',
-      'privacy': '隐私',
-      'notifications': '通知',
-      'messages': '消息',
-      'announcements': '公告',
-      'friends': '好友',
-      'gifts': '礼物',
-      'blocked_users': '已屏蔽用户',
-      'home': '首页',
-      'rooms': '房间',
-      'games': '游戏',
-      'wallet': '钱包',
-      'profile': '个人资料',
-      'join': '加入',
-      'login': '登录',
-      'create_account': '创建账号',
-      'get_started': '开始',
-      'username': '用户名',
-      'email': '邮箱',
-      'password': '密码',
-      'welcome': '欢迎',
-      'welcome_back': '欢迎回来',
-      'chat_rooms': '聊天房间',
-      'popular_rooms': '热门房间 🔥',
-      'your_balance': '您的余额',
-      'diamonds': '钻石',
-      'online': '在线',
-      'account': '账号',
-      'help_center': '帮助中心',
-      'logout': '退出登录',
-      'privacy_settings': '隐私',
-      'friend_requests': '好友请求',
-      'room_invites': '房间邀请',
-      'friend_messages': '好友消息',
-      'my_gifts': '我的礼物',
-      'transaction_history': '交易记录',
-      'coins': '金币',
-      'recharge': '充值',
-      'welcome_to_partychat': '欢迎来到 PartyChat',
-      'chat_play_make_friends': '聊天 • 游戏 • 交朋友',
-      'change_profile_photo': '更换头像照片',
-      'choose_avatar': '选择头像',
-      'change_username': '更改用户名',
-      'save': '保存',
-      'cancel': '取消',
-      'play_now': '立即游戏',
-      'my_wallet': '我的钱包',
-      'vip_level': 'VIP 等级 3',
-      'online_status': '在线状态',
-      'room_activity': '房间动态',
-      'private_account': '私人账号',
+      'settings': 'è®¾ç½®',
+      'language': 'è¯­è¨€',
+      'privacy': 'éšç§',
+      'notifications': 'é€šçŸ¥',
+      'messages': 'æ¶ˆæ¯',
+      'announcements': 'å…¬å‘Š',
+      'friends': 'å¥½å‹',
+      'gifts': 'ç¤¼ç‰©',
+      'blocked_users': 'å·²å±è”½ç”¨æˆ·',
+      'home': 'é¦–é¡µ',
+      'rooms': 'æˆ¿é—´',
+      'games': 'æ¸¸æˆ',
+      'wallet': 'é’±åŒ…',
+      'profile': 'ä¸ªäººèµ„æ–™',
+      'join': 'åŠ å…¥',
+      'login': 'ç™»å½•',
+      'create_account': 'åˆ›å»ºè´¦å·',
+      'get_started': 'å¼€å§‹',
+      'username': 'ç”¨æˆ·å',
+      'email': 'é‚®ç®±',
+      'password': 'å¯†ç ',
+      'welcome': 'æ¬¢è¿Ž',
+      'welcome_back': 'æ¬¢è¿Žå›žæ¥',
+      'chat_rooms': 'èŠå¤©æˆ¿é—´',
+      'popular_rooms': 'çƒ­é—¨æˆ¿é—´ ðŸ”¥',
+      'your_balance': 'æ‚¨çš„ä½™é¢',
+      'diamonds': 'é’»çŸ³',
+      'online': 'åœ¨çº¿',
+      'account': 'è´¦å·',
+      'help_center': 'å¸®åŠ©ä¸­å¿ƒ',
+      'logout': 'é€€å‡ºç™»å½•',
+      'privacy_settings': 'éšç§',
+      'friend_requests': 'å¥½å‹è¯·æ±‚',
+      'room_invites': 'æˆ¿é—´é‚€è¯·',
+      'friend_messages': 'å¥½å‹æ¶ˆæ¯',
+      'my_gifts': 'æˆ‘çš„ç¤¼ç‰©',
+      'transaction_history': 'äº¤æ˜“è®°å½•',
+      'coins': 'é‡‘å¸',
+      'recharge': 'å……å€¼',
+      'welcome_to_partychat': 'æ¬¢è¿Žæ¥åˆ° PartyChat',
+      'chat_play_make_friends': 'èŠå¤© â€¢ æ¸¸æˆ â€¢ äº¤æœ‹å‹',
+      'change_profile_photo': 'æ›´æ¢å¤´åƒç…§ç‰‡',
+      'choose_avatar': 'é€‰æ‹©å¤´åƒ',
+      'change_username': 'æ›´æ”¹ç”¨æˆ·å',
+      'save': 'ä¿å­˜',
+      'cancel': 'å–æ¶ˆ',
+      'play_now': 'ç«‹å³æ¸¸æˆ',
+      'my_wallet': 'æˆ‘çš„é’±åŒ…',
+      'vip_level': 'VIP ç­‰çº§ 3',
+      'online_status': 'åœ¨çº¿çŠ¶æ€',
+      'room_activity': 'æˆ¿é—´åŠ¨æ€',
+      'private_account': 'ç§äººè´¦å·',
     },
   };
 
@@ -993,7 +993,7 @@ class PartyChatData {
     await ProfileUnreadService.createNotification(
       uid: toUid,
       type: 'gifts',
-      title: 'New Gift 🎁',
+      title: 'New Gift ðŸŽ',
       message: '${sender['name'] ?? 'Party User'} ne $giftName bheja.',
       actorUid: fromUid,
       actorName: sender['name'] ?? 'Party User',
@@ -1002,7 +1002,7 @@ class PartyChatData {
     await ProfileUnreadService.createNotification(
       uid: fromUid,
       type: 'myGifts',
-      title: 'Gift Sent 🎁',
+      title: 'Gift Sent ðŸŽ',
       message: 'Aapne $giftName successfully bheja.',
       actorUid: toUid,
       actorName: receiver['name'] ?? 'Party User',
@@ -1087,17 +1087,17 @@ class _PartyChatAppState extends State<PartyChatApp> {
             brightness: Brightness.dark,
             scaffoldBackgroundColor: const Color(0xFF05030B),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF9B3DFF),
+              seedColor: const Color(0xFF7B35FF),
               brightness: Brightness.dark,
             ).copyWith(
-              primary: const Color(0xFFB65CFF),
-              secondary: const Color(0xFFFF39D5),
-              surface: const Color(0xFF0E0A19),
+              primary: const Color(0xFFC05CFF),
+              secondary: const Color(0xFFFF2BD6),
+              surface: const Color(0xFF10091D),
             ),
             navigationBarTheme: const NavigationBarThemeData(
               backgroundColor: Color(0xFF0C0915),
-              indicatorColor: Color(0xFF57307A),
-              height: 72,
+              indicatorColor: Color(0xFF7138A5),
+              height: 78,
               labelTextStyle: WidgetStatePropertyAll(
                 TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
               ),
@@ -1196,11 +1196,11 @@ class _GlowOrb extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: color.withOpacity(0.08),
+          color: color.withOpacity(0.11),
           boxShadow: [
             BoxShadow(
               color: color.withOpacity(0.20),
-              blurRadius: 100,
+              blurRadius: 115,
               spreadRadius: 25,
             ),
           ],
@@ -1229,13 +1229,13 @@ class _NeonPanel extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF17102B), Color(0xFF0D0918)],
+          colors: [Color(0xFF211033), Color(0xFF0B0713)],
         ),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: const Color(0xFF7E35D9), width: 1),
+        border: Border.all(color: const Color(0xFF9B4DFF), width: 1.2),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x552D00FF),
+            color: Color(0x774F00FF),
             blurRadius: 20,
             spreadRadius: 1,
           ),
@@ -1263,10 +1263,10 @@ class _NeonAction extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         gradient: const LinearGradient(
-          colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
+          colors: [Color(0xFF6E2DFF), Color(0xFFFF20D0)],
         ),
         boxShadow: const [
-          BoxShadow(color: Color(0x664F00FF), blurRadius: 16),
+          BoxShadow(color: Color(0x884F00FF), blurRadius: 20, spreadRadius: 1),
         ],
       ),
       child: Material(
@@ -1871,7 +1871,7 @@ class HomeTab extends StatelessWidget {
             const CircleAvatar(radius: 25, backgroundColor: Color(0xFF57307A), child: Icon(Icons.person)),
             const SizedBox(width: 12),
             const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Hello, Party User 👋', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+              Text('Hello, Party User ðŸ‘‹', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
               Text('Welcome back', style: TextStyle(color: Colors.white60)),
             ])),
             Container(
@@ -1887,23 +1887,23 @@ class HomeTab extends StatelessWidget {
               const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Your Balance', style: TextStyle(color: Colors.white70)),
                 SizedBox(height: 4),
-                Text('12,580 🪙', style: TextStyle(fontSize: 29, fontWeight: FontWeight.w900)),
+                Text('12,580 ðŸª™', style: TextStyle(fontSize: 29, fontWeight: FontWeight.w900)),
                 SizedBox(height: 5),
-                Text('💎 2,450 Diamonds', style: TextStyle(color: Color(0xFFD9C9FF))),
+                Text('ðŸ’Ž 2,450 Diamonds', style: TextStyle(color: Color(0xFFD9C9FF))),
               ])),
               const Icon(Icons.diamond, size: 48, color: Color(0xFFB65CFF)),
             ]),
           ),
           const SizedBox(height: 22),
-          Row(children: [const Expanded(child: Text('Popular Rooms 🔥', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900))), Text('See All ›', style: TextStyle(color: Color(0xFFFF5DE0), fontWeight: FontWeight.w700))]),
+          Row(children: [const Expanded(child: Text('Popular Rooms ðŸ”¥', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900))), Text('See All â€º', style: TextStyle(color: Color(0xFFFF5DE0), fontWeight: FontWeight.w700))]),
           const SizedBox(height: 12),
-          const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Chat • Friends • Fun'),
-          const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Games • Challenge • Win'),
-          const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music • Vibes • Party'),
+          const RoomTile('Friends Forever ðŸ’œ', '2.4K online', Icons.people, subtitle: 'Chat â€¢ Friends â€¢ Fun'),
+          const RoomTile('Gaming Zone ðŸŽ®', '1.8K online', Icons.games, subtitle: 'Games â€¢ Challenge â€¢ Win'),
+          const RoomTile('Music Lovers ðŸŽµ', '1.2K online', Icons.music_note, subtitle: 'Music â€¢ Vibes â€¢ Party'),
           const SizedBox(height: 10),
           _NeonPanel(
             padding: EdgeInsets.zero,
-            child: SizedBox(height: 120, child: Center(child: Text('GOOD VIBES\nONLY ♥', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFFF0B9FF), letterSpacing: 2)))),
+            child: SizedBox(height: 120, child: Center(child: Text('GOOD VIBES\nONLY â™¥', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFFF0B9FF), letterSpacing: 2)))),
           ),
         ],
       ),
@@ -1928,11 +1928,11 @@ class RoomsTab extends StatelessWidget {
             _chip('All', true), _chip('Friends', false), _chip('Gaming', false), _chip('Music', false), _chip('Fun', false),
           ])),
           const SizedBox(height: 16),
-          const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
-          const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
-          const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
-          const RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax • Talk • Be Yourself'),
-          const RoomTile('Love Corner 💕', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
+          const RoomTile('Friends Forever ðŸ’œ', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
+          const RoomTile('Gaming Zone ðŸŽ®', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
+          const RoomTile('Music Lovers ðŸŽµ', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
+          const RoomTile('Chill Zone ðŸŒ™', '980 online', Icons.nightlight_round, subtitle: 'Relax â€¢ Talk â€¢ Be Yourself'),
+          const RoomTile('Love Corner ðŸ’•', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
         ],
       ),
     );
@@ -1949,7 +1949,7 @@ class RoomTile extends StatelessWidget {
   final IconData icon;
   final String subtitle;
 
-  const RoomTile(this.title, this.online, this.icon, {super.key, this.subtitle = 'Chat • Friends • Fun'});
+  const RoomTile(this.title, this.online, this.icon, {super.key, this.subtitle = 'Chat â€¢ Friends â€¢ Fun'});
 
   @override
   Widget build(BuildContext context) {
@@ -1959,7 +1959,7 @@ class RoomTile extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [Color(0xFF171126), Color(0xFF0D0917)]),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF5524A1)),
+        border: Border.all(color: const Color(0xFF7138FF)),
         boxShadow: const [BoxShadow(color: Color(0x331C00FF), blurRadius: 12)],
       ),
       child: Row(children: [
@@ -2209,7 +2209,7 @@ class RoomInviteFriendsPage extends StatelessWidget {
                         roomTitle: roomTitle,
                       );
                       if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Room invite bhej diya 👍')),
+                        const SnackBar(content: Text('Room invite bhej diya ðŸ‘')),
                       );
                     } catch (e) {
                       if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
@@ -2282,12 +2282,12 @@ class WalletTab extends StatelessWidget {
           _NeonPanel(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('Coins', style: TextStyle(color: Colors.white70)),
             const SizedBox(height: 3),
-            Row(children: [const Text('12,580', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900)), const SizedBox(width: 8), const Text('🪙', style: TextStyle(fontSize: 28))]),
+            Row(children: [const Text('12,580', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900)), const SizedBox(width: 8), const Text('ðŸª™', style: TextStyle(fontSize: 28))]),
             const SizedBox(height: 6),
-            const Text('2,450 💎 Diamonds', style: TextStyle(fontSize: 17, color: Color(0xFFE1D2FF))),
+            const Text('2,450 ðŸ’Ž Diamonds', style: TextStyle(fontSize: 17, color: Color(0xFFE1D2FF))),
           ])),
           const SizedBox(height: 14),
-          SizedBox(width: double.infinity, child: _NeonAction(label: '＋  Recharge', onPressed: () {})),
+          SizedBox(width: double.infinity, child: _NeonAction(label: 'ï¼‹  Recharge', onPressed: () {})),
           const SizedBox(height: 10),
           OutlinedButton.icon(style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), side: const BorderSide(color: Color(0xFFB65CFF))), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TransactionHistoryPage())), icon: const Icon(Icons.history), label: const Text('Transaction History', style: TextStyle(fontWeight: FontWeight.w800))),
           const SizedBox(height: 18),
@@ -2443,7 +2443,7 @@ class _ProfileTabState extends State<ProfileTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Profile photo save ho gayi 👍',
+            'Profile photo save ho gayi ðŸ‘',
           ),
         ),
       );
@@ -2556,7 +2556,7 @@ class _ProfileTabState extends State<ProfileTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Avatar save ho gaya 👍',
+            'Avatar save ho gaya ðŸ‘',
           ),
         ),
       );
@@ -2591,7 +2591,7 @@ class _ProfileTabState extends State<ProfileTab> {
             maxLength: 20,
             decoration: InputDecoration(
               hintText: AppLanguage.text('username'),
-              helperText: '3–20 characters',
+              helperText: '3â€“20 characters',
             ),
           ),
           actions: [
@@ -2677,7 +2677,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                        'Username save ho gaya 👍',
+                        'Username save ho gaya ðŸ‘',
                       ),
                     ),
                   );
@@ -2789,7 +2789,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 builder: (context, snapshot) {
                   final data = snapshot.data?.data();
                   final name = data?['name'] as String? ?? user.displayName ?? 'PartyChat User';
-                  return Column(children: [Text('$name 👑', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)), const SizedBox(height: 5), const Text('VIP Level 3', style: TextStyle(color: Color(0xFFFFD15C), fontWeight: FontWeight.w900))]);
+                  return Column(children: [Text('$name ðŸ‘‘', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)), const SizedBox(height: 5), const Text('VIP Level 3', style: TextStyle(color: Color(0xFFFFD15C), fontWeight: FontWeight.w900))]);
                 },
               ),
               const SizedBox(height: 14),
@@ -3031,7 +3031,7 @@ class GiftsPage extends StatelessWidget {
               return ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.card_giftcard)),
                 title: Text(d['giftName'] ?? 'Gift'),
-                subtitle: Text('From: ${d['senderName'] ?? 'Party User'} • ${d['cost'] ?? 0} coins'),
+                subtitle: Text('From: ${d['senderName'] ?? 'Party User'} â€¢ ${d['cost'] ?? 0} coins'),
               );
             },
           );
@@ -3070,7 +3070,7 @@ class MyGiftsPage extends StatelessWidget {
               return ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.card_giftcard)),
                 title: Text(d['giftName'] ?? 'Gift'),
-                subtitle: Text('To: ${d['receiverName'] ?? 'Party User'} • ${d['cost'] ?? 0} coins'),
+                subtitle: Text('To: ${d['receiverName'] ?? 'Party User'} â€¢ ${d['cost'] ?? 0} coins'),
               );
             },
           );
@@ -3147,7 +3147,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Friend request bhej di 👍')),
+                                const SnackBar(content: Text('Friend request bhej di ðŸ‘')),
                               );
                             }
                           } catch (e) {
@@ -3254,10 +3254,10 @@ class _FriendsPageState extends State<FriendsPage> {
 
   Future<void> _giftDialog(BuildContext context, String fromUid, String toUid, String name) async {
     final gifts = [
-      {'name': 'Rose 🌹', 'cost': 10},
-      {'name': 'Heart ❤️', 'cost': 50},
-      {'name': 'Crown 👑', 'cost': 100},
-      {'name': 'Diamond 💎', 'cost': 500},
+      {'name': 'Rose ðŸŒ¹', 'cost': 10},
+      {'name': 'Heart â¤ï¸', 'cost': 50},
+      {'name': 'Crown ðŸ‘‘', 'cost': 100},
+      {'name': 'Diamond ðŸ’Ž', 'cost': 500},
     ];
     await showModalBottomSheet(
       context: context,
@@ -3279,7 +3279,7 @@ class _FriendsPageState extends State<FriendsPage> {
                   );
                   if (context.mounted) {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gift bhej diya 🎁')));
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gift bhej diya ðŸŽ')));
                   }
                 } catch (e) {
                   if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
@@ -3347,7 +3347,7 @@ class _ChatPageState extends State<ChatPage> {
                 if (snapshot.hasError) return const Center(child: Text('Messages load nahi ho sake.'));
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
-                if (docs.isEmpty) return const Center(child: Text('Say hello 👋'));
+                if (docs.isEmpty) return const Center(child: Text('Say hello ðŸ‘‹'));
                 return ListView.builder(
                   padding: const EdgeInsets.all(12),
                   itemCount: docs.length,
@@ -3864,7 +3864,7 @@ class AccountPage extends StatelessWidget {
 
                   Navigator.pop(dialogContext);
 
-                                    Navigator.pushAndRemoveUntil(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                       builder: (_) =>
@@ -3872,3 +3872,635 @@ class AccountPage extends StatelessWidget {
                     ),
                     (route) => false,
                   );
+                } catch (e) {
+                  if (!dialogContext.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Account deletion failed: $e',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    confirmController.dispose();
+  }
+}
+
+/* ============================================================
+   PRIVACY
+   ============================================================ */
+
+class PrivacyPage extends StatefulWidget {
+  const PrivacyPage({super.key});
+
+  @override
+  State<PrivacyPage> createState() =>
+      _PrivacyPageState();
+}
+
+class _PrivacyPageState
+    extends State<PrivacyPage> {
+  User? get user =>
+      FirebaseAuth.instance.currentUser;
+
+  String profileVisibility = 'Everyone';
+  String photoVisibility = 'Everyone';
+  String messagePermission = 'Everyone';
+  String giftPermission = 'Everyone';
+
+  bool onlineStatus = true;
+  bool roomActivity = true;
+  bool privateAccount = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrivacySettings();
+  }
+
+  Future<void> _loadPrivacySettings() async {
+    final currentUser = user;
+
+    if (currentUser == null) return;
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+
+      if (!doc.exists) return;
+
+      final data = doc.data()!;
+
+      if (!mounted) return;
+
+      setState(() {
+        profileVisibility =
+            data['profileVisibility'] ?? 'Everyone';
+
+        photoVisibility =
+            data['photoVisibility'] ?? 'Everyone';
+
+        messagePermission =
+            data['messagePermission'] ?? 'Everyone';
+
+        giftPermission =
+            data['giftPermission'] ?? 'Everyone';
+
+        onlineStatus =
+            data['onlineStatus'] ?? true;
+
+        roomActivity =
+            data['roomActivity'] ?? true;
+
+        privateAccount =
+            data['privateAccount'] ?? false;
+      });
+    } catch (e) {
+      debugPrint(
+        'Privacy load failed: $e',
+      );
+    }
+  }
+
+  Future<void> _saveField(
+    String field,
+    dynamic value,
+  ) async {
+    final currentUser = user;
+
+    if (currentUser == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .set(
+      {field: value},
+      SetOptions(merge: true),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('privacy'),
+        ),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text(
+              'Who can view my profile',
+            ),
+            subtitle: Text(profileVisibility),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can view my profile',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                profileVisibility,
+                (value) async {
+                  setState(() {
+                    profileVisibility = value;
+                  });
+
+                  await _saveField(
+                    'profileVisibility',
+                    value,
+                  );
+                },
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo),
+            title: const Text(
+              'Who can view my profile photo',
+            ),
+            subtitle: Text(photoVisibility),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can view my profile photo',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                photoVisibility,
+                (value) async {
+                  setState(() {
+                    photoVisibility = value;
+                  });
+
+                  await _saveField(
+                    'photoVisibility',
+                    value,
+                  );
+                },
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text(
+              'Who can message me',
+            ),
+            subtitle: Text(messagePermission),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can message me',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                messagePermission,
+                (value) async {
+                  setState(() {
+                    messagePermission = value;
+                  });
+
+                  await _saveField(
+                    'messagePermission',
+                    value,
+                  );
+                },
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.card_giftcard,
+            ),
+            title: const Text(
+              'Who can send me gifts',
+            ),
+            subtitle: Text(giftPermission),
+            trailing: const Icon(
+              Icons.chevron_right,
+            ),
+            onTap: () {
+              _chooseOption(
+                context,
+                'Who can send me gifts',
+                [
+                  'Everyone',
+                  'Friends Only',
+                  'Nobody',
+                ],
+                giftPermission,
+                (value) async {
+                  setState(() {
+                    giftPermission = value;
+                  });
+
+                  await _saveField(
+                    'giftPermission',
+                    value,
+                  );
+                },
+              );
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.circle),
+            title: Text(
+              AppLanguage.text('online_status'),
+            ),
+            subtitle: const Text(
+              'Show when I am online',
+            ),
+            value: onlineStatus,
+            onChanged: (value) async {
+              setState(() {
+                onlineStatus = value;
+              });
+
+              await _saveField(
+                'onlineStatus',
+                value,
+              );
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(
+              Icons.meeting_room,
+            ),
+            title: Text(
+              AppLanguage.text('room_activity'),
+            ),
+            subtitle: const Text(
+              'Show my room activity to others',
+            ),
+            value: roomActivity,
+            onChanged: (value) async {
+              setState(() {
+                roomActivity = value;
+              });
+
+              await _saveField(
+                'roomActivity',
+                value,
+              );
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.lock),
+            title: Text(
+              AppLanguage.text('private_account'),
+            ),
+            subtitle: const Text(
+              'Only approved people can interact with me',
+            ),
+            value: privateAccount,
+            onChanged: (value) async {
+              setState(() {
+                privateAccount = value;
+              });
+
+              await _saveField(
+                'privateAccount',
+                value,
+              );
+            },
+          ),
+
+          // Blocked Users intentionally removed.
+        ],
+      ),
+    );
+  }
+
+  void _chooseOption(
+    BuildContext context,
+    String title,
+    List<String> options,
+    String currentValue,
+    ValueChanged<String> onSelected,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ...options.map(
+                (option) => ListTile(
+                  title: Text(option),
+                  trailing: option == currentValue
+                      ? const Icon(Icons.check)
+                      : null,
+                  onTap: () {
+                    onSelected(option);
+                    Navigator.pop(sheetContext);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/* ============================================================
+   LANGUAGE PAGE
+   ============================================================ */
+
+class LanguagePage extends StatelessWidget {
+  const LanguagePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('language'),
+        ),
+      ),
+      body: ValueListenableBuilder<String>(
+        valueListenable: AppLanguage.current,
+        builder: (context, selectedLanguage, child) {
+          return ListView.builder(
+            itemCount: AppLanguage.languages.length,
+            itemBuilder: (context, index) {
+              final language =
+                  AppLanguage.languages[index];
+
+              return ListTile(
+                title: Text(language),
+                trailing:
+                    language == selectedLanguage
+                        ? const Icon(Icons.check)
+                        : null,
+                onTap: () async {
+                  await AppLanguage.change(
+                    language,
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
+
+class NotificationsPage extends StatefulWidget {
+  const NotificationsPage({super.key});
+
+  @override
+  State<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  bool messages = true;
+  bool announcements = true;
+
+  Future<void> _markAllRead() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await ProfileUnreadService.markRead(user.uid, 'notifications');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
+    final ref = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('notifications');
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLanguage.text('notifications')),
+        actions: [
+          TextButton(onPressed: _markAllRead, child: const Text('Read all')),
+        ],
+      ),
+      body: ListView(
+        children: [
+          SwitchListTile(
+            title: Text(AppLanguage.text('messages')),
+            subtitle: const Text('Message notifications on/off'),
+            value: messages,
+            onChanged: (v) => setState(() => messages = v),
+          ),
+          SwitchListTile(
+            title: Text(AppLanguage.text('announcements')),
+            subtitle: const Text('PartyChat announcements on/off'),
+            value: announcements,
+            onChanged: (v) => setState(() => announcements = v),
+          ),
+          const Divider(),
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: ref.orderBy('createdAt', descending: true).snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) return const Padding(
+                padding: EdgeInsets.all(20),
+                child: Text('Notifications load nahi ho sakin.'),
+              );
+              if (!snapshot.hasData) return const Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(child: CircularProgressIndicator()),
+              );
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) return const Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(child: Text('No notifications yet.')),
+              );
+              return Column(
+                children: docs.map((doc) {
+                  final d = doc.data();
+                  final read = d['isRead'] == true;
+                  return ListTile(
+                    tileColor: read ? null : const Color(0xFF15111F),
+                    leading: Icon(
+                      read ? Icons.notifications_none : Icons.notifications_active,
+                    ),
+                    title: Text(d['title'] ?? 'Notification'),
+                    subtitle: Text(d['message'] ?? ''),
+                    trailing: read ? null : const CircleAvatar(
+                      radius: 5,
+                      backgroundColor: Colors.red,
+                    ),
+                    onTap: () async {
+                      await doc.reference.update({
+                        'isRead': true,
+                        'readAt': FieldValue.serverTimestamp(),
+                      });
+                      await ProfileUnreadService.markRead(user.uid, d['badgeKey'] ?? 'notifications');
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   BLOCKED USERS
+   ============================================================ */
+
+class BlockedUsersPage extends StatelessWidget {
+  const BlockedUsersPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
+    final ref = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('blockedUsers');
+
+    return Scaffold(
+      appBar: AppBar(title: Text(AppLanguage.text('blocked_users'))),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: ref.snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) return const Center(child: Text('Blocked users load nahi ho sake.'));
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          final docs = snapshot.data!.docs;
+          if (docs.isEmpty) return const Center(child: Text('No blocked users.'));
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final d = doc.data();
+              return ListTile(
+                leading: _NetworkOrAvatar(
+                  photoUrl: d['photoURL'] as String?,
+                  avatar: d['avatar'] as String?,
+                ),
+                title: Text(d['name'] ?? 'Blocked User'),
+                subtitle: Text(d['email'] ?? ''),
+                trailing: OutlinedButton(
+                  onPressed: () async {
+                    await PartyChatData.unblockUser(user.uid, doc.id);
+                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('User unblock kar diya.')),
+                    );
+                  },
+                  child: const Text('Unblock'),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   HELP CENTER
+   ============================================================ */
+
+class HelpCenterPage extends StatelessWidget {
+  const HelpCenterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('help_center'),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: const [
+          ListTile(
+            leading: Icon(Icons.help_outline),
+            title: Text('PartyChat Help Center'),
+            subtitle: Text(
+              'Help and support features will be connected here.',
+            ),
+          ),
+          SizedBox(height: 10),
+          ListTile(
+            leading: Icon(Icons.support_agent),
+            title: Text('Contact Support'),
+            subtitle: Text(
+              'Support contact system will be added later.',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   TRANSACTION HISTORY
+   ============================================================ */
+
+class TransactionHistoryPage
+    extends StatelessWidget {
+  const TransactionHistoryPage({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text(
+            'transaction_history',
+          ),
+        ),
+      ),
+      body: const Center(
+        child: Text(
+          'No transactions yet.',
+        ),
+      ),
+    );
+  }
+}
