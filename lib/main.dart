@@ -74,7 +74,7 @@ class AppLanguage {
       'welcome': 'Welcome',
       'welcome_back': 'Welcome back',
       'chat_rooms': 'Chat Rooms',
-      'popular_rooms': 'Popular Rooms ',
+      'popular_rooms': 'Popular Rooms 🔥',
       'your_balance': 'Your Balance',
       'diamonds': 'Diamonds',
       'online': 'online',
@@ -90,7 +90,7 @@ class AppLanguage {
       'coins': 'Coins',
       'recharge': 'Recharge',
       'welcome_to_partychat': 'Welcome to PartyChat',
-      'chat_play_make_friends': 'Chat - Play - Make Friends',
+      'chat_play_make_friends': 'Chat • Play • Make Friends',
       'change_profile_photo': 'Change Profile Photo',
       'choose_avatar': 'Choose Avatar',
       'change_username': 'Change Username',
@@ -128,7 +128,7 @@ class AppLanguage {
       'welcome': 'خوش آمدید',
       'welcome_back': 'دوبارہ خوش آمدید',
       'chat_rooms': 'چیٹ رومز',
-      'popular_rooms': 'مقبول رومز ',
+      'popular_rooms': 'مقبول رومز 🔥',
       'your_balance': 'آپ کا بیلنس',
       'diamonds': 'ڈائمنڈز',
       'online': 'آن لائن',
@@ -144,7 +144,7 @@ class AppLanguage {
       'coins': 'کوائنز',
       'recharge': 'ریچارج',
       'welcome_to_partychat': 'PartyChat میں خوش آمدید',
-      'chat_play_make_friends': 'چیٹ - کھیلیں - دوست بنائیں',
+      'chat_play_make_friends': 'چیٹ • کھیلیں • دوست بنائیں',
       'change_profile_photo': 'پروفائل فوٹو تبدیل کریں',
       'choose_avatar': 'اوتار منتخب کریں',
       'change_username': 'یوزرنیم تبدیل کریں',
@@ -182,7 +182,7 @@ class AppLanguage {
       'welcome': 'स्वागत है',
       'welcome_back': 'वापसी पर स्वागत है',
       'chat_rooms': 'चैट रूम्स',
-      'popular_rooms': 'लोकप्रिय रूम्स ',
+      'popular_rooms': 'लोकप्रिय रूम्स 🔥',
       'your_balance': 'आपका बैलेंस',
       'diamonds': 'डायमंड्स',
       'online': 'ऑनलाइन',
@@ -198,7 +198,7 @@ class AppLanguage {
       'coins': 'कॉइन्स',
       'recharge': 'रिचार्ज',
       'welcome_to_partychat': 'PartyChat में आपका स्वागत है',
-      'chat_play_make_friends': 'चैट - खेलें - दोस्त बनाएं',
+      'chat_play_make_friends': 'चैट • खेलें • दोस्त बनाएं',
       'change_profile_photo': 'प्रोफाइल फोटो बदलें',
       'choose_avatar': 'अवतार चुनें',
       'change_username': 'यूज़रनेम बदलें',
@@ -236,7 +236,7 @@ class AppLanguage {
       'welcome': 'مرحباً',
       'welcome_back': 'مرحباً بعودتك',
       'chat_rooms': 'غرف الدردشة',
-      'popular_rooms': 'الغرف الشائعة ',
+      'popular_rooms': 'الغرف الشائعة 🔥',
       'your_balance': 'رصيدك',
       'diamonds': 'الماس',
       'online': 'متصل',
@@ -252,7 +252,7 @@ class AppLanguage {
       'coins': 'العملات',
       'recharge': 'إعادة الشحن',
       'welcome_to_partychat': 'مرحباً بك في PartyChat',
-      'chat_play_make_friends': 'دردش - العب - كوّن صداقات',
+      'chat_play_make_friends': 'دردش • العب • كوّن صداقات',
       'change_profile_photo': 'تغيير صورة الملف الشخصي',
       'choose_avatar': 'اختر الصورة الرمزية',
       'change_username': 'تغيير اسم المستخدم',
@@ -266,58 +266,58 @@ class AppLanguage {
       'private_account': 'حساب خاص',
     },
     'Bengali': {
-      'settings': 'à¦¸à§‡à¦Ÿà¦¿à¦‚à¦¸',
-      'language': 'à¦­à¦¾à¦·à¦¾',
-      'privacy': 'à¦—à§‹à¦ªà¦¨à§€à¦¯à¦¼à¦¤à¦¾',
-      'notifications': 'à¦¨à§‹à¦Ÿà¦¿à¦«à¦¿à¦-à§‡à¦¶à¦¨',
-      'messages': 'à¦¬à¦¾à¦°à§à¦¤à¦¾',
-      'announcements': 'à¦˜à§‹à¦·à¦£à¦¾',
-      'friends': 'à¦¬à¦¨à§à¦§à§à¦°à¦¾',
-      'gifts': 'à¦‰à¦ªà¦¹à¦¾à¦°',
-      'blocked_users': 'à¦¬à§à¦²à¦- à¦-à¦°à¦¾ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦°à¦-à¦¾à¦°à§€',
-      'home': 'à¦¹à§‹à¦®',
-      'rooms': 'à¦°à§à¦®',
-      'games': 'à¦—à§‡à¦®à¦¸',
-      'wallet': 'à¦“à¦¯à¦¼à¦¾à¦²à§‡à¦Ÿ',
-      'profile': 'à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦²',
-      'join': 'à¦¯à§‹à¦— à¦¦à¦¿à¦¨',
-      'login': 'à¦²à¦—à¦‡à¦¨',
-      'create_account': 'à¦…à§à¦¯à¦¾à¦-à¦¾à¦‰à¦¨à§à¦Ÿ à¦¤à§ˆà¦°à¦¿ à¦-à¦°à§à¦¨',
-      'get_started': 'à¦¶à§à¦°à§ à¦-à¦°à§à¦¨',
-      'username': 'à¦‡à¦‰à¦œà¦¾à¦°à¦¨à§‡à¦®',
-      'email': 'à¦‡à¦®à§‡à¦‡à¦²',
-      'password': 'à¦ªà¦¾à¦¸à¦“à¦¯à¦¼à¦¾à¦°à§à¦¡',
-      'welcome': 'à¦¸à§à¦¬à¦¾à¦—à¦¤à¦®',
-      'welcome_back': 'à¦†à¦¬à¦¾à¦° à¦¸à§à¦¬à¦¾à¦—à¦¤à¦®',
-      'chat_rooms': 'à¦šà§à¦¯à¦¾à¦Ÿ à¦°à§à¦®',
-      'popular_rooms': 'জনপ্রিয় রুম ',
-      'your_balance': 'à¦†à¦ªà¦¨à¦¾à¦° à¦¬à§à¦¯à¦¾à¦²à§‡à¦¨à§à¦¸',
-      'diamonds': 'à¦¡à¦¾à¦¯à¦¼à¦®à¦¨à§à¦¡',
-      'online': 'à¦…à¦¨à¦²à¦¾à¦‡à¦¨',
-      'account': 'à¦…à§à¦¯à¦¾à¦-à¦¾à¦‰à¦¨à§à¦Ÿ',
-      'help_center': 'à¦¹à§‡à¦²à§à¦ª à¦¸à§‡à¦¨à§à¦Ÿà¦¾à¦°',
-      'logout': 'à¦²à¦—à¦†à¦‰à¦Ÿ',
-      'privacy_settings': 'à¦—à§‹à¦ªà¦¨à§€à¦¯à¦¼à¦¤à¦¾',
-      'friend_requests': 'à¦¬à¦¨à§à¦§à§à¦¤à§à¦¬à§‡à¦° à¦…à¦¨à§à¦°à§‹à¦§',
-      'room_invites': 'à¦°à§à¦® à¦†à¦®à¦¨à§à¦¤à§à¦°à¦£',
-      'friend_messages': 'à¦¬à¦¨à§à¦§à§à¦° à¦¬à¦¾à¦°à§à¦¤à¦¾',
-      'my_gifts': 'à¦†à¦®à¦¾à¦° à¦‰à¦ªà¦¹à¦¾à¦°',
-      'transaction_history': 'à¦²à§‡à¦¨à¦¦à§‡à¦¨à§‡à¦° à¦‡à¦¤à¦¿à¦¹à¦¾à¦¸',
-      'coins': 'à¦-à¦¯à¦¼à§‡à¦¨',
-      'recharge': 'à¦°à¦¿à¦šà¦¾à¦°à§à¦œ',
-      'welcome_to_partychat': 'PartyChat-à¦ à¦¸à§à¦¬à¦¾à¦—à¦¤à¦®',
-      'chat_play_make_friends': 'চ্যাট - খেলুন - বন্ধু বানান',
-      'change_profile_photo': 'à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦›à¦¬à¦¿ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦-à¦°à§à¦¨',
-      'choose_avatar': 'à¦…à§à¦¯à¦¾à¦­à¦¾à¦Ÿà¦¾à¦° à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦-à¦°à§à¦¨',
-      'change_username': 'à¦‡à¦‰à¦œà¦¾à¦°à¦¨à§‡à¦® à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦-à¦°à§à¦¨',
-      'save': 'à¦¸à¦‚à¦°à¦-à§à¦·à¦£',
-      'cancel': 'à¦¬à¦¾à¦¤à¦¿à¦²',
-      'play_now': 'à¦à¦–à¦¨ à¦–à§‡à¦²à§à¦¨',
-      'my_wallet': 'à¦†à¦®à¦¾à¦° à¦“à¦¯à¦¼à¦¾à¦²à§‡à¦Ÿ',
-      'vip_level': 'VIP à¦²à§‡à¦­à§‡à¦² 3',
-      'online_status': 'à¦…à¦¨à¦²à¦¾à¦‡à¦¨ à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸',
-      'room_activity': 'à¦°à§à¦® à¦-à¦¾à¦°à§à¦¯à¦-à¦²à¦¾à¦ª',
-      'private_account': 'à¦ªà§à¦°à¦¾à¦‡à¦­à§‡à¦Ÿ à¦…à§à¦¯à¦¾à¦-à¦¾à¦‰à¦¨à§à¦Ÿ',
+      'settings': 'সেটিংস',
+      'language': 'ভাষা',
+      'privacy': 'গোপনীয়তা',
+      'notifications': 'নোটিফিকেশন',
+      'messages': 'বার্তা',
+      'announcements': 'ঘোষণা',
+      'friends': 'বন্ধুরা',
+      'gifts': 'উপহার',
+      'blocked_users': 'ব্লক করা ব্যবহারকারী',
+      'home': 'হোম',
+      'rooms': 'রুম',
+      'games': 'গেমস',
+      'wallet': 'ওয়ালেট',
+      'profile': 'প্রোফাইল',
+      'join': 'যোগ দিন',
+      'login': 'লগইন',
+      'create_account': 'অ্যাকাউন্ট তৈরি করুন',
+      'get_started': 'শুরু করুন',
+      'username': 'ইউজারনেম',
+      'email': 'ইমেইল',
+      'password': 'পাসওয়ার্ড',
+      'welcome': 'স্বাগতম',
+      'welcome_back': 'আবার স্বাগতম',
+      'chat_rooms': 'চ্যাট রুম',
+      'popular_rooms': 'জনপ্রিয় রুম 🔥',
+      'your_balance': 'আপনার ব্যালেন্স',
+      'diamonds': 'ডায়মন্ড',
+      'online': 'অনলাইন',
+      'account': 'অ্যাকাউন্ট',
+      'help_center': 'হেল্প সেন্টার',
+      'logout': 'লগআউট',
+      'privacy_settings': 'গোপনীয়তা',
+      'friend_requests': 'বন্ধুত্বের অনুরোধ',
+      'room_invites': 'রুম আমন্ত্রণ',
+      'friend_messages': 'বন্ধুর বার্তা',
+      'my_gifts': 'আমার উপহার',
+      'transaction_history': 'লেনদেনের ইতিহাস',
+      'coins': 'কয়েন',
+      'recharge': 'রিচার্জ',
+      'welcome_to_partychat': 'PartyChat-এ স্বাগতম',
+      'chat_play_make_friends': 'চ্যাট • খেলুন • বন্ধু বানান',
+      'change_profile_photo': 'প্রোফাইল ছবি পরিবর্তন করুন',
+      'choose_avatar': 'অ্যাভাটার নির্বাচন করুন',
+      'change_username': 'ইউজারনেম পরিবর্তন করুন',
+      'save': 'সংরক্ষণ',
+      'cancel': 'বাতিল',
+      'play_now': 'এখন খেলুন',
+      'my_wallet': 'আমার ওয়ালেট',
+      'vip_level': 'VIP লেভেল 3',
+      'online_status': 'অনলাইন স্ট্যাটাস',
+      'room_activity': 'রুম কার্যকলাপ',
+      'private_account': 'প্রাইভেট অ্যাকাউন্ট',
     },
     'Turkish': {
       'settings': 'Ayarlar',
@@ -344,7 +344,7 @@ class AppLanguage {
       'welcome': 'Hoş Geldiniz',
       'welcome_back': 'Tekrar hoş geldiniz',
       'chat_rooms': 'Sohbet Odaları',
-      'popular_rooms': 'Popüler Odalar ',
+      'popular_rooms': 'Popüler Odalar 🔥',
       'your_balance': 'Bakiyeniz',
       'diamonds': 'Elmaslar',
       'online': 'çevrimiçi',
@@ -360,7 +360,7 @@ class AppLanguage {
       'coins': 'Paralar',
       'recharge': 'Yükle',
       'welcome_to_partychat': 'PartyChat\'e Hoş Geldiniz',
-      'chat_play_make_friends': 'Sohbet - Oyna - Arkadaş Edin',
+      'chat_play_make_friends': 'Sohbet • Oyna • Arkadaş Edin',
       'change_profile_photo': 'Profil Fotoğrafını Değiştir',
       'choose_avatar': 'Avatar Seç',
       'change_username': 'Kullanıcı Adını Değiştir',
@@ -398,7 +398,7 @@ class AppLanguage {
       'welcome': 'Selamat Datang',
       'welcome_back': 'Selamat datang kembali',
       'chat_rooms': 'Ruang Chat',
-      'popular_rooms': 'Ruang Populer ',
+      'popular_rooms': 'Ruang Populer 🔥',
       'your_balance': 'Saldo Anda',
       'diamonds': 'Berlian',
       'online': 'online',
@@ -414,7 +414,7 @@ class AppLanguage {
       'coins': 'Koin',
       'recharge': 'Isi Ulang',
       'welcome_to_partychat': 'Selamat Datang di PartyChat',
-      'chat_play_make_friends': 'Chat - Main - Cari Teman',
+      'chat_play_make_friends': 'Chat • Main • Cari Teman',
       'change_profile_photo': 'Ubah Foto Profil',
       'choose_avatar': 'Pilih Avatar',
       'change_username': 'Ubah Nama Pengguna',
@@ -452,7 +452,7 @@ class AppLanguage {
       'welcome': 'Bienvenido',
       'welcome_back': 'Bienvenido de nuevo',
       'chat_rooms': 'Salas de chat',
-      'popular_rooms': 'Salas populares ',
+      'popular_rooms': 'Salas populares 🔥',
       'your_balance': 'Tu saldo',
       'diamonds': 'Diamantes',
       'online': 'en línea',
@@ -468,7 +468,7 @@ class AppLanguage {
       'coins': 'Monedas',
       'recharge': 'Recargar',
       'welcome_to_partychat': 'Bienvenido a PartyChat',
-      'chat_play_make_friends': 'Chatea - Juega - Haz amigos',
+      'chat_play_make_friends': 'Chatea • Juega • Haz amigos',
       'change_profile_photo': 'Cambiar foto de perfil',
       'choose_avatar': 'Elegir avatar',
       'change_username': 'Cambiar nombre de usuario',
@@ -506,7 +506,7 @@ class AppLanguage {
       'welcome': 'Bienvenue',
       'welcome_back': 'Bon retour',
       'chat_rooms': 'Salons de discussion',
-      'popular_rooms': 'Salons populaires ',
+      'popular_rooms': 'Salons populaires 🔥',
       'your_balance': 'Votre solde',
       'diamonds': 'Diamants',
       'online': 'en ligne',
@@ -522,7 +522,7 @@ class AppLanguage {
       'coins': 'Pièces',
       'recharge': 'Recharger',
       'welcome_to_partychat': 'Bienvenue sur PartyChat',
-      'chat_play_make_friends': 'Discutez - Jouez - Faites des amis',
+      'chat_play_make_friends': 'Discutez • Jouez • Faites des amis',
       'change_profile_photo': 'Changer la photo de profil',
       'choose_avatar': 'Choisir un avatar',
       'change_username': 'Changer le nom d’utilisateur',
@@ -550,7 +550,7 @@ class AppLanguage {
       'games': '游戏',
       'wallet': '钱包',
       'profile': '个人资料',
-      'join': 'åŠ å…¥',
+      'join': 'åŠ 入',
       'login': '登录',
       'create_account': '创建账号',
       'get_started': '开始',
@@ -560,7 +560,7 @@ class AppLanguage {
       'welcome': '欢迎',
       'welcome_back': '欢迎回来',
       'chat_rooms': '聊天房间',
-      'popular_rooms': '热门房间 ',
+      'popular_rooms': '热门房间 🔥',
       'your_balance': '您的余额',
       'diamonds': '钻石',
       'online': '在线',
@@ -576,7 +576,7 @@ class AppLanguage {
       'coins': '金币',
       'recharge': '充值',
       'welcome_to_partychat': '欢迎来到 PartyChat',
-      'chat_play_make_friends': '聊天 - 游戏 - 交朋友',
+      'chat_play_make_friends': '聊天 • 游戏 • 交朋友',
       'change_profile_photo': '更换头像照片',
       'choose_avatar': '选择头像',
       'change_username': '更改用户名',
@@ -900,7 +900,7 @@ class PartyChatData {
     final clean = text.trim();
     if (clean.isEmpty) return;
     if (await isBlockedEither(fromUid, toUid)) {
-      throw Exception('Messages are blocked.');
+      throw Exception('Messaging is blocked.');
     }
 
     final id = chatId(fromUid, toUid);
@@ -920,7 +920,7 @@ class PartyChatData {
       'otherUid': fromUid,
       'lastMessage': clean,
       'lastMessageAt': FieldValue.serverTimestamp(),
-    };
+          };
     await userDoc(toUid).collection('chats').doc(id).set({
       ...summary,
       'otherUid': fromUid,
@@ -995,7 +995,7 @@ class PartyChatData {
     await ProfileUnreadService.createNotification(
       uid: toUid,
       type: 'gifts',
-      title: 'New Gift ',
+      title: 'New Gift 🎁',
       message: '${sender['name'] ?? 'Party User'} sent you $giftName.',
       actorUid: fromUid,
       actorName: sender['name'] ?? 'Party User',
@@ -1004,8 +1004,8 @@ class PartyChatData {
     await ProfileUnreadService.createNotification(
       uid: fromUid,
       type: 'myGifts',
-      title: 'Gift Sent ',
-      message: 'Aapne $giftName successfully bheja.',
+      title: 'Gift Sent 🎁',
+      message: 'You sent $giftName successfully.',
       actorUid: toUid,
       actorName: receiver['name'] ?? 'Party User',
       actorPhoto: receiver['photoURL'] ?? '',
@@ -1019,7 +1019,7 @@ class PartyChatData {
     required String roomTitle,
   }) async {
     if (await isBlockedEither(fromUid, toUid)) {
-      throw Exception('Invite blocked hai.');
+      throw Exception('Invites are blocked.');
     }
     final fromData = await userData(fromUid) ?? {};
     final inviteRef = userDoc(toUid).collection('roomInvites').doc();
@@ -1036,7 +1036,7 @@ class PartyChatData {
       uid: toUid,
       type: 'roomInvites',
       title: 'Room Invite',
-      message: '${fromData['name'] ?? 'Party User'} ne aapko room invite bheja.',
+      message: '${fromData['name'] ?? 'Party User'} sent you a room invitation.',
       actorUid: fromUid,
       actorName: fromData['name'] ?? 'Party User',
       actorPhoto: fromData['photoURL'] ?? '',
@@ -1513,7 +1513,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Email aur password required hain.',
+            'Email and password are required.',
           ),
         ),
       );
@@ -1524,7 +1524,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Username 3 se 20 characters ka hona chahiye.',
+            'Username must be 3 to 20 characters long.',
           ),
         ),
       );
@@ -1917,11 +1917,11 @@ class HomeTab extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: 22),
-          Row(children: [const Expanded(child: Text('Popular Rooms ', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900))), Text('See All ›', style: TextStyle(color: Color(0xFFFF5DE0), fontWeight: FontWeight.w700))]),
+          Row(children: [const Expanded(child: Text('Popular Rooms 🔥', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900))), Text('See All ›', style: TextStyle(color: Color(0xFFFF5DE0), fontWeight: FontWeight.w700))]),
           const SizedBox(height: 12),
-          const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Chat - Friends - Fun'),
-          const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Games - Challenge - Win'),
-          const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music - Vibes - Party'),
+          const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Chat • Friends • Fun'),
+          const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Games • Challenge • Win'),
+          const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music • Vibes • Party'),
           const SizedBox(height: 10),
           _NeonPanel(
             padding: EdgeInsets.zero,
@@ -1953,7 +1953,7 @@ class RoomsTab extends StatelessWidget {
           const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
           const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
           const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
-          const RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax - Talk - Be Yourself'),
+          const RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax • Talk • Be Yourself'),
           const RoomTile('Love Corner 💕', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
         ],
       ),
@@ -1971,7 +1971,7 @@ class RoomTile extends StatelessWidget {
   final IconData icon;
   final String subtitle;
 
-  const RoomTile(this.title, this.online, this.icon, {super.key, this.subtitle = 'Chat - Friends - Fun'});
+  const RoomTile(this.title, this.online, this.icon, {super.key, this.subtitle = 'Chat • Friends • Fun'});
 
   @override
   Widget build(BuildContext context) {
@@ -2209,7 +2209,7 @@ class RoomInviteFriendsPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snapshot.data!.docs;
-          if (docs.isEmpty) return const Center(child: Text('Pehle friends add karein.'));
+          if (docs.isEmpty) return const Center(child: Text('Add friends first.'));
           return ListView.builder(
             itemCount: docs.length,
             itemBuilder: (context, index) {
@@ -2231,7 +2231,7 @@ class RoomInviteFriendsPage extends StatelessWidget {
                         roomTitle: roomTitle,
                       );
                       if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Room invite bhej diya 👍')),
+                        const SnackBar(content: Text('Room invitation sent successfully.')),
                       );
                     } catch (e) {
                       if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
@@ -2304,12 +2304,20 @@ class WalletTab extends StatelessWidget {
           _NeonPanel(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('Coins', style: TextStyle(color: Colors.white70)),
             const SizedBox(height: 3),
-            Row(children: [const Text('12,580', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Color(0xFFFFC107))), const SizedBox(width: 8), const Text('Coins', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFFFFC107)))]),
+            Row(children: [
+              const Text('12,580', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Color(0xFFFFC107))),
+              const SizedBox(width: 8),
+              const Icon(Icons.monetization_on, color: Color(0xFFFFC107), size: 28),
+            ]),
             const SizedBox(height: 6),
-            const Text('2,450 Diamonds', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF4DD0E1))),
+            const Row(children: [
+              Text('2,450', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF29B6F6))),
+              SizedBox(width: 6),
+              Text('Diamonds', style: TextStyle(fontSize: 17, color: Color(0xFF29B6F6))),
+            ]),
           ])),
           const SizedBox(height: 14),
-          SizedBox(width: double.infinity, child: _NeonAction(label: 'Recharge', onPressed: () {})),
+          SizedBox(width: double.infinity, child: _NeonAction(label: '＋  Recharge', onPressed: () {})),
           const SizedBox(height: 10),
           OutlinedButton.icon(style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), side: const BorderSide(color: Color(0xFFB65CFF))), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TransactionHistoryPage())), icon: const Icon(Icons.history), label: const Text('Transaction History', style: TextStyle(fontWeight: FontWeight.w800))),
           const SizedBox(height: 18),
@@ -2317,8 +2325,6 @@ class WalletTab extends StatelessWidget {
           const SizedBox(height: 10),
           Row(children: [
             Expanded(child: _walletAction(Icons.add_card, 'Top Up')),
-            const SizedBox(width: 8),
-            const SizedBox(width: 8),
             const SizedBox(width: 8),
             Expanded(child: _walletAction(Icons.history, 'History')),
           ]),
@@ -2463,7 +2469,7 @@ Future<void> ensureUserId() async {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Photo size zyada hai. Choti photo select karein.',
+            'Photo is too large. Please select a smaller photo.',
           ),
         ),
       );
@@ -2487,7 +2493,7 @@ Future<void> ensureUserId() async {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Profile photo save ho gayi 👍',
+            'Profile photo saved successfully.',
           ),
         ),
       );
@@ -2497,7 +2503,7 @@ Future<void> ensureUserId() async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Photo save nahi hui: $e',
+            'Photo could not be saved: $e',
           ),
         ),
       );
@@ -2600,7 +2606,7 @@ Future<void> ensureUserId() async {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Avatar save ho gaya 👍',
+            'Avatar saved successfully.',
           ),
         ),
       );
@@ -2610,7 +2616,7 @@ Future<void> ensureUserId() async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Avatar save nahi hua: $e',
+            'Avatar could not be saved: $e',
           ),
         ),
       );
@@ -2656,7 +2662,7 @@ Future<void> ensureUserId() async {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                        'Username 3 se 20 characters ka hona chahiye.',
+                        'Username must be 3 to 20 characters long.',
                       ),
                     ),
                   );
@@ -2688,7 +2694,7 @@ Future<void> ensureUserId() async {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'Username dobara change karne ke liye $hours hours $minutes minutes wait karein.',
+                            'Please wait $hours hours $minutes minutes before changing your username again.',
                           ),
                         ),
                       );
@@ -2721,7 +2727,7 @@ Future<void> ensureUserId() async {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                        'Username save ho gaya 👍',
+                        'Username saved successfully.',
                       ),
                     ),
                   );
@@ -2731,7 +2737,7 @@ Future<void> ensureUserId() async {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'Username save nahi hua: $e',
+                        'Username could not be saved: $e',
                       ),
                     ),
                   );
@@ -2762,6 +2768,7 @@ Future<void> ensureUserId() async {
         unreadKey,
       );
     }
+
     if (!context.mounted) return;
 
     Navigator.push(
@@ -2947,7 +2954,7 @@ class FriendRequestsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Requests load nahi ho sakin.'));
+          if (snapshot.hasError) return const Center(child: Text('Could not load friend requests.'));
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friend requests yet.'));
@@ -3012,7 +3019,7 @@ class RoomInvitesPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Invites load nahi ho sakin.'));
+          if (snapshot.hasError) return const Center(child: Text('Could not load room invites.'));
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No room invites yet.'));
@@ -3065,7 +3072,7 @@ class FriendMessagesPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.orderBy('lastMessageAt', descending: true).snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Chats load nahi ho sakin.'));
+          if (snapshot.hasError) return const Center(child: Text('Could not load chats.'));
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No messages yet.'));
@@ -3120,7 +3127,7 @@ class GiftsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Gifts load nahi ho sakin.'));
+          if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No gifts yet.'));
@@ -3131,7 +3138,7 @@ class GiftsPage extends StatelessWidget {
               return ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.card_giftcard)),
                 title: Text(d['giftName'] ?? 'Gift'),
-                subtitle: Text('From: ${d['senderName'] ?? 'Party User'} - ${d['cost'] ?? 0} coins'),
+                subtitle: Text('From: ${d['senderName'] ?? 'Party User'} • ${d['cost'] ?? 0} coins'),
               );
             },
           );
@@ -3159,7 +3166,7 @@ class MyGiftsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Gifts load nahi ho sakin.'));
+          if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Your sent gifts will appear here.'));
@@ -3170,7 +3177,7 @@ class MyGiftsPage extends StatelessWidget {
               return ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.card_giftcard)),
                 title: Text(d['giftName'] ?? 'Gift'),
-                subtitle: Text('To: ${d['receiverName'] ?? 'Party User'} - ${d['cost'] ?? 0} coins'),
+                subtitle: Text('To: ${d['receiverName'] ?? 'Party User'} • ${d['cost'] ?? 0} coins'),
               );
             },
           );
@@ -3224,7 +3231,7 @@ class _FriendsPageState extends State<FriendsPage> {
         child: SizedBox(
           height: MediaQuery.of(context).size.height * .65,
           child: matches.isEmpty
-              ? const Center(child: Text('Koi user nahi mila.'))
+              ? const Center(child: Text('No users found.'))
               : ListView.builder(
                   itemCount: matches.length,
                   itemBuilder: (context, index) {
@@ -3247,7 +3254,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Friend request bhej di 👍')),
+                                const SnackBar(content: Text('Friend request sent successfully.')),
                               );
                             }
                           } catch (e) {
@@ -3287,7 +3294,7 @@ class _FriendsPageState extends State<FriendsPage> {
                   content: TextField(
                     controller: searchController,
                     decoration: const InputDecoration(
-                      hintText: 'Name ya email search karein',
+                      hintText: 'Search by name or email',
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (v) => query = v,
@@ -3307,7 +3314,7 @@ class _FriendsPageState extends State<FriendsPage> {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: friendsRef.snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Friends load nahi ho sake.'));
+          if (snapshot.hasError) return const Center(child: Text('Could not load friends.'));
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friends yet. Find friends with the + button.'));
@@ -3379,7 +3386,7 @@ class _FriendsPageState extends State<FriendsPage> {
                   );
                   if (context.mounted) {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gift bhej diya ')));
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gift sent successfully.')));
                   }
                 } catch (e) {
                   if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
@@ -3444,7 +3451,7 @@ class _ChatPageState extends State<ChatPage> {
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: ref.orderBy('createdAt', descending: false).snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasError) return const Center(child: Text('Messages load nahi ho sake.'));
+                if (snapshot.hasError) return const Center(child: Text('Could not load messages.'));
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('Say hello 👋'));
@@ -3681,7 +3688,7 @@ class AccountPage extends StatelessWidget {
     if (user == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(
+                    title: Text(
             AppLanguage.text('account'),
           ),
         ),
@@ -4523,7 +4530,7 @@ class BlockedUsersPage extends StatelessWidget {
                   onPressed: () async {
                     await PartyChatData.unblockUser(user.uid, doc.id);
                     if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('User unblocked.')),
+                      const SnackBar(content: Text('User unblock kar diya.')),
                     );
                   },
                   child: const Text('Unblock'),
@@ -4604,3 +4611,5 @@ class TransactionHistoryPage
     );
   }
 }
+
+
