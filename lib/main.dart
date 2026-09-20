@@ -2075,7 +2075,7 @@ class _RoomPageState extends State<RoomPage> {
     }
 
     try {
-      await ZegoUIKit().turnMicrophoneOn(
+      ZegoUIKit().turnMicrophoneOn(
         next,
         userID: widget.userId,
       );
