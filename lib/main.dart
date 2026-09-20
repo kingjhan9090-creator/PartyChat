@@ -1942,26 +1942,727 @@ class RoomsTab extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          const Text('Rooms', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
+          const Text(
+            'Rooms',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+
           const SizedBox(height: 14),
-          TextField(decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: 'Search rooms...', suffixIcon: const Icon(Icons.tune))),
-          const SizedBox(height: 14),
-          SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
-            _chip('All', true), _chip('Friends', false), _chip('Gaming', false), _chip('Music', false), _chip('Fun', false),
-          ])),
-          const SizedBox(height: 16),
-          const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
-          const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
-          const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
-          const RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax • Talk • Be Yourself'),
-          const RoomTile('Love Corner 💕', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
+
+          TextField(
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: 'Search rooms...',
+              suffixIcon: const Icon(Icons.tune),
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // =====================================================
+          // MAIN ROOM OPTIONS
+          // =====================================================
+
+          Row(
+            children: [
+              Expanded(
+                child: _roomMainButton(
+                  context,
+                  'All Rooms',
+                  Icons.public,
+                  false,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _roomMainButton(
+                  context,
+                  'Popular Rooms',
+                  Icons.local_fire_department,
+                  true,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            children: [
+              Expanded(
+                child: _roomMainButton(
+                  context,
+                  'New Rooms',
+                  Icons.fiber_new,
+                  false,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _roomMainButton(
+                  context,
+                  'Your Room',
+                  Icons.meeting_room,
+                  false,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // =====================================================
+          // ALL ROOMS
+          // =====================================================
+
+          const Text(
+            'All Rooms',
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          const RoomTile(
+            'Friends Forever 💜',
+            '2.4K online',
+            Icons.people,
+            subtitle: 'Make new friends & enjoy chat',
+          ),
+
+          const RoomTile(
+            'Gaming Zone 🎮',
+            '1.8K online',
+            Icons.games,
+            subtitle: 'Play games & win rewards',
+          ),
+
+          const RoomTile(
+            'Music Lovers 🎵',
+            '1.2K online',
+            Icons.music_note,
+            subtitle: 'Music, Vibes & Party',
+          ),
+
+          const RoomTile(
+            'Chill Zone 🌙',
+            '980 online',
+            Icons.nightlight_round,
+            subtitle: 'Relax • Talk • Be Yourself',
+          ),
+
+          const RoomTile(
+            'Love Corner 💕',
+            '756 online',
+            Icons.favorite,
+            subtitle: 'Sweet talks & more',
+          ),
+
+          const SizedBox(height: 12),
+
+          // =====================================================
+          // YOUR ROOM
+          // =====================================================
+
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const YourRoomPage(),
+                ),
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 28,
+              ),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF171126),
+                    Color(0xFF0D0917),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: const Color(0xFF8B42FF),
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x553F00FF),
+                    blurRadius: 18,
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF7138FF),
+                          Color(0xFFE52DD4),
+                        ],
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x665B1CFF),
+                          blurRadius: 16,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.meeting_room,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+
+                  const SizedBox(width: 15),
+
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your Room',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'My Room • Recently Joined • Joined Rooms • With Friends',
+                          style: TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white70,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _chip(String text, bool selected) {
-    return Container(margin: const EdgeInsets.only(right: 8), padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 9), decoration: BoxDecoration(gradient: selected ? const LinearGradient(colors: [Color(0xFF7338FF), Color(0xFFE52DD4)]) : null, color: selected ? null : const Color(0xFF171125), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFF51317B))), child: Text(text, style: const TextStyle(fontWeight: FontWeight.w800)));
+  Widget _roomMainButton(
+    BuildContext context,
+    String title,
+    IconData icon,
+    bool highlighted,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        if (title == 'Popular Rooms') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const PopularRoomsPage(),
+            ),
+          );
+        } else if (title == 'New Rooms') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const NewRoomsPage(),
+            ),
+          );
+        } else if (title == 'Your Room') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const YourRoomPage(),
+            ),
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 15,
+        ),
+        decoration: BoxDecoration(
+          gradient: highlighted
+              ? const LinearGradient(
+                  colors: [
+                    Color(0xFF7138FF),
+                    Color(0xFFE52DD4),
+                  ],
+                )
+              : null,
+          color: highlighted
+              ? null
+              : const Color(0xFF171125),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF7138FF),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
+            ),
+            const SizedBox(height: 7),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ============================================================
+// POPULAR ROOMS PAGE
+// ============================================================
+
+class PopularRoomsPage extends StatelessWidget {
+  const PopularRoomsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Popular Rooms'),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 30),
+          children: const [
+            RoomTile(
+              'Friends Forever 💜',
+              '2.4K online',
+              Icons.people,
+              subtitle: 'Popular • Active • Gifting',
+            ),
+            RoomTile(
+              'Gaming Zone 🎮',
+              '1.8K online',
+              Icons.games,
+              subtitle: 'Popular gaming room',
+            ),
+            RoomTile(
+              'Music Lovers 🎵',
+              '1.2K online',
+              Icons.music_note,
+              subtitle: 'Music • Vibes • Party',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ============================================================
+// NEW ROOMS PAGE
+// ============================================================
+
+class NewRoomsPage extends StatelessWidget {
+  const NewRoomsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('New Rooms'),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 30),
+          children: const [
+            RoomTile(
+              'New Friends Room',
+              '24 online',
+              Icons.people_outline,
+              subtitle: 'New room',
+            ),
+            RoomTile(
+              'New Gaming Room',
+              '18 online',
+              Icons.games_outlined,
+              subtitle: 'New room',
+            ),
+            RoomTile(
+              'New Music Room',
+              '12 online',
+              Icons.music_note,
+              subtitle: 'New room',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ============================================================
+// YOUR ROOM PAGE
+// ============================================================
+
+class YourRoomPage extends StatelessWidget {
+  const YourRoomPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Your Room'),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 30),
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _yourRoomTab(
+                    context,
+                    'My Room',
+                    Icons.home_work,
+                    const MyRoomPage(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _yourRoomTab(
+                    context,
+                    'Recently Joined',
+                    Icons.history,
+                    const RecentlyJoinedRoomsPage(),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _yourRoomTab(
+                    context,
+                    'Joined Rooms',
+                    Icons.login,
+                    const JoinedRoomsPage(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _yourRoomTab(
+                    context,
+                    'With Friends',
+                    Icons.people,
+                    const FriendRoomsPage(),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'My Room',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MyRoomPage(),
+                  ),
+                );
+              },
+              child: Container(
+                height: 170,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF171126),
+                      Color(0xFF0D0917),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: const Color(0xFF7138FF),
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x553F00FF),
+                      blurRadius: 20,
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.meeting_room,
+                        size: 52,
+                        color: Color(0xFFD65CFF),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'My Room',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'Open your room',
+                        style: TextStyle(
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _yourRoomTab(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Widget page,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => page,
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 14,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF171125),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF51317B),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: const Color(0xFFD65CFF),
+              size: 23,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ============================================================
+// MY ROOM
+// ============================================================
+
+class MyRoomPage extends StatelessWidget {
+  const MyRoomPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Room'),
+      ),
+      body: _NeonBackground(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: _NeonPanel(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.meeting_room,
+                    size: 60,
+                    color: Color(0xFFD65CFF),
+                  ),
+                  const SizedBox(height: 15),
+                  const Text(
+                    'My Room',
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Your created room will appear here.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+// ============================================================
+// RECENTLY JOINED
+// ============================================================
+
+class RecentlyJoinedRoomsPage extends StatelessWidget {
+  const RecentlyJoinedRoomsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recently Joined'),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(18),
+          children: const [
+            RoomTile(
+              'Friends Forever 💜',
+              '2.4K online',
+              Icons.people,
+              subtitle: 'Recently joined',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ============================================================
+// JOINED ROOMS
+// ============================================================
+
+class JoinedRoomsPage extends StatelessWidget {
+  const JoinedRoomsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Joined Rooms'),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(18),
+          children: const [
+            RoomTile(
+              'Gaming Zone 🎮',
+              '1.8K online',
+              Icons.games,
+              subtitle: 'Joined room',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ============================================================
+// WITH FRIENDS
+// ============================================================
+
+class FriendRoomsPage extends StatelessWidget {
+  const FriendRoomsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('With Friends'),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(18),
+          children: const [
+            RoomTile(
+              'Friends Forever 💜',
+              '2.4K online',
+              Icons.people,
+              subtitle: 'Your friends are here',
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
