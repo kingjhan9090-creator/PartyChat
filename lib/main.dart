@@ -2358,16 +2358,40 @@ class _ProfileTabState extends State<ProfileTab> {
   };
 
   @override
-  void initState() {
-    super.initState();
+void initState() {
+  super.initState();
 
-    final user = FirebaseAuth.instance.currentUser;
+  final user = FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      ProfileUnreadService.ensure(user.uid);
-    }
+  if (user != null) {
+    ProfileUnreadService.ensure(user.uid);
+    ensureUserId();
   }
+}
 
+Future<void> ensureUserId() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  final userDoc =
+      FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+  final snapshot = await userDoc.get();
+  final data = snapshot.data();
+
+  if (data == null || data['userId'] != null) return;
+
+  final random = Random();
+  final newUserId =
+      (100000 + random.nextInt(900000)).toString();
+
+  await userDoc.set(
+    {'userId': newUserId},
+    SetOptions(merge: true),
+  );
+}
+
+  
   ImageProvider<Object>? _imageProvider(
     Map<String, dynamic>? data,
   ) {
