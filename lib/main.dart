@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:zego_uikit/zego_uikit.dart';
 import 'package:zego_uikit_prebuilt_live_audio_room/zego_uikit_prebuilt_live_audio_room.dart';
 
@@ -1470,6 +1472,24 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool signup = false;
+  Future<String> generateUniqueUserId() async {
+  final random = Random();
+  final usersRef = FirebaseFirestore.instance.collection('users');
+
+  while (true) {
+    final userId =
+        (100000 + random.nextInt(900000)).toString();
+
+    final existing = await usersRef
+        .where('userId', isEqualTo: userId)
+        .limit(1)
+        .get();
+
+    if (existing.docs.isEmpty) {
+      return userId;
+    }
+  }
+  }
   bool obscurePassword = true;
 
   final nameController = TextEditingController();
@@ -1524,6 +1544,7 @@ class _LoginPageState extends State<LoginPage> {
         final user = credential.user;
 
         if (user != null) {
+          final userId = await generateUniqueUserId();
           await user.updateDisplayName(name);
 
           await FirebaseFirestore.instance
@@ -1533,6 +1554,7 @@ class _LoginPageState extends State<LoginPage> {
             {
               'name': name,
               'email': email,
+              'userId': userId,
               'photoURL': '',
               'language': AppLanguage.current.value,
               'coins': 12580,
@@ -2789,8 +2811,64 @@ class _ProfileTabState extends State<ProfileTab> {
                 builder: (context, snapshot) {
                   final data = snapshot.data?.data();
                   final name = data?['name'] as String? ?? user.displayName ?? 'PartyChat User';
-                  return Column(children: [Text('$name ðŸ‘‘', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)), const SizedBox(height: 5), const Text('VIP Level 3', style: TextStyle(color: Color(0xFFFFD15C), fontWeight: FontWeight.w900))]);
-                },
+                 return Column(
+  children: [
+    Text(
+      '$name 👑',
+      style: const TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w900,
+      ),
+    ),
+    const SizedBox(height: 5),
+    Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'ID: ${data?['userId'] ?? '------'}',
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 5),
+        GestureDetector(
+          onTap: () async {
+            final id = data?['userId']?.toString();
+
+            if (id == null || id.isEmpty) return;
+
+            await Clipboard.setData(
+              ClipboardData(text: id),
+            );
+
+            if (!context.mounted) return;
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('User ID copied'),
+              ),
+            );
+          },
+          child: const Icon(
+            Icons.copy,
+            size: 16,
+            color: Colors.white70,
+          ),
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    const Text(
+      'VIP Level 3',
+      style: TextStyle(
+        color: Color(0xFFFFD15C),
+        fontWeight: FontWeight.w900,
+      ),
+    ),
+  ],
+);
               ),
               const SizedBox(height: 14),
               Wrap(spacing: 10, runSpacing: 10, alignment: WrapAlignment.center, children: [
