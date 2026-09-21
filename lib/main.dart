@@ -2493,11 +2493,32 @@ class _RoomsTabState extends State<RoomsTab> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          const Text(
-            'Rooms',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Rooms',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Search',
+                icon: const Icon(Icons.search_rounded, size: 28),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PartyChatSearchPage(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           _buildMainTabs(),
           if (selectedMainTab == 3) ...[
             const SizedBox(height: 14),
@@ -2552,7 +2573,6 @@ class _RoomsTabState extends State<RoomsTab> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: List.generate(myRoomTabs.length, (index) {
-          final selected = selectedMyRoomTab == index;
           return Padding(
             padding: EdgeInsets.only(right: index == myRoomTabs.length - 1 ? 0 : 8),
             child: GestureDetector(
@@ -3372,27 +3392,33 @@ class GamesTab extends StatelessWidget {
   static const List<Map<String, String>> games = [
     {
       'title': 'Ludo',
-      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Ludo_board_game.jpg',
+      'tag': 'BOARD',
+      'image':
+          'https://commons.wikimedia.org/wiki/Special:FilePath/Ludo_board(1).png',
     },
     {
       'title': 'Carrom',
-      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Carrom_board.jpg',
+      'tag': 'CLASSIC',
+      'image':
+          'https://commons.wikimedia.org/wiki/Special:FilePath/Carrom_board.jpg',
     },
     {
       'title': '8 Ball Pool',
-      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/8ballpool.jpg',
+      'tag': 'POOL',
+      'image':
+          'https://opengameart.org/sites/default/files/pool_table_complete_12-02-2016.png',
     },
     {
       'title': 'Quiz',
-      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Quiz_competition_image.jpg',
+      'tag': 'TRIVIA',
+      'image':
+          'https://commons.wikimedia.org/wiki/Special:FilePath/Quiz_competition_image.jpg',
     },
     {
       'title': 'Bubble Shooter',
-      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Bubbles_game.JPG',
-    },
-    {
-      'title': 'More Games',
-      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Balloons_Colorful_Shooting_Gallery_Folk_Festival.jpg',
+      'tag': 'ARCADE',
+      'image':
+          'https://commons.wikimedia.org/wiki/Special:FilePath/Bubbles_game.JPG',
     },
   ];
 
@@ -3400,18 +3426,19 @@ class GamesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return _NeonBackground(
       child: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(18, 22, 18, 100),
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 100),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: .88,
+          childAspectRatio: .82,
         ),
         itemCount: games.length,
         itemBuilder: (context, index) {
           final game = games[index];
           return GameCard(
             title: game['title']!,
+            tag: game['tag']!,
             imageUrl: game['image']!,
           );
         },
@@ -3422,33 +3449,137 @@ class GamesTab extends StatelessWidget {
 
 class GameCard extends StatelessWidget {
   final String title;
+  final String tag;
   final String imageUrl;
 
   const GameCard({
     super.key,
     required this.title,
+    required this.tag,
     required this.imageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
-    return _NeonPanel(
-      padding: EdgeInsets.zero,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF7138FF), width: 1.1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x551F00FF),
+            blurRadius: 18,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
+        borderRadius: BorderRadius.circular(19),
+        child: Material(
+          color: const Color(0xFF0E0918),
+          child: InkWell(
+            onTap: () {},
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF31145E),
+                            Color(0xFF120A20),
+                          ],
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.sports_esports,
+                        size: 54,
+                        color: Colors.white70,
+                      ),
+                    );
+                  },
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF25103F),
+                            Color(0xFF0E0918),
+                          ],
+                        ),
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    );
+                  },
+                ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x12000000),
+                        Color(0x33000000),
+                        Color(0xEE05030B),
+                      ],
+                      stops: [0.0, 0.48, 1.0],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xCC080510),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFB65CFF),
+                      ),
+                    ),
+                    child: Text(
+                      tag,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 36,
+                        height: 36,
                         decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
                           gradient: LinearGradient(
                             colors: [
                               Color(0xFF7138FF),
@@ -3457,76 +3588,23 @@ class GameCard extends StatelessWidget {
                           ),
                         ),
                         child: const Icon(
-                          Icons.sports_esports,
-                          size: 48,
+                          Icons.play_arrow_rounded,
                           color: Colors.white,
-                        ),
-                      );
-                    },
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF24103B),
-                              Color(0xFF120A20),
-                            ],
-                          ),
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    },
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(10, 24, 10, 10),
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Color(0xCC05030B),
-                          ],
+                          size: 22,
                         ),
                       ),
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 9, 10, 11),
-              child: Text(
-                AppLanguage.text('play_now'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFFD6B9FF),
-                  fontWeight: FontWeight.w700,
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
+
 
 class WalletTab extends StatelessWidget {
   const WalletTab({super.key});
@@ -3783,7 +3861,8 @@ Future<void> ensureUserId() async {
 
                   return GestureDetector(
                     onTap: () {
-                      setDialogState(() {
+final selected = selectedMyRoomTab == index;
+                                       setDialogState(() {
                         tempSelected = avatar;
                       });
                     },
@@ -4186,156 +4265,126 @@ class FriendRequestsPage extends StatelessWidget {
 
     if (user == null) {
       return const Scaffold(
-        body: Center(
-          child: Text('Please login first.'),
-        ),
+        body: Center(child: Text('Please login first.')),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppLanguage.text('friend_requests'),
-        ),
+        title: Text(AppLanguage.text('friend_requests')),
       ),
-      body: StreamBuilder<
-          QuerySnapshot<Map<String, dynamic>>>(
-        stream: PartyChatData.friendRequestsStream(
-          user.uid,
-        ),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: PartyChatData.friendRequestsStream(user.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(
-              child: Text(
-                'Could not load friend requests.',
-              ),
+              child: Text('Could not load friend requests.'),
             );
           }
 
           if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           final docs = snapshot.data!.docs;
 
           if (docs.isEmpty) {
-            return const Center(
-              child: Text(
-                'No friend requests yet.',
-              ),
-            );
+            return const Center(child: Text('No friend requests yet.'));
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: docs.length,
             itemBuilder: (context, index) {
-              final data = docs[index].data();
-
+              final request = docs[index].data();
               final requesterUid =
-                  data['uid']?.toString() ??
-                      docs[index].id;
+                  request['requesterUid']?.toString() ??
+                  request['uid']?.toString() ??
+                  docs[index].id;
 
-              final name =
-                  data['name']?.toString() ??
-                      'Party User';
+              return FutureBuilder<Map<String, dynamic>?>(
+                future: PartyChatData.userData(requesterUid),
+                builder: (context, userSnapshot) {
+                  final latest = userSnapshot.data ?? request;
+                  final name =
+                      latest['name']?.toString() ?? 'Party User';
+                  final photo =
+                      latest['photoURL']?.toString() ?? '';
+                  final avatar =
+                      latest['avatar']?.toString() ?? '';
 
-              return ListTile(
-                leading: _NetworkOrAvatar(
-                  photoUrl:
-                      data['photoURL'] as String?,
-                  avatar:
-                      data['avatar'] as String?,
-                ),
-                title: Text(name),
-                subtitle: Text(
-                  'UID: $requesterUid',
-                ),
-                trailing: Wrap(
-                  children: [
-                    IconButton(
-                      tooltip: 'Accept',
-                      icon: const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                      ),
-                      onPressed: () async {
-                        try {
-                          await PartyChatData
-                              .acceptFriendRequest(
-                            uid: user.uid,
-                            requesterUid: requesterUid,
-                          );
-
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Friend request accepted.',
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  e.toString(),
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                      },
+                  return ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SimpleUserProfilePage(
+                            uid: requesterUid,
+                            name: name,
+                            photoUrl: photo,
+                            avatar: avatar,
+                          ),
+                        ),
+                      );
+                    },
+                    leading: _NetworkOrAvatar(
+                      photoUrl: photo,
+                      avatar: avatar,
                     ),
-                    IconButton(
-                      tooltip: 'Reject',
-                      icon: const Icon(
-                        Icons.cancel,
-                        color: Colors.red,
+                    title: Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
                       ),
-                      onPressed: () async {
-                        try {
-                          await PartyChatData
-                              .rejectFriendRequest(
-                            uid: user.uid,
-                            requesterUid: requesterUid,
-                          );
-
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Friend request rejected.',
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  e.toString(),
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                      },
                     ),
-                  ],
-                ),
+                    trailing: Wrap(
+                      children: [
+                        IconButton(
+                          tooltip: 'Accept',
+                          icon: const Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                          ),
+                          onPressed: () async {
+                            try {
+                              await PartyChatData.acceptFriendRequest(
+                                uid: user.uid,
+                                requesterUid: requesterUid,
+                              );
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                        IconButton(
+                          tooltip: 'Reject',
+                          icon: const Icon(
+                            Icons.cancel,
+                            color: Colors.redAccent,
+                          ),
+                          onPressed: () async {
+                            try {
+                              await PartyChatData.rejectFriendRequest(
+                                uid: user.uid,
+                                requesterUid: requesterUid,
+                              );
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
               );
             },
           );
@@ -4344,10 +4393,6 @@ class FriendRequestsPage extends StatelessWidget {
     );
   }
 }
-
-/* ============================================================
-   ROOM INVITES
-   ============================================================ */
 
 class RoomInvitesPage extends StatelessWidget {
   const RoomInvitesPage({super.key});
@@ -4538,311 +4583,537 @@ class MyGiftsPage extends StatelessWidget {
    FRIENDS + FIND FRIENDS
    ============================================================ */
 
-class FriendsPage extends StatefulWidget {
-  const FriendsPage({super.key});
+/* ============================================================
+   USER SEARCH + MINI PROFILE
+   ============================================================ */
+
+class PartyChatSearchPage extends StatefulWidget {
+  const PartyChatSearchPage({super.key});
 
   @override
-  State<FriendsPage> createState() => _FriendsPageState();
+  State<PartyChatSearchPage> createState() => _PartyChatSearchPageState();
 }
 
-class _FriendsPageState extends State<FriendsPage> {
-  final searchController = TextEditingController();
+class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
+  final controller = TextEditingController();
+  String? mode;
+  bool searching = false;
+  List<Map<String, dynamic>> userResults = [];
+  List<Map<String, String>> roomResults = [];
+  final Set<String> pendingRequests = <String>{};
+
+  static const List<Map<String, String>> rooms = [
+    {
+      'title': 'Friends Forever 💜',
+      'online': '2.4K online',
+      'subtitle': 'Make new friends & enjoy chat',
+    },
+    {
+      'title': 'Gaming Zone 🎮',
+      'online': '1.8K online',
+      'subtitle': 'Play games & enjoy together',
+    },
+    {
+      'title': 'Music Lovers 🎵',
+      'online': '1.2K online',
+      'subtitle': 'Music • Vibes • Party',
+    },
+    {
+      'title': 'Chill Zone 🌙',
+      'online': '980 online',
+      'subtitle': 'Relax • Talk • Be Yourself',
+    },
+  ];
 
   @override
   void dispose() {
-    searchController.dispose();
+    controller.dispose();
     super.dispose();
   }
 
-  Future<void> _findFriends() async {
-    final user = FirebaseAuth.instance.currentUser;
+  String get hint {
+    if (mode == 'uid') return 'Enter UID';
+    if (mode == 'name') return 'Enter Name';
+    return 'Enter Room Name';
+  }
 
-    if (user == null) return;
+  Future<void> _search() async {
+    final query = controller.text.trim().toLowerCase();
+    if (query.isEmpty) return;
 
-    final search = searchController.text.trim();
-
-    if (search.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter a UID or name.'),
-        ),
-      );
-      return;
-    }
+    setState(() {
+      searching = true;
+      userResults = [];
+      roomResults = [];
+    });
 
     try {
-      final matches =
-          await PartyChatData.searchUsersByName(search);
-
-      final uidMatch =
-          await PartyChatData.findUserByUid(search);
-
-      final users = <Map<String, dynamic>>[];
-
-      if (uidMatch != null) {
-        users.add(uidMatch);
-      }
-
-      for (final match in matches) {
-        final matchUid =
-            match['uid']?.toString();
-
-        if (matchUid == null) continue;
-
-        final alreadyAdded = users.any(
-          (item) =>
-              item['uid']?.toString() == matchUid,
-        );
-
-        if (!alreadyAdded) {
-          users.add(match);
+      if (mode == 'uid') {
+        final user = await PartyChatData.findUserByUid(query);
+        if (user != null) {
+          userResults = [user];
         }
+      } else if (mode == 'name') {
+        final users = await PartyChatData.searchUsersByName(query);
+        userResults = users.where((user) {
+          final name = user['name']?.toString().toLowerCase() ?? '';
+          return name.contains(query);
+        }).toList();
+      } else {
+        roomResults = rooms.where((room) {
+          final title = room['title']!.toLowerCase();
+          return title.contains(query);
+        }).toList();
       }
-
-      users.removeWhere(
-        (item) =>
-            item['uid']?.toString() == user.uid,
-      );
-
-      if (!mounted) return;
-
-      Navigator.pop(context);
-
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (_) {
-          return SafeArea(
-            child: SizedBox(
-              height:
-                  MediaQuery.of(context).size.height * .65,
-              child: users.isEmpty
-                  ? const Center(
-                      child: Text('No users found.'),
-                    )
-                  : ListView.builder(
-                      itemCount: users.length,
-                      itemBuilder: (context, index) {
-                        final data = users[index];
-
-                        final uid =
-                            data['uid']?.toString() ?? '';
-
-                        final name =
-                            data['name']?.toString() ??
-                                'Party User';
-
-                        final userId =
-                            data['userId']?.toString() ??
-                                uid;
-
-                        return ListTile(
-                          leading: _NetworkOrAvatar(
-                            photoUrl:
-                                data['photoURL'] as String?,
-                            avatar:
-                                data['avatar'] as String?,
-                          ),
-                          title: Text(name),
-                          subtitle: Text(
-                            'UID: $userId',
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(
-                              Icons.person_add,
-                            ),
-                            onPressed: () async {
-                              try {
-                                await PartyChatData
-                                    .sendFriendRequest(
-                                  fromUid: user.uid,
-                                  toUid: uid,
-                                );
-
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(
-                                    context,
-                                  ).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Friend request sent successfully.',
-                                      ),
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(
-                                    context,
-                                  ).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        e.toString(),
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          );
-        },
-      );
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => searching = false);
+      }
     }
+  }
+
+  void _selectUser(Map<String, dynamic> data) {
+    final uid = data['uid']?.toString() ?? '';
+    if (uid.isEmpty) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SimpleUserProfilePage(
+          uid: uid,
+          name: data['name']?.toString() ?? 'Party User',
+          photoUrl: data['photoURL']?.toString() ?? '',
+          avatar: data['avatar']?.toString() ?? '',
+        ),
+      ),
+    );
+  }
+
+  void _selectRoom(Map<String, String> room) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RoomPage(
+          title: room['title'] ?? 'Room',
+          online: room['online'] ?? '',
+        ),
+      ),
+    );
+  }
+
+  Widget _searchButton({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1D1230), Color(0xFF0D0917)],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF7138FF)),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 5,
+        ),
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
+            ),
+          ),
+          child: Icon(icon, color: Colors.white),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => setState(() {
+          mode = value;
+          controller.clear();
+          userResults = [];
+          roomResults = [];
+        }),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final user =
-        FirebaseAuth.instance.currentUser;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Search'),
+        actions: [
+          if (mode != null)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => setState(() {
+                mode = null;
+                controller.clear();
+                userResults = [];
+                roomResults = [];
+              }),
+            ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          child: mode == null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Search',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Choose one search type',
+                      style: TextStyle(color: Colors.white54),
+                    ),
+                    const SizedBox(height: 20),
+                    _searchButton(
+                      icon: Icons.badge_outlined,
+                      title: 'UID Search',
+                      value: 'uid',
+                    ),
+                    _searchButton(
+                      icon: Icons.person_search,
+                      title: 'Name Search',
+                      value: 'name',
+                    ),
+                    _searchButton(
+                      icon: Icons.meeting_room_outlined,
+                      title: 'Room Search',
+                      value: 'room',
+                    ),
+                  ],
+                )
+              : Column(
+                  children: [
+                    TextField(
+                      controller: controller,
+                      autofocus: true,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (_) => _search(),
+                      decoration: InputDecoration(
+                        hintText: hint,
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.arrow_forward_rounded),
+                          onPressed: _search,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Expanded(
+                      child: searching
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : _buildResults(),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResults() {
+    if (mode == 'room') {
+      if (roomResults.isEmpty) {
+        return const Center(child: Text('No matching rooms found.'));
+      }
+
+      return ListView.builder(
+        itemCount: roomResults.length,
+        itemBuilder: (context, index) {
+          final room = roomResults[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF171126), Color(0xFF0D0917)],
+              ),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFF7138FF)),
+            ),
+            child: ListTile(
+              onTap: () => _selectRoom(room),
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFF7138FF),
+                child: Icon(Icons.meeting_room, color: Colors.white),
+              ),
+              title: Text(
+                room['title'] ?? 'Room',
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+              subtitle: Text(
+                room['online'] ?? '',
+                style: const TextStyle(color: Color(0xFF43F5B0)),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          );
+        },
+      );
+    }
+
+    if (userResults.isEmpty) {
+      return const Center(child: Text('No matching users found.'));
+    }
+
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+
+    return ListView.builder(
+      itemCount: userResults.length,
+      itemBuilder: (context, index) {
+        final data = userResults[index];
+        final uid = data['uid']?.toString() ?? '';
+        if (uid == currentUid) return const SizedBox.shrink();
+
+        final name = data['name']?.toString() ?? 'Party User';
+        final photo = data['photoURL']?.toString() ?? '';
+        final avatar = data['avatar']?.toString() ?? '';
+
+        return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          future: currentUid == null
+              ? null
+              : PartyChatData.friendRequests(currentUid).doc(uid).get(),
+          builder: (context, snapshot) {
+            final pending =
+                pendingRequests.contains(uid) ||
+                (snapshot.data?.exists ?? false);
+
+            return ListTile(
+              onTap: () => _selectUser(data),
+              leading: _NetworkOrAvatar(
+                photoUrl: photo,
+                avatar: avatar,
+              ),
+              title: Text(
+                name,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              subtitle: Text(
+                'UID: ${data['userId'] ?? uid}',
+                style: const TextStyle(color: Colors.white54),
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  pending
+                      ? Icons.check_circle_rounded
+                      : Icons.person_add_rounded,
+                  color: pending
+                      ? Colors.greenAccent
+                      : Colors.white,
+                ),
+                onPressed: pending || currentUid == null
+                    ? null
+                    : () async {
+                        try {
+                          await PartyChatData.sendFriendRequest(
+                            fromUid: currentUid,
+                            toUid: uid,
+                          );
+                          if (mounted) {
+                            setState(() => pendingRequests.add(uid));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Friend request sent successfully.',
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        }
+                      },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class SimpleUserProfilePage extends StatelessWidget {
+  final String uid;
+  final String name;
+  final String photoUrl;
+  final String avatar;
+
+  const SimpleUserProfilePage({
+    super.key,
+    required this.uid,
+    required this.name,
+    this.photoUrl = '',
+    this.avatar = '',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Profile')),
+      body: FutureBuilder<Map<String, dynamic>?>(
+        future: PartyChatData.userData(uid),
+        builder: (context, snapshot) {
+          final data = snapshot.data ?? {};
+          final currentName = data['name']?.toString() ?? name;
+          final currentPhoto =
+              data['photoURL']?.toString() ?? photoUrl;
+          final currentAvatar =
+              data['avatar']?.toString() ?? avatar;
+          final publicUid =
+              data['userId']?.toString() ?? uid;
+
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _NetworkOrAvatar(
+                    photoUrl: currentPhoto,
+                    avatar: currentAvatar,
+                    radius: 64,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    currentName,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'UID: $publicUid',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   FRIENDS
+   ============================================================ */
+
+class FriendsPage extends StatelessWidget {
+  const FriendsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
       return const Scaffold(
-        body: Center(
-          child: Text('Please login first.'),
-        ),
+        body: Center(child: Text('Please login first.')),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppLanguage.text('friends'),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.person_add,
-            ),
-            tooltip: 'Find Friends',
-            onPressed: () {
-              searchController.clear();
-
-              showDialog(
-                context: context,
-                builder: (_) {
-                  return AlertDialog(
-                    title: const Text(
-                      'Find Friends',
-                    ),
-                    content: TextField(
-                      controller:
-                          searchController,
-                      decoration:
-                          const InputDecoration(
-                        hintText:
-                            'Search by UID or Name',
-                        border:
-                            OutlineInputBorder(),
-                      ),
-                      textInputAction:
-                          TextInputAction.search,
-                      onSubmitted: (_) {
-                        _findFriends();
-                      },
-                    ),
-                    actions: [
-                      FilledButton(
-                        onPressed: _findFriends,
-                        child: const Text(
-                          'Search',
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        ],
+        title: Text(AppLanguage.text('friends')),
       ),
-      body: StreamBuilder<
-          QuerySnapshot<Map<String, dynamic>>>(
-        stream:
-            PartyChatData.friendsStream(
-          user.uid,
-        ),
-        builder:
-            (context, snapshot) {
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: PartyChatData.friendsStream(user.uid),
+        builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(
-              child: Text(
-                'Could not load friends.',
-              ),
+              child: Text('Could not load friends.'),
             );
           }
 
           if (!snapshot.hasData) {
-            return const Center(
-              child:
-                  CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
-          final docs =
-              snapshot.data!.docs;
+          final docs = snapshot.data!.docs;
 
           if (docs.isEmpty) {
-            return const Center(
-              child: Text(
-                'No friends yet. Find friends with the + button.',
-              ),
-            );
+            return const Center(child: Text('No friends yet.'));
           }
 
           return ListView.builder(
             itemCount: docs.length,
-            itemBuilder:
-                (context, index) {
-              final data =
-                  docs[index].data();
-
+            itemBuilder: (context, index) {
+              final data = docs[index].data();
               final uid =
-                  data['uid']?.toString() ??
-                      docs[index].id;
-
+                  data['uid']?.toString() ?? docs[index].id;
               final name =
-                  data['name']?.toString() ??
-                      'Friend';
+                  data['name']?.toString() ?? 'Friend';
+              final photo =
+                  data['photoURL']?.toString() ?? '';
+              final avatar =
+                  data['avatar']?.toString() ?? '';
 
               return ListTile(
-                leading:
-                    _NetworkOrAvatar(
-                  photoUrl:
-                      data['photoURL']
-                          as String?,
-                  avatar:
-                      data['avatar']
-                          as String?,
+                leading: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SimpleUserProfilePage(
+                          uid: uid,
+                          name: name,
+                          photoUrl: photo,
+                          avatar: avatar,
+                        ),
+                      ),
+                    );
+                  },
+                  child: _NetworkOrAvatar(
+                    photoUrl: photo,
+                    avatar: avatar,
+                  ),
                 ),
                 title: Text(name),
-                subtitle: Text(
-                  'UID: ${uid}',
-                ),
                 trailing: Wrap(
                   children: [
                     IconButton(
-                      icon: const Icon(
-                        Icons.message,
-                      ),
+                      icon: const Icon(Icons.message),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                ChatPage(
+                            builder: (_) => ChatPage(
                               otherUid: uid,
                               otherName: name,
                             ),
@@ -4851,11 +5122,8 @@ class _FriendsPageState extends State<FriendsPage> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(
-                        Icons.card_giftcard,
-                      ),
-                      onPressed: () =>
-                          _giftDialog(
+                      icon: const Icon(Icons.card_giftcard),
+                      onPressed: () => _giftDialog(
                         context,
                         user.uid,
                         uid,
@@ -4863,11 +5131,8 @@ class _FriendsPageState extends State<FriendsPage> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(
-                        Icons.block,
-                      ),
-                      onPressed: () =>
-                          _block(
+                      icon: const Icon(Icons.block),
+                      onPressed: () => _block(
                         context,
                         user.uid,
                         uid,
@@ -4885,107 +5150,56 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   Future<void> _giftDialog(
+     
     BuildContext context,
     String fromUid,
     String toUid,
     String name,
   ) async {
     final gifts = [
-      {
-        'name': 'Rose 🌹',
-        'cost': 10,
-      },
-      {
-        'name': 'Heart ❤️',
-        'cost': 50,
-      },
-      {
-        'name': 'Crown 👑',
-        'cost': 100,
-      },
-      {
-        'name': 'Diamond 💎',
-        'cost': 500,
-      },
+      {'name': 'Rose 🌹', 'cost': 10},
+      {'name': 'Heart ❤️', 'cost': 50},
+      {'name': 'Crown 👑', 'cost': 100},
+      {'name': 'Diamond 💎', 'cost': 500},
     ];
 
     await showModalBottomSheet(
       context: context,
-      builder: (_) {
+      builder: (sheetContext) {
         return SafeArea(
-          child: Column(
-            mainAxisSize:
-                MainAxisSize.min,
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.all(16),
-                child: Text(
-                  'Gift for $name',
-                  style:
-                      const TextStyle(
-                    fontSize: 18,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
-              ),
-              ...gifts.map(
-                (gift) => ListTile(
-                  title: Text(
-                    gift['name']
-                        as String,
-                  ),
-                  trailing: Text(
-                    '${gift['cost']} coins',
-                  ),
-                  onTap: () async {
-                    try {
-                      await PartyChatData
-                          .sendGift(
-                        fromUid: fromUid,
-                        toUid: toUid,
-                        giftName:
-                            gift['name']
-                                as String,
-                        cost:
-                            gift['cost']
-                                as int,
+          child: ListView(
+            shrinkWrap: true,
+            children: gifts.map((gift) {
+              return ListTile(
+                leading: const Icon(Icons.card_giftcard),
+                title: Text('${gift['name']}'),
+                subtitle: Text('${gift['cost']} coins'),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  try {
+                    await PartyChatData.sendGift(
+                      fromUid: fromUid,
+                      toUid: toUid,
+                      giftName: gift['name'].toString(),
+                      cost: gift['cost'] as int,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Gift sent to $name.'),
+                        ),
                       );
-
-                      if (context.mounted) {
-                        Navigator.pop(
-                          context,
-                        );
-
-                        ScaffoldMessenger
-                            .of(context)
-                            .showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Gift sent successfully.',
-                            ),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger
-                            .of(context)
-                            .showSnackBar(
-                          SnackBar(
-                            content:
-                                Text(
-                              e.toString(),
-                            ),
-                          ),
-                        );
-                      }
                     }
-                  },
-                ),
-              ),
-            ],
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString())),
+                      );
+                    }
+                  }
+                },
+              );
+            }).toList(),
           ),
         );
       },
@@ -5004,38 +5218,20 @@ class _FriendsPageState extends State<FriendsPage> {
         otherUid: otherUid,
         otherData: data,
       );
-
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-          const SnackBar(
-            content: Text(
-              'User blocked successfully.',
-            ),
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User blocked.')),
         );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString(),
-            ),
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
         );
       }
     }
   }
 }
-
-
-
-
-/* ============================================================
-   CHAT
-   ============================================================ */
 
 class ChatPage extends StatefulWidget {
   final String otherUid;
@@ -5151,18 +5347,26 @@ class _ChatPageState extends State<ChatPage> {
 class _NetworkOrAvatar extends StatelessWidget {
   final String? photoUrl;
   final String? avatar;
+  final double radius;
 
   const _NetworkOrAvatar({
     required this.photoUrl,
     required this.avatar,
+    this.radius = 20,
   });
 
   @override
   Widget build(BuildContext context) {
     if (photoUrl != null && photoUrl!.isNotEmpty) {
-      return CircleAvatar(backgroundImage: NetworkImage(photoUrl!));
+      return CircleAvatar(
+        radius: radius,
+        backgroundImage: NetworkImage(photoUrl!),
+      );
     }
-    return const CircleAvatar(child: Icon(Icons.person));
+    return CircleAvatar(
+      radius: radius,
+      child: const Icon(Icons.person),
+    );
   }
 }
 
