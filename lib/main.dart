@@ -3584,50 +3584,155 @@ class FriendRequestsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
 
-    final ref = FirebaseFirestore.instance
-        .collection('users').doc(user.uid).collection('friendRequests');
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Please login first.'),
+        ),
+      );
+    }
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLanguage.text('friend_requests'))),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: ref.orderBy('createdAt', descending: true).snapshots(),
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('friend_requests'),
+        ),
+      ),
+      body: StreamBuilder<
+          QuerySnapshot<Map<String, dynamic>>>(
+        stream: PartyChatData.friendRequestsStream(
+          user.uid,
+        ),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Could not load friend requests.'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                'Could not load friend requests.',
+              ),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
           final docs = snapshot.data!.docs;
-          if (docs.isEmpty) return const Center(child: Text('No friend requests yet.'));
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No friend requests yet.',
+              ),
+            );
+          }
+
           return ListView.builder(
             itemCount: docs.length,
             itemBuilder: (context, index) {
-              final d = docs[index].data();
-              final uid = d['requesterUid'] ?? docs[index].id;
+              final data = docs[index].data();
+
+              final requesterUid =
+                  data['uid']?.toString() ??
+                      docs[index].id;
+
+              final name =
+                  data['name']?.toString() ??
+                      'Party User';
+
               return ListTile(
                 leading: _NetworkOrAvatar(
-                  photoUrl: d['photoURL'] as String?,
-                  avatar: d['avatar'] as String?,
+                  photoUrl:
+                      data['photoURL'] as String?,
+                  avatar:
+                      data['avatar'] as String?,
                 ),
-                title: Text(d['name'] ?? 'Party User'),
-                subtitle: const Text('Wants to be your friend'),
+                title: Text(name),
+                subtitle: Text(
+                  'UID: $requesterUid',
+                ),
                 trailing: Wrap(
                   children: [
                     IconButton(
                       tooltip: 'Accept',
-                      icon: const Icon(Icons.check_circle, color: Colors.green),
+                      icon: const Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ),
                       onPressed: () async {
                         try {
-                          await PartyChatData.acceptFriendRequest(uid: user.uid, requesterUid: uid);
+                          await PartyChatData
+                              .acceptFriendRequest(
+                            myUid: user.uid,
+                            otherUid: requesterUid,
+                          );
+
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Friend request accepted.',
+                                ),
+                              ),
+                            );
+                          }
                         } catch (e) {
-                          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.toString(),
+                                ),
+                              ),
+                            );
+                          }
                         }
                       },
                     ),
                     IconButton(
                       tooltip: 'Reject',
-                      icon: const Icon(Icons.cancel, color: Colors.red),
+                      icon: const Icon(
+                        Icons.cancel,
+                        color: Colors.red,
+                      ),
                       onPressed: () async {
-                        await PartyChatData.rejectFriendRequest(uid: user.uid, requesterUid: uid);
+                        try {
+                          await PartyChatData
+                              .rejectFriendRequest(
+                            myUid: user.uid,
+                            otherUid: requesterUid,
+                          );
+
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Friend request rejected.',
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.toString(),
+                                ),
+                              ),
+                            );
+                          }
+                        }
                       },
                     ),
                   ],
@@ -3827,6 +3932,9 @@ class MyGiftsPage extends StatelessWidget {
   }
 }
 
+
+
+
 /* ============================================================
    FRIENDS + FIND FRIENDS
    ============================================================ */
@@ -3840,7 +3948,6 @@ class FriendsPage extends StatefulWidget {
 
 class _FriendsPageState extends State<FriendsPage> {
   final searchController = TextEditingController();
-  String query = '';
 
   @override
   void dispose() {
@@ -3850,144 +3957,323 @@ class _FriendsPageState extends State<FriendsPage> {
 
   Future<void> _findFriends() async {
     final user = FirebaseAuth.instance.currentUser;
+
     if (user == null) return;
-    final search = searchController.text.trim().toLowerCase();
-    if (search.isEmpty) return;
 
-    final snap = await FirebaseFirestore.instance.collection('users').limit(50).get();
-    final matches = snap.docs.where((d) {
-      if (d.id == user.uid) return false;
-      final data = d.data();
-      final name = (data['name'] ?? '').toString().toLowerCase();
-      final email = (data['email'] ?? '').toString().toLowerCase();
-      return name.contains(search) || email.contains(search);
-    }).toList();
+    final search = searchController.text.trim();
 
-    if (!mounted) return;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => SafeArea(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * .65,
-          child: matches.isEmpty
-              ? const Center(child: Text('No users found.'))
-              : ListView.builder(
-                  itemCount: matches.length,
-                  itemBuilder: (context, index) {
-                    final d = matches[index];
-                    final data = d.data();
-                    return ListTile(
-                      leading: _NetworkOrAvatar(
-                        photoUrl: data['photoURL'] as String?,
-                        avatar: data['avatar'] as String?,
-                      ),
-                      title: Text(data['name'] ?? 'Party User'),
-                      subtitle: Text(data['email'] ?? ''),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.person_add),
-                        onPressed: () async {
-                          try {
-                            await PartyChatData.sendFriendRequest(
-                              fromUid: user.uid,
-                              toUid: d.id,
-                            );
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Friend request sent successfully.')),
-                              );
-                            }
-                          } catch (e) {
-                            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('$e')),
-                            );
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
+    if (search.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enter a UID or name.'),
         ),
-      ),
-    );
+      );
+      return;
+    }
+
+    try {
+      final matches =
+          await PartyChatData.searchUsersByName(search);
+
+      final uidMatch =
+          await PartyChatData.findUserByUid(search);
+
+      final users = <Map<String, dynamic>>[];
+
+      if (uidMatch != null) {
+        users.add(uidMatch);
+      }
+
+      for (final match in matches) {
+        final matchUid =
+            match['uid']?.toString();
+
+        if (matchUid == null) continue;
+
+        final alreadyAdded = users.any(
+          (item) =>
+              item['uid']?.toString() == matchUid,
+        );
+
+        if (!alreadyAdded) {
+          users.add(match);
+        }
+      }
+
+      users.removeWhere(
+        (item) =>
+            item['uid']?.toString() == user.uid,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pop(context);
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) {
+          return SafeArea(
+            child: SizedBox(
+              height:
+                  MediaQuery.of(context).size.height * .65,
+              child: users.isEmpty
+                  ? const Center(
+                      child: Text('No users found.'),
+                    )
+                  : ListView.builder(
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        final data = users[index];
+
+                        final uid =
+                            data['uid']?.toString() ?? '';
+
+                        final name =
+                            data['name']?.toString() ??
+                                'Party User';
+
+                        final userId =
+                            data['userId']?.toString() ??
+                                uid;
+
+                        return ListTile(
+                          leading: _NetworkOrAvatar(
+                            photoUrl:
+                                data['photoURL'] as String?,
+                            avatar:
+                                data['avatar'] as String?,
+                          ),
+                          title: Text(name),
+                          subtitle: Text(
+                            'UID: $userId',
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(
+                              Icons.person_add,
+                            ),
+                            onPressed: () async {
+                              try {
+                                await PartyChatData
+                                    .sendFriendRequest(
+                                  fromUid: user.uid,
+                                  toUid: uid,
+                                );
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Friend request sent successfully.',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        e.toString(),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-    final friendsRef = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('friends');
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Please login first.'),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLanguage.text('friends')),
+        title: Text(
+          AppLanguage.text('friends'),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.person_add),
+            icon: const Icon(
+              Icons.person_add,
+            ),
             tooltip: 'Find Friends',
             onPressed: () {
+              searchController.clear();
+
               showDialog(
                 context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Find Friends'),
-                  content: TextField(
-                    controller: searchController,
-                    decoration: const InputDecoration(
-                      hintText: 'Search by name or email',
-                      border: OutlineInputBorder(),
+                builder: (_) {
+                  return AlertDialog(
+                    title: const Text(
+                      'Find Friends',
                     ),
-                    onChanged: (v) => query = v,
-                  ),
-                  actions: [
-                    FilledButton(
-                      onPressed: _findFriends,
-                      child: const Text('Search'),
+                    content: TextField(
+                      controller:
+                          searchController,
+                      decoration:
+                          const InputDecoration(
+                        hintText:
+                            'Search by UID or Name',
+                        border:
+                            OutlineInputBorder(),
+                      ),
+                      textInputAction:
+                          TextInputAction.search,
+                      onSubmitted: (_) {
+                        _findFriends();
+                      },
                     ),
-                  ],
-                ),
+                    actions: [
+                      FilledButton(
+                        onPressed: _findFriends,
+                        child: const Text(
+                          'Search',
+                        ),
+                      ),
+                    ],
+                  );
+                },
               );
             },
           ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: friendsRef.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Could not load friends.'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          final docs = snapshot.data!.docs;
-          if (docs.isEmpty) return const Center(child: Text('No friends yet. Find friends with the + button.'));
+      body: StreamBuilder<
+          QuerySnapshot<Map<String, dynamic>>>(
+        stream:
+            PartyChatData.friendsStream(
+          user.uid,
+        ),
+        builder:
+            (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                'Could not load friends.',
+              ),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return const Center(
+              child:
+                  CircularProgressIndicator(),
+            );
+          }
+
+          final docs =
+              snapshot.data!.docs;
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No friends yet. Find friends with the + button.',
+              ),
+            );
+          }
+
           return ListView.builder(
             itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final d = docs[index].data();
-              final uid = d['uid'] ?? docs[index].id;
+            itemBuilder:
+                (context, index) {
+              final data =
+                  docs[index].data();
+
+              final uid =
+                  data['uid']?.toString() ??
+                      docs[index].id;
+
+              final name =
+                  data['name']?.toString() ??
+                      'Friend';
+
               return ListTile(
-                leading: _NetworkOrAvatar(
-                  photoUrl: d['photoURL'] as String?,
-                  avatar: d['avatar'] as String?,
+                leading:
+                    _NetworkOrAvatar(
+                  photoUrl:
+                      data['photoURL']
+                          as String?,
+                  avatar:
+                      data['avatar']
+                          as String?,
                 ),
-                title: Text(d['name'] ?? 'Friend'),
-                subtitle: Text(d['email'] ?? ''),
+                title: Text(name),
+                subtitle: Text(
+                  'UID: ${uid}',
+                ),
                 trailing: Wrap(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.message),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(
-                        builder: (_) => ChatPage(
-                          otherUid: uid,
-                          otherName: d['name'] ?? 'Friend',
-                        ),
-                      )),
+                      icon: const Icon(
+                        Icons.message,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ChatPage(
+                              otherUid: uid,
+                              otherName: name,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.card_giftcard),
-                      onPressed: () => _giftDialog(context, user.uid, uid, d['name'] ?? 'Friend'),
+                      icon: const Icon(
+                        Icons.card_giftcard,
+                      ),
+                      onPressed: () =>
+                          _giftDialog(
+                        context,
+                        user.uid,
+                        uid,
+                        name,
+                      ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.block),
-                      onPressed: () => _block(context, user.uid, uid, d),
+                      icon: const Icon(
+                        Icons.block,
+                      ),
+                      onPressed: () =>
+                          _block(
+                        context,
+                        user.uid,
+                        uid,
+                        data,
+                      ),
                     ),
                   ],
                 ),
@@ -3999,55 +4285,154 @@ class _FriendsPageState extends State<FriendsPage> {
     );
   }
 
-  Future<void> _giftDialog(BuildContext context, String fromUid, String toUid, String name) async {
+  Future<void> _giftDialog(
+    BuildContext context,
+    String fromUid,
+    String toUid,
+    String name,
+  ) async {
     final gifts = [
-      {'name': 'Rose 🌹', 'cost': 10},
-      {'name': 'Heart ❤️', 'cost': 50},
-      {'name': 'Crown 👑', 'cost': 100},
-      {'name': 'Diamond 💎', 'cost': 500},
+      {
+        'name': 'Rose 🌹',
+        'cost': 10,
+      },
+      {
+        'name': 'Heart ❤️',
+        'cost': 50,
+      },
+      {
+        'name': 'Crown 👑',
+        'cost': 100,
+      },
+      {
+        'name': 'Diamond 💎',
+        'cost': 500,
+      },
     ];
+
     await showModalBottomSheet(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(padding: const EdgeInsets.all(16), child: Text('Gift for $name', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-            ...gifts.map((gift) => ListTile(
-              title: Text(gift['name'] as String),
-              trailing: Text('${gift['cost']} coins'),
-              onTap: () async {
-                try {
-                  await PartyChatData.sendGift(
-                    fromUid: fromUid,
-                    toUid: toUid,
-                    giftName: gift['name'] as String,
-                    cost: gift['cost'] as int,
-                  );
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gift sent successfully.')));
-                  }
-                } catch (e) {
-                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-                }
-              },
-            )),
-          ],
-        ),
-      ),
+      builder: (_) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize:
+                MainAxisSize.min,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.all(16),
+                child: Text(
+                  'Gift for $name',
+                  style:
+                      const TextStyle(
+                    fontSize: 18,
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
+                ),
+              ),
+              ...gifts.map(
+                (gift) => ListTile(
+                  title: Text(
+                    gift['name']
+                        as String,
+                  ),
+                  trailing: Text(
+                    '${gift['cost']} coins',
+                  ),
+                  onTap: () async {
+                    try {
+                      await PartyChatData
+                          .sendGift(
+                        fromUid: fromUid,
+                        toUid: toUid,
+                        giftName:
+                            gift['name']
+                                as String,
+                        cost:
+                            gift['cost']
+                                as int,
+                      );
+
+                      if (context.mounted) {
+                        Navigator.pop(
+                          context,
+                        );
+
+                        ScaffoldMessenger
+                            .of(context)
+                            .showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Gift sent successfully.',
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger
+                            .of(context)
+                            .showSnackBar(
+                          SnackBar(
+                            content:
+                                Text(
+                              e.toString(),
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Future<void> _block(BuildContext context, String uid, String otherUid, Map<String, dynamic> data) async {
+  Future<void> _block(
+    BuildContext context,
+    String uid,
+    String otherUid,
+    Map<String, dynamic> data,
+  ) async {
     try {
-      await PartyChatData.blockUser(uid: uid, otherUid: otherUid, otherData: data);
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User block kar diya.')));
+      await PartyChatData.blockUser(
+        uid: uid,
+        otherUid: otherUid,
+        otherData: data,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+          const SnackBar(
+            content: Text(
+              'User blocked successfully.',
+            ),
+          ),
+        );
+      }
     } catch (e) {
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+            ),
+          ),
+        );
+      }
     }
   }
 }
+
+
+
 
 /* ============================================================
    CHAT
