@@ -1506,9 +1506,6 @@ class PartyChatData {
   }
 }
 
-Important: "PartyChatData" ki purani class poori ki poori replace karni hai. "PartyChatApp" se pehle class khatam honi chahiye, aur "PartyChatApp" ko change nahi karna.
-
-Iske baad abhi build mat chalao. Pehle save/commit karo; phir build result dekhte hain.
 
 
 
@@ -3364,19 +3361,60 @@ class RoomInviteFriendsPage extends StatelessWidget {
 /* ============================================================
    GAMES
    ============================================================ */
+// Game thumbnails currently use Wikimedia Commons files through Special:FilePath URLs.
+// For a production/offline Play Store build, these images should later be bundled locally
+// in assets/ with the required license/attribution information.
+
 
 class GamesTab extends StatelessWidget {
   const GamesTab({super.key});
 
+  static const List<Map<String, String>> games = [
+    {
+      'title': 'Ludo',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Ludo_board_game.jpg',
+    },
+    {
+      'title': 'Carrom',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Carrom_board.jpg',
+    },
+    {
+      'title': '8 Ball Pool',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/8ballpool.jpg',
+    },
+    {
+      'title': 'Quiz',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Quiz_competition_image.jpg',
+    },
+    {
+      'title': 'Bubble Shooter',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Bubbles_game.JPG',
+    },
+    {
+      'title': 'More Games',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Balloons_Colorful_Shooting_Gallery_Folk_Festival.jpg',
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     return _NeonBackground(
-      child: GridView.count(
+      child: GridView.builder(
         padding: const EdgeInsets.fromLTRB(18, 22, 18, 100),
-        crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: .93,
-        children: const [
-          GameCard('Ludo', Icons.casino), GameCard('Carrom', Icons.sports), GameCard('8 Ball Pool', Icons.sports_bar), GameCard('Quiz', Icons.quiz), GameCard('Bubble Shooter', Icons.bubble_chart), GameCard('More Games', Icons.apps),
-        ],
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: .88,
+        ),
+        itemCount: games.length,
+        itemBuilder: (context, index) {
+          final game = games[index];
+          return GameCard(
+            title: game['title']!,
+            imageUrl: game['image']!,
+          );
+        },
       ),
     );
   }
@@ -3384,19 +3422,108 @@ class GamesTab extends StatelessWidget {
 
 class GameCard extends StatelessWidget {
   final String title;
-  final IconData icon;
-  const GameCard(this.title, this.icon, {super.key});
+  final String imageUrl;
+
+  const GameCard({
+    super.key,
+    required this.title,
+    required this.imageUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
     return _NeonPanel(
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(width: 62, height: 62, decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), gradient: const LinearGradient(colors: [Color(0xFF7138FF), Color(0xFFE52DD4)]), boxShadow: const [BoxShadow(color: Color(0x664F00FF), blurRadius: 18)]), child: Icon(icon, size: 34, color: const Color(0xFFFFD15C))),
-        const SizedBox(height: 13),
-        Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w900)),
-        const SizedBox(height: 7),
-        Text(AppLanguage.text('play_now'), style: const TextStyle(color: Color(0xFFD6B9FF), fontWeight: FontWeight.w700)),
-      ]),
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF7138FF),
+                              Color(0xFFE52DD4),
+                            ],
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.sports_esports,
+                          size: 48,
+                          color: Colors.white,
+                        ),
+                      );
+                    },
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF24103B),
+                              Color(0xFF120A20),
+                            ],
+                          ),
+                        ),
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    },
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(10, 24, 10, 10),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Color(0xCC05030B),
+                          ],
+                        ),
+                      ),
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 9, 10, 11),
+              child: Text(
+                AppLanguage.text('play_now'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFD6B9FF),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -4137,8 +4264,8 @@ class FriendRequestsPage extends StatelessWidget {
                         try {
                           await PartyChatData
                               .acceptFriendRequest(
-                            myUid: user.uid,
-                            otherUid: requesterUid,
+                            uid: user.uid,
+                            requesterUid: requesterUid,
                           );
 
                           if (context.mounted) {
@@ -4177,8 +4304,8 @@ class FriendRequestsPage extends StatelessWidget {
                         try {
                           await PartyChatData
                               .rejectFriendRequest(
-                            myUid: user.uid,
-                            otherUid: requesterUid,
+                            uid: user.uid,
+                            requesterUid: requesterUid,
                           );
 
                           if (context.mounted) {
@@ -6109,5 +6236,3 @@ class TransactionHistoryPage
     );
   }
 }
-
-
