@@ -3559,39 +3559,42 @@ class _RoomPageState extends State<RoomPage> {
         );
 
     return Scaffold(
-      body: Stack(
-        children: [
-          ZegoUIKitPrebuiltLiveAudioRoom(
-            appID: zegoAppId,
-            appSign: zegoAppSign,
-            userID: widget.userId,
-            userName: roomUserName,
-            roomID: roomId,
-            config: (ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
-              ..seat.avatarBuilder = (context, size, user, extraInfo) => _ZegoFirebaseAvatar(userId: user?.id ?? '', size: size)
-              ..userAvatarUrl = (roomPhotoUrl != null && roomPhotoUrl!.length <= 64) ? roomPhotoUrl : null),
+  body: Stack(
+    children: [
+      ZegoUIKitPrebuiltLiveAudioRoom(
+        appID: zegoAppId,
+        appSign: zegoAppSign,
+        userID: widget.userId,
+        userName: roomUserName,
+        roomID: roomId,
+        config: (ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
+          ..seat.avatarBuilder = (context, size, user, extraInfo) =>
+              _ZegoFirebaseAvatar(
+                userId: user?.id ?? '',
+                size: size,
+              )),
+      ),
+      Positioned(
+        top: 42,
+        right: 12,
+        child: SafeArea(
+          child: IconButton.filled(
+            tooltip: 'Invite Friend',
+            icon: const Icon(Icons.person_add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RoomInviteFriendsPage(
+                    roomId: roomId,
+                    roomTitle: widget.title,
+                  ),
+                ),
+              );
+            },
           ),
-          Positioned(
-            top: 42,
-            right: 12,
-            child: SafeArea(
-              child: IconButton.filled(
-                tooltip: 'Invite Friend',
-                icon: const Icon(Icons.person_add),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RoomInviteFriendsPage(
-                        roomId: roomId,
-                        roomTitle: widget.title,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+        ),
+      ),
           Positioned(
             bottom: 24,
             left: 0,
