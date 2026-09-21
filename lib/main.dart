@@ -1048,7 +1048,6 @@ class PartyChatData {
 /* ============================================================
    APP
    ============================================================ */
-
 class PartyChatApp extends StatefulWidget {
   const PartyChatApp({super.key});
 
@@ -1887,132 +1886,108 @@ class HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return _NeonBackground(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 100),
+        padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: FirebaseAuth.instance.currentUser == null
-                ? null
-                : FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(FirebaseAuth.instance.currentUser!.uid)
-                    .snapshots(),
-            builder: (context, snapshot) {
-              final data = snapshot.data?.data();
-              final user = FirebaseAuth.instance.currentUser;
-              final name = (data?['name'] ?? user?.displayName ?? 'Party User').toString();
-              final photoUrl = (data?['photoURL'] ?? user?.photoURL ?? '').toString();
-
-              return Row(
-                children: [
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundColor: const Color(0xFF57307A),
-                    backgroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                    child: photoUrl.isEmpty ? const Icon(Icons.person) : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hello, $name 👋',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                        ),
-                        const Text(
-                          'Welcome back',
-                          style: TextStyle(color: Colors.white60),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF211331),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFF7138FF)),
-                    ),
-                    child: const Icon(Icons.notifications_none),
-                  ),
-                ],
-              );
-            },
+          const Text(
+            'Home',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
           ),
-          const SizedBox(height: 18),
-          Row(
-            children: const [
-              Expanded(child: _HomeActionCard(icon: Icons.campaign, title: 'New Update', subtitle: 'See what is new')),
-              SizedBox(width: 10),
-              Expanded(child: _HomeActionCard(icon: Icons.card_giftcard, title: 'Daily Free Reward', subtitle: 'Claim your free reward')),
-            ],
+          const SizedBox(height: 20),
+          _HomeBigBox(
+            title: 'New Update',
+            icon: Icons.campaign_rounded,
+            subtitle: 'See what is new in PartyChat',
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: const [
-              Expanded(child: _HomeActionCard(icon: Icons.task_alt, title: 'Daily Task', subtitle: 'Complete today\'s tasks')),
-              SizedBox(width: 10),
-              Expanded(child: _HomeActionCard(icon: Icons.celebration, title: 'Event', subtitle: 'Join active events')),
-            ],
+          const SizedBox(height: 14),
+          _HomeBigBox(
+            title: 'Event',
+            icon: Icons.celebration_rounded,
+            subtitle: 'Join the latest PartyChat event',
           ),
-          const SizedBox(height: 22),
-          Row(
-            children: const [
-              Expanded(child: Text('Popular Rooms 🔥', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900))),
-              Text('See All ›', style: TextStyle(color: Color(0xFFFF5DE0), fontWeight: FontWeight.w700)),
-            ],
+          const SizedBox(height: 14),
+          _HomeBigBox(
+            title: 'Free Reward',
+            icon: Icons.card_giftcard_rounded,
+            subtitle: 'Collect your free daily reward',
           ),
-          const SizedBox(height: 12),
-          const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Chat • Friends • Fun'),
-          const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Games • Challenge • Win'),
-          const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music • Vibes • Party'),
+          const SizedBox(height: 14),
+          _HomeBigBox(
+            title: 'Daily Task',
+            icon: Icons.task_alt_rounded,
+            subtitle: 'Complete today\'s tasks',
+          ),
         ],
       ),
     );
   }
 }
 
-class _HomeActionCard extends StatelessWidget {
-  final IconData icon;
+class _HomeBigBox extends StatelessWidget {
   final String title;
   final String subtitle;
+  final IconData icon;
 
-  const _HomeActionCard({
-    required this.icon,
+  const _HomeBigBox({
     required this.title,
     required this.subtitle,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      width: double.infinity,
+      height: 128,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        color: const Color(0xFF171125),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF7138FF)),
-        boxShadow: const [BoxShadow(color: Color(0x331F00FF), blurRadius: 12)],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF211331), Color(0xFF100B1A)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFF7138FF), width: 1.2),
+        boxShadow: const [
+          BoxShadow(color: Color(0x443F00FF), blurRadius: 18, spreadRadius: 1),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 66,
+            height: 66,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: const LinearGradient(
                 colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
               ),
+              boxShadow: const [
+                BoxShadow(color: Color(0x665B1CFF), blurRadius: 18),
+              ],
             ),
-            child: Icon(icon, color: Colors.white),
+            child: Icon(icon, color: Colors.white, size: 32),
           ),
-          const SizedBox(height: 10),
-          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900)),
-          const SizedBox(height: 4),
-          Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: Colors.white60, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios_rounded,
+              color: Colors.white70, size: 18),
         ],
       ),
     );
@@ -2027,107 +2002,190 @@ class RoomsTab extends StatefulWidget {
 }
 
 class _RoomsTabState extends State<RoomsTab> {
-  int selectedRoomTab = 0;
+  int selectedMainTab = 0;
+  int selectedMyRoomTab = 0;
 
-  List<Widget> _roomListForSelectedTab() {
-    switch (selectedRoomTab) {
-      case 1:
-        return const [
-          RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
-          RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
-          RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
-        ];
-      case 2:
-        return const [
-          RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax • Talk • Be Yourself'),
-          RoomTile('Love Corner 💕', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
-          RoomTile('New Friends ✨', '620 online', Icons.auto_awesome, subtitle: 'Meet new people'),
-        ];
-      case 3:
-        return const [
-          RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Rooms with your friends'),
-          RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax with friends'),
-        ];
-      default:
-        return const [
-          RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
-          RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
-          RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
-          RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax • Talk • Be Yourself'),
-          RoomTile('Love Corner 💕', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
-        ];
-    }
-  }
+  static const mainTabs = [
+    'All Room',
+    'Popular Room',
+    'New Room',
+    'My Room',
+  ];
+
+  static const myRoomTabs = [
+    'Recently Joined',
+    'Joined',
+    'With Friend',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    const titles = ['All Rooms', 'Popular Rooms', 'New Rooms', 'With Friends'];
-    const icons = [Icons.public, Icons.local_fire_department, Icons.fiber_new, Icons.people_alt];
-
     return _NeonBackground(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          const Text('Rooms', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 14),
-          const TextField(
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.search),
-              hintText: 'Search rooms...',
-              suffixIcon: Icon(Icons.tune),
-            ),
-
-                      ),
+          const Text(
+            'Rooms',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(child: _roomMainButton(titles[0], icons[0], 0)),
-              const SizedBox(width: 8),
-              Expanded(child: _roomMainButton(titles[1], icons[1], 1)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(child: _roomMainButton(titles[2], icons[2], 2)),
-              const SizedBox(width: 8),
-              Expanded(child: _roomMainButton(titles[3], icons[3], 3)),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(titles[selectedRoomTab], style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 12),
-          ..._roomListForSelectedTab(),
+          _buildMainTabs(),
+          if (selectedMainTab == 3) ...[
+            const SizedBox(height: 14),
+            _buildMyRoomTabs(),
+          ],
+          const SizedBox(height: 22),
+          _buildRoomContent(),
         ],
       ),
     );
   }
 
-  Widget _roomMainButton(String title, IconData icon, int index) {
-    final highlighted = selectedRoomTab == index;
-    return GestureDetector(
-      onTap: () => setState(() => selectedRoomTab = index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-        decoration: BoxDecoration(
-          gradient: highlighted
-              ? const LinearGradient(colors: [Color(0xFF7138FF), Color(0xFFE52DD4)])
-              : null,
-          color: highlighted ? null : const Color(0xFF171125),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF7138FF)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(height: 7),
-            Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800)),
-          ],
-        ),
+  Widget _buildMainTabs() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(mainTabs.length, (index) {
+          final selected = selectedMainTab == index;
+          return Padding(
+            padding: EdgeInsets.only(right: index == mainTabs.length - 1 ? 0 : 8),
+            child: GestureDetector(
+              onTap: () => setState(() => selectedMainTab = index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 13),
+                decoration: BoxDecoration(
+                  gradient: selected
+                      ? const LinearGradient(
+                          colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
+                        )
+                      : null,
+                  color: selected ? null : const Color(0xFF171125),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: const Color(0xFF7138FF)),
+                ),
+                child: Text(
+                  mainTabs[index],
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
+
+  Widget _buildMyRoomTabs() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(myRoomTabs.length, (index) {
+          final selected = selectedMyRoomTab == index;
+          return Padding(
+            padding: EdgeInsets.only(right: index == myRoomTabs.length - 1 ? 0 : 8),
+            child: GestureDetector(
+              onTap: () => setState(() => selectedMyRoomTab = index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 11),
+                decoration: BoxDecoration(
+                  color: selected ? const Color(0xFF2B1940) : const Color(0xFF120D1C),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: selected ? const Color(0xFFE52DD4) : const Color(0xFF493060),
+                  ),
+                ),
+                child: Text(
+                  myRoomTabs[index],
+                                   style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: selected ? Colors.white : Colors.white70,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildRoomContent() {
+    if (selectedMainTab == 0) {
+      return const Column(
+        children: [
+          RoomTile('Friends Forever 💜', '2.4K online', Icons.people,
+              subtitle: 'Make new friends & enjoy chat'),
+          RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games,
+              subtitle: 'Play games & enjoy together'),
+          RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note,
+              subtitle: 'Music • Vibes • Party'),
+          RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round,
+              subtitle: 'Relax • Talk • Be Yourself'),
+        ],
+      );
+    }
+
+    if (selectedMainTab == 1) {
+      return const Column(
+        children: [
+          RoomTile('Friends Forever 💜', '2.4K online', Icons.people,
+              subtitle: 'Popular • Active • Gifting'),
+          RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games,
+              subtitle: 'Popular gaming room'),
+          RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note,
+              subtitle: 'Music • Vibes • Party'),
+        ],
+      );
+    }
+
+    if (selectedMainTab == 2) {
+      return const Column(
+        children: [
+          RoomTile('New Friends 🌟', '320 online', Icons.auto_awesome,
+              subtitle: 'New room • Meet new people'),
+          RoomTile('Fresh Talk 💬', '210 online', Icons.chat_bubble,
+              subtitle: 'New room • Start chatting'),
+          RoomTile('New Vibes 🎵', '145 online', Icons.music_note,
+              subtitle: 'New room • Music & chat'),
+        ],
+      );
+    }
+
+    if (selectedMyRoomTab == 0) {
+      return const Column(
+        children: [
+          RoomTile('Recently Joined', 'Room history', Icons.history,
+              subtitle: 'Your recently joined rooms'),
+        ],
+      );
+    }
+
+    if (selectedMyRoomTab == 1) {
+      return const Column(
+        children: [
+          RoomTile('Joined Rooms', 'Your rooms', Icons.meeting_room,
+              subtitle: 'Rooms you have joined'),
+        ],
+      );
+    }
+
+    return const Column(
+      children: [
+        RoomTile('With Friend', 'Friends rooms', Icons.people_alt,
+            subtitle: 'Rooms you joined with friends'),
+      ],
+    );
+  }
 }
+
+
+// ============================================================
+// POPULAR ROOMS PAGE
+// ============================================================
 
 class PopularRoomsPage extends StatelessWidget {
   const PopularRoomsPage({super.key});
@@ -3092,6 +3150,7 @@ Future<void> ensureUserId() async {
   }
 
   Future<void> _chooseAvatar(
+ 
     BuildContext context,
     DocumentReference<Map<String, dynamic>> userDoc,
   ) async {
@@ -3116,7 +3175,6 @@ Future<void> ensureUserId() async {
                 itemCount: avatars.length,
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
-
                   crossAxisCount: 4,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
@@ -4144,6 +4202,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.lock),
             title: Text(
+
               AppLanguage.text('privacy'),
             ),
             trailing: const Icon(Icons.chevron_right),
