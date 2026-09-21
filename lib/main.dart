@@ -1526,121 +1526,6 @@ class PartyChatData {
 /* ============================================================
    APP
    ============================================================ */
-
-/* ============================================================
-   PARTY CHAT ONLINE LOADING
-   ============================================================ */
-
-class PartyChatLoading extends StatefulWidget {
-  final double size;
-  final String label;
-
-  const PartyChatLoading({
-    super.key,
-    this.size = 54,
-    this.label = 'LOADING...',
-  });
-
-  @override
-  State<PartyChatLoading> createState() => _PartyChatLoadingState();
-}
-
-class _PartyChatLoadingState extends State<PartyChatLoading>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  static const List<Color> _dotColors = [
-    Color(0xFFFFC83D),
-    Color(0xFF9B5CFF),
-    Color(0xFF7C3AED),
-    Color(0xFF2A2238),
-    Color(0xFFFFD86B),
-    Color(0xFF8B5CF6),
-    Color(0xFF3A3048),
-    Color(0xFFD6A84F),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ringSize = widget.size;
-    final dotSize = ringSize < 44 ? 5.0 : 6.0;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: ringSize,
-          height: ringSize,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Stack(
-                children: List.generate(_dotColors.length, (index) {
-                  final angle =
-                      (index * 2 * pi / _dotColors.length) -
-                      (pi / 2) +
-                      (_controller.value * 2 * pi);
-                  final radius = (ringSize - dotSize) / 2;
-                  final center = ringSize / 2;
-                  final left = center + cos(angle) * radius - dotSize / 2;
-                  final top = center + sin(angle) * radius - dotSize / 2;
-
-                  return Positioned(
-                    left: left,
-                    top: top,
-                    child: Container(
-                      width: dotSize,
-                      height: dotSize,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _dotColors[index],
-                        boxShadow: [
-                          BoxShadow(
-                            color: _dotColors[index].withValues(alpha: 0.65),
-                            blurRadius: 7,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              );
-            },
-          ),
-        ),
-        if (widget.label.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(
-            widget.label,
-            style: const TextStyle(
-              color: Color(0xFFD8C2FF),
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2.2,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
 class PartyChatApp extends StatefulWidget {
   const PartyChatApp({super.key});
 
@@ -1681,11 +1566,11 @@ class _PartyChatAppState extends State<PartyChatApp> {
             brightness: Brightness.dark,
             scaffoldBackgroundColor: const Color(0xFF05030B),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF8B5CF6),
+              seedColor: const Color(0xFF7C3AED),
               brightness: Brightness.dark,
             ).copyWith(
               primary: const Color(0xFFFFC83D),
-              secondary: const Color(0xFFFFC83D),
+              secondary: const Color(0xFF9B5CFF),
               surface: const Color(0xFF10091D),
             ),
             navigationBarTheme: const NavigationBarThemeData(
@@ -1840,9 +1725,79 @@ class _NeonPanel extends StatelessWidget {
   }
 }
 
-class _NeonAction extends StatelessWidget {
+class _PartyLoading extends StatefulWidget {
   final String label;
-  final VoidCallback onPressed;
+  const _PartyLoading({this.label = 'LOADING...'});
+
+  @override
+  State<_PartyLoading> createState() => _PartyLoadingState();
+}
+
+class _PartyLoadingState extends State<_PartyLoading>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 42,
+          height: 42,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.rotate(
+                angle: _controller.value * math.pi * 2,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 3.2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFC83D)),
+                  backgroundColor: Color(0xFF3B245E),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 9),
+        Text(
+          widget.label,
+          style: const TextStyle(
+            color: Color(0xFFFFC83D),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoadingOverlay extends StatelessWidget {
+  const _LoadingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xD9080610),
+      child: const Center(child: _PartyLoading()),
+    );
+  }
+}
+
+class _NeonAction extends StatefulWidget {
+  final String label;
+  final FutureOr<void> Function() onPressed;
   final IconData? icon;
 
   const _NeonAction({
@@ -1852,37 +1807,59 @@ class _NeonAction extends StatelessWidget {
   });
 
   @override
+  State<_NeonAction> createState() => _NeonActionState();
+}
+
+class _NeonActionState extends State<_NeonAction> {
+  bool loading = false;
+
+  Future<void> _run() async {
+    if (loading) return;
+    setState(() => loading = true);
+    try {
+      await widget.onPressed();
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         gradient: const LinearGradient(
-          colors: [Color(0xFF6E3BCB), Color(0xFF8B5CF6)],
+          colors: [Color(0xFF5A2FA8), Color(0xFF8B5CF6)],
         ),
+        border: Border.all(color: const Color(0xFFFFC83D), width: 1.1),
         boxShadow: const [
           BoxShadow(color: Color(0x884F00FF), blurRadius: 20, spreadRadius: 1),
+          BoxShadow(color: Color(0x55FFC83D), blurRadius: 18),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: onPressed,
+          onTap: _run,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 18),
-                  const SizedBox(width: 7),
-                ],
-                Text(
-                  label,
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ],
-            ),
+            child: loading
+                ? const Center(child: SizedBox(height: 52, child: _PartyLoading()))
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.icon != null) ...[
+                        Icon(widget.icon, size: 18),
+                        const SizedBox(width: 7),
+                      ],
+                      Text(
+                        widget.label,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
@@ -1906,28 +1883,26 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    _openAppWhenReady();
-  }
+    Future.delayed(const Duration(seconds: 2), () async {
+      if (!mounted) return;
 
-  Future<void> _openAppWhenReady() async {
-    final user = FirebaseAuth.instance.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      await Future.wait([
-        AppLanguage.load(),
-        ProfileUnreadService.ensure(user.uid),
-      ]);
-    }
+      if (user != null) {
+        await AppLanguage.load();
+        await ProfileUnreadService.ensure(user.uid);
+      }
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            user != null ? const MainPage() : const WelcomePage(),
-      ),
-    );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              user != null ? const MainPage() : const WelcomePage(),
+        ),
+      );
+    });
   }
 
   @override
@@ -1970,7 +1945,9 @@ class _SplashPageState extends State<SplashPage> {
                   style: const TextStyle(color: Colors.white70, fontSize: 16),
                 ),
                 const SizedBox(height: 18),
-                const Text('GOOD VIBES ONLY', style: TextStyle(letterSpacing: 4, color: Color(0xFFD8C2FF), fontWeight: FontWeight.w700)),
+                const _PartyLoading(),
+                const SizedBox(height: 18),
+                const Text('GOOD VIBES ONLY', style: TextStyle(letterSpacing: 4, color: Color(0xFFFFC83D), fontWeight: FontWeight.w700)),
               ],
             ),
           ),
@@ -2013,7 +1990,7 @@ class WelcomePage extends StatelessWidget {
                     style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900),
                     children: [
                       TextSpan(text: 'Party', style: TextStyle(color: Colors.white)),
-                      TextSpan(text: 'Chat', style: TextStyle(color: Color(0xFFFF39D5))),
+                      TextSpan(text: 'Chat', style: TextStyle(color: Color(0xFFFFC83D))),
                     ],
                   ),
                 ),
@@ -2051,8 +2028,6 @@ class WelcomePage extends StatelessWidget {
       ),
     );
   }
-
-
 }
 
 /* ============================================================
@@ -2068,6 +2043,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool signup = false;
+  bool loading = false;
   Future<String> generateUniqueUserId() async {
   final random = Random();
   final usersRef = FirebaseFirestore.instance.collection('users');
@@ -2082,6 +2058,7 @@ class _LoginPageState extends State<LoginPage> {
         .get();
 
     if (existing.docs.isEmpty) {
+      
       return userId;
     }
   }
@@ -2101,6 +2078,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> continueToApp() async {
+    if (loading) return;
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final name = nameController.text.trim();
@@ -2128,6 +2106,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
+      if (mounted) setState(() => loading = true);
       UserCredential credential;
 
       if (signup) {
@@ -2186,6 +2165,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } catch (e) {
+      if (mounted) setState(() => loading = false);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2197,7 +2177,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> continueWithGoogle() async {
+    if (loading) return;
     try {
+      if (mounted) setState(() => loading = true);
       final GoogleSignInAccount? googleUser =
           await GoogleSignIn(
         serverClientId:
@@ -2248,6 +2230,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } catch (e) {
+      if (mounted) setState(() => loading = false);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2261,8 +2244,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
             horizontal: 24,
             vertical: 30,
@@ -2431,6 +2416,9 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
+          ),
+          if (loading) const Positioned.fill(child: _LoadingOverlay()),
+        ],
       ),
     );
   }
@@ -2462,7 +2450,7 @@ class _MainPageState extends State<MainPage> {
     if (value == selected || switchingTab) return;
     setState(() => switchingTab = true);
     _tabTimer?.cancel();
-    _tabTimer = Timer(const Duration(seconds: 1), () {
+    _tabTimer = Timer(const Duration(milliseconds: 450), () {
       if (!mounted) return;
       setState(() {
         selected = value;
@@ -2478,14 +2466,8 @@ class _MainPageState extends State<MainPage> {
       body: Stack(
         children: [
           SafeArea(bottom: false, child: pages[selected]),
-          IgnorePointer(
-            ignoring: !switchingTab,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 160),
-              opacity: switchingTab ? 1 : 0,
-              child: const Align(alignment: Alignment.topCenter, child: _PartyTabLoadingBar()),
-            ),
-          ),
+          if (switchingTab)
+            const Positioned.fill(child: _LoadingOverlay()),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -2896,7 +2878,7 @@ class SimpleUserProfilePage extends StatelessWidget {
         child: FutureBuilder<Map<String, dynamic>?>(
           future: PartyChatData.userData(uid),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: PartyChatLoading(size: 34, label: '')));
+            if (!snapshot.hasData) return const Center(child: _PartyLoading());
             final data = snapshot.data ?? <String, dynamic>{};
             final name = data['name']?.toString() ?? 'Party User';
             final publicId = data['userId']?.toString() ?? uid;
@@ -3001,7 +2983,7 @@ class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
           ),
         ),
         const SizedBox(height: 18),
-        if (searching) const SizedBox(width: double.infinity, child: PartyChatLoading(size: 34, label: '')),
+        if (searching) const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Center(child: _PartyLoading())),
         if (!searching && lastQuery.isNotEmpty && userResults.isEmpty && roomResults.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 80), child: Center(child: Text('No matching result.', style: TextStyle(color: Colors.white54)))),
         if (userResults.isNotEmpty) ...[
@@ -3771,7 +3753,7 @@ class RoomInviteFriendsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Add friends first.'));
           return ListView.builder(
@@ -3931,7 +3913,7 @@ class GameCard extends StatelessWidget {
                           ),
                         ),
                         child: const Center(
-                          child: PartyChatLoading(size: 34, label: ''),
+                          child: const _PartyLoading(),
                         ),
                       );
                     },
@@ -4137,7 +4119,8 @@ Future<void> ensureUserId() async {
           ),
         );
       },
-    );
+
+          );
   }
 
   Future<void> _pickGallery(
@@ -4645,7 +4628,7 @@ class FriendRequestsPage extends StatelessWidget {
         stream: PartyChatData.friendRequestsStream(user.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load friend requests.'));
-          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: PartyChatLoading(size: 34, label: '')));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friend requests yet.'));
           return ListView.separated(
@@ -4704,7 +4687,7 @@ class RoomInvitesPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load room invites.'));
-          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No room invites yet.'));
           return ListView.builder(
@@ -4764,7 +4747,7 @@ class FriendMessagesPage extends StatelessWidget {
         stream: ref.orderBy('lastMessageAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load chats.'));
-          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No messages yet.'));
           return ListView.builder(
@@ -4819,7 +4802,7 @@ class GiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No gifts yet.'));
           return ListView.builder(
@@ -4858,7 +4841,7 @@ class MyGiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Your sent gifts will appear here.'));
           return ListView.builder(
@@ -4902,7 +4885,7 @@ class _FriendsPageState extends State<FriendsPage> {
         stream: PartyChatData.friendsStream(user.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load friends.'));
-          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: PartyChatLoading(size: 34, label: '')));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friends yet.'));
           return ListView.separated(
@@ -5003,7 +4986,7 @@ class _ChatPageState extends State<ChatPage> {
               stream: ref.orderBy('createdAt', descending: false).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) return const Center(child: Text('Could not load messages.'));
-                if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
+                if (!snapshot.hasData) return const Center(child: _PartyLoading());
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('Say hello 👋'));
                 return ListView.builder(
@@ -5018,10 +5001,24 @@ class _ChatPageState extends State<ChatPage> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: mine ? const Color(0xFF7C3AED) : const Color(0xFF201C2C),
+                          color: mine ? const Color(0xFF7C3AED) : const Color(0xFF08080B),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Text(d['text'] ?? ''),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                          children: [
+                            Text(d['text'] ?? ''),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatMessageTime(d['createdAt']),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: mine ? Colors.white70 : Colors.white54,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -5069,6 +5066,17 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+}
+
+String _formatMessageTime(dynamic value) {
+  DateTime? date;
+  if (value is Timestamp) date = value.toDate().toLocal();
+  if (value is DateTime) date = value.toLocal();
+  if (date == null) return '';
+  final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+  final minute = date.minute.toString().padLeft(2, '0');
+  final period = date.hour >= 12 ? 'PM' : 'AM';
+  return '$hour:$minute $period';
 }
 
 /* ============================================================
@@ -5134,7 +5142,7 @@ class SettingsPage extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                                MaterialPageRoute(
+                MaterialPageRoute(
                   builder: (_) => const LanguagePage(),
                 ),
               );
@@ -5904,41 +5912,52 @@ class _PrivacyPageState
    LANGUAGE PAGE
    ============================================================ */
 
-class LanguagePage extends StatelessWidget {
+class LanguagePage extends StatefulWidget {
   const LanguagePage({super.key});
+
+  @override
+  State<LanguagePage> createState() => _LanguagePageState();
+}
+
+class _LanguagePageState extends State<LanguagePage> {
+  bool saving = false;
+
+  Future<void> _select(String language) async {
+    if (saving) return;
+    setState(() => saving = true);
+    try {
+      await AppLanguage.change(language);
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('language'),
-        ),
-      ),
-      body: ValueListenableBuilder<String>(
-        valueListenable: AppLanguage.current,
-        builder: (context, selectedLanguage, child) {
-          return ListView.builder(
-            itemCount: AppLanguage.languages.length,
-            itemBuilder: (context, index) {
-              final language =
-                  AppLanguage.languages[index];
-
-              return ListTile(
-                title: Text(language),
-                trailing:
-                    language == selectedLanguage
-                        ? const Icon(Icons.check)
+      appBar: AppBar(title: Text(AppLanguage.text('language'))),
+      body: Stack(
+        children: [
+          ValueListenableBuilder<String>(
+            valueListenable: AppLanguage.current,
+            builder: (context, selectedLanguage, child) {
+              return ListView.builder(
+                itemCount: AppLanguage.languages.length,
+                itemBuilder: (context, index) {
+                  final language = AppLanguage.languages[index];
+                  return ListTile(
+                    title: Text(language),
+                    trailing: language == selectedLanguage
+                        ? const Icon(Icons.check, color: Color(0xFFFFC83D))
                         : null,
-                onTap: () async {
-                  await AppLanguage.change(
-                    language,
+                    onTap: () => _select(language),
                   );
                 },
               );
             },
-          );
-        },
+          ),
+          if (saving) const Positioned.fill(child: _LoadingOverlay()),
+        ],
       ),
     );
   }
@@ -6002,7 +6021,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               );
               if (!snapshot.hasData) return const Padding(
                 padding: EdgeInsets.all(20),
-                child: Center(child: PartyChatLoading(size: 34, label: '')),
+                child: const Center(child: _PartyLoading()),
               );
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Padding(
@@ -6061,7 +6080,7 @@ class BlockedUsersPage extends StatelessWidget {
         stream: ref.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load blocked users.'));
-          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
+          if (!snapshot.hasData) return const Center(child: _PartyLoading());
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No blocked users.'));
           return ListView.builder(
@@ -6161,7 +6180,3 @@ class TransactionHistoryPage
     );
   }
 }
-
-
-
-  
