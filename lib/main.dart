@@ -1526,6 +1526,121 @@ class PartyChatData {
 /* ============================================================
    APP
    ============================================================ */
+
+/* ============================================================
+   PARTY CHAT ONLINE LOADING
+   ============================================================ */
+
+class PartyChatLoading extends StatefulWidget {
+  final double size;
+  final String label;
+
+  const PartyChatLoading({
+    super.key,
+    this.size = 54,
+    this.label = 'LOADING...',
+  });
+
+  @override
+  State<PartyChatLoading> createState() => _PartyChatLoadingState();
+}
+
+class _PartyChatLoadingState extends State<PartyChatLoading>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  static const List<Color> _dotColors = [
+    Color(0xFFFFC83D),
+    Color(0xFF9B5CFF),
+    Color(0xFF7C3AED),
+    Color(0xFF2A2238),
+    Color(0xFFFFD86B),
+    Color(0xFF8B5CF6),
+    Color(0xFF3A3048),
+    Color(0xFFD6A84F),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ringSize = widget.size;
+    final dotSize = ringSize < 44 ? 5.0 : 6.0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: ringSize,
+          height: ringSize,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Stack(
+                children: List.generate(_dotColors.length, (index) {
+                  final angle =
+                      (index * 2 * pi / _dotColors.length) -
+                      (pi / 2) +
+                      (_controller.value * 2 * pi);
+                  final radius = (ringSize - dotSize) / 2;
+                  final center = ringSize / 2;
+                  final left = center + cos(angle) * radius - dotSize / 2;
+                  final top = center + sin(angle) * radius - dotSize / 2;
+
+                  return Positioned(
+                    left: left,
+                    top: top,
+                    child: Container(
+                      width: dotSize,
+                      height: dotSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _dotColors[index],
+                        boxShadow: [
+                          BoxShadow(
+                            color: _dotColors[index].withValues(alpha: 0.65),
+                            blurRadius: 7,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              );
+            },
+          ),
+        ),
+        if (widget.label.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(
+            widget.label,
+            style: const TextStyle(
+              color: Color(0xFFD8C2FF),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 2.2,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class PartyChatApp extends StatefulWidget {
   const PartyChatApp({super.key});
 
@@ -1566,11 +1681,11 @@ class _PartyChatAppState extends State<PartyChatApp> {
             brightness: Brightness.dark,
             scaffoldBackgroundColor: const Color(0xFF05030B),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF7C3AED),
+              seedColor: const Color(0xFF8B5CF6),
               brightness: Brightness.dark,
             ).copyWith(
               primary: const Color(0xFFFFC83D),
-              secondary: const Color(0xFF9B5CFF),
+              secondary: const Color(0xFFFFC83D),
               surface: const Color(0xFF10091D),
             ),
             navigationBarTheme: const NavigationBarThemeData(
@@ -1791,26 +1906,28 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 2), () async {
-      if (!mounted) return;
+    _openAppWhenReady();
+  }
 
-      final user = FirebaseAuth.instance.currentUser;
+  Future<void> _openAppWhenReady() async {
+    final user = FirebaseAuth.instance.currentUser;
 
-      if (user != null) {
-        await AppLanguage.load();
-        await ProfileUnreadService.ensure(user.uid);
-      }
+    if (user != null) {
+      await Future.wait([
+        AppLanguage.load(),
+        ProfileUnreadService.ensure(user.uid),
+      ]);
+    }
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              user != null ? const MainPage() : const WelcomePage(),
-        ),
-      );
-    });
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            user != null ? const MainPage() : const WelcomePage(),
+      ),
+    );
   }
 
   @override
@@ -1843,7 +1960,7 @@ class _SplashPageState extends State<SplashPage> {
                     style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900),
                     children: [
                       TextSpan(text: 'Party', style: TextStyle(color: Colors.white)),
-                      TextSpan(text: 'Chat', style: TextStyle(color: Color(0xFFFF38D7))),
+                      TextSpan(text: 'Chat', style: TextStyle(color: Color(0xFFFFC83D))),
                     ],
                   ),
                 ),
@@ -1934,6 +2051,8 @@ class WelcomePage extends StatelessWidget {
       ),
     );
   }
+
+
 }
 
 /* ============================================================
@@ -2777,7 +2896,7 @@ class SimpleUserProfilePage extends StatelessWidget {
         child: FutureBuilder<Map<String, dynamic>?>(
           future: PartyChatData.userData(uid),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
+            if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: PartyChatLoading(size: 34, label: '')));
             final data = snapshot.data ?? <String, dynamic>{};
             final name = data['name']?.toString() ?? 'Party User';
             final publicId = data['userId']?.toString() ?? uid;
@@ -2882,7 +3001,7 @@ class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
           ),
         ),
         const SizedBox(height: 18),
-        if (searching) const SizedBox(width: double.infinity, child: LinearProgressIndicator(minHeight: 3)),
+        if (searching) const SizedBox(width: double.infinity, child: PartyChatLoading(size: 34, label: '')),
         if (!searching && lastQuery.isNotEmpty && userResults.isEmpty && roomResults.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 80), child: Center(child: Text('No matching result.', style: TextStyle(color: Colors.white54)))),
         if (userResults.isNotEmpty) ...[
@@ -3652,7 +3771,7 @@ class RoomInviteFriendsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Add friends first.'));
           return ListView.builder(
@@ -3812,7 +3931,7 @@ class GameCard extends StatelessWidget {
                           ),
                         ),
                         child: const Center(
-                          child: LinearProgressIndicator(minHeight: 3),
+                          child: PartyChatLoading(size: 34, label: ''),
                         ),
                       );
                     },
@@ -4526,7 +4645,7 @@ class FriendRequestsPage extends StatelessWidget {
         stream: PartyChatData.friendRequestsStream(user.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load friend requests.'));
-          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
+          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: PartyChatLoading(size: 34, label: '')));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friend requests yet.'));
           return ListView.separated(
@@ -4585,7 +4704,7 @@ class RoomInvitesPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load room invites.'));
-          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No room invites yet.'));
           return ListView.builder(
@@ -4645,7 +4764,7 @@ class FriendMessagesPage extends StatelessWidget {
         stream: ref.orderBy('lastMessageAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load chats.'));
-          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No messages yet.'));
           return ListView.builder(
@@ -4700,7 +4819,7 @@ class GiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No gifts yet.'));
           return ListView.builder(
@@ -4739,7 +4858,7 @@ class MyGiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Your sent gifts will appear here.'));
           return ListView.builder(
@@ -4783,7 +4902,7 @@ class _FriendsPageState extends State<FriendsPage> {
         stream: PartyChatData.friendsStream(user.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load friends.'));
-          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
+          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: PartyChatLoading(size: 34, label: '')));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friends yet.'));
           return ListView.separated(
@@ -4884,7 +5003,7 @@ class _ChatPageState extends State<ChatPage> {
               stream: ref.orderBy('createdAt', descending: false).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) return const Center(child: Text('Could not load messages.'));
-                if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+                if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('Say hello 👋'));
                 return ListView.builder(
@@ -5015,7 +5134,7 @@ class SettingsPage extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                                MaterialPageRoute(
                   builder: (_) => const LanguagePage(),
                 ),
               );
@@ -5883,7 +6002,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               );
               if (!snapshot.hasData) return const Padding(
                 padding: EdgeInsets.all(20),
-                child: Center(child: LinearProgressIndicator(minHeight: 3)),
+                child: Center(child: PartyChatLoading(size: 34, label: '')),
               );
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Padding(
@@ -5942,7 +6061,7 @@ class BlockedUsersPage extends StatelessWidget {
         stream: ref.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load blocked users.'));
-          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+          if (!snapshot.hasData) return const Center(child: PartyChatLoading(size: 34, label: ''));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No blocked users.'));
           return ListView.builder(
@@ -6042,3 +6161,7 @@ class TransactionHistoryPage
     );
   }
 }
+
+
+
+  
