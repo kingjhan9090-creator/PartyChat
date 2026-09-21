@@ -2573,6 +2573,7 @@ class _RoomsTabState extends State<RoomsTab> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: List.generate(myRoomTabs.length, (index) {
+          final selected = selectedMyRoomTab == index;
           return Padding(
             padding: EdgeInsets.only(right: index == myRoomTabs.length - 1 ? 0 : 8),
             child: GestureDetector(
@@ -3861,8 +3862,7 @@ Future<void> ensureUserId() async {
 
                   return GestureDetector(
                     onTap: () {
-final selected = selectedMyRoomTab == index;
-                                       setDialogState(() {
+                      setDialogState(() {
                         tempSelected = avatar;
                       });
                     },
@@ -5150,7 +5150,6 @@ class FriendsPage extends StatelessWidget {
   }
 
   Future<void> _giftDialog(
-     
     BuildContext context,
     String fromUid,
     String toUid,
