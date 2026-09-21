@@ -1889,365 +1889,245 @@ class HomeTab extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(18, 18, 18, 100),
         children: [
-          Row(children: [
-            const CircleAvatar(radius: 25, backgroundColor: Color(0xFF57307A), child: Icon(Icons.person)),
-            const SizedBox(width: 12),
-            const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Hello, Party User 👋', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-              Text('Welcome back', style: TextStyle(color: Colors.white60)),
-            ])),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: const Color(0xFF211331), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFF7138FF))),
-              child: const Icon(Icons.notifications_none),
-            ),
-          ]),
+          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: FirebaseAuth.instance.currentUser == null
+                ? null
+                : FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots(),
+            builder: (context, snapshot) {
+              final data = snapshot.data?.data();
+              final user = FirebaseAuth.instance.currentUser;
+              final name = (data?['name'] ?? user?.displayName ?? 'Party User').toString();
+              final photoUrl = (data?['photoURL'] ?? user?.photoURL ?? '').toString();
+
+              return Row(
+                children: [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: const Color(0xFF57307A),
+                    backgroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+                    child: photoUrl.isEmpty ? const Icon(Icons.person) : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hello, $name 👋',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                        ),
+                        const Text(
+                          'Welcome back',
+                          style: TextStyle(color: Colors.white60),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF211331),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFF7138FF)),
+                    ),
+                    child: const Icon(Icons.notifications_none),
+                  ),
+                ],
+              );
+            },
+          ),
           const SizedBox(height: 18),
-          _NeonPanel(
-            padding: const EdgeInsets.all(20),
-            child: Row(children: [
-              const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Your Balance', style: TextStyle(color: Colors.white70)),
-                SizedBox(height: 4),
-                Text('12,580 🪙', style: TextStyle(fontSize: 29, fontWeight: FontWeight.w900)),
-                SizedBox(height: 5),
-                Text('💎 2,450 Diamonds', style: TextStyle(color: Color(0xFFD9C9FF))),
-              ])),
-              const Icon(Icons.diamond, size: 48, color: Color(0xFFB65CFF)),
-            ]),
+          Row(
+            children: const [
+              Expanded(child: _HomeActionCard(icon: Icons.campaign, title: 'New Update', subtitle: 'See what is new')),
+              SizedBox(width: 10),
+              Expanded(child: _HomeActionCard(icon: Icons.card_giftcard, title: 'Daily Free Reward', subtitle: 'Claim your free reward')),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: const [
+              Expanded(child: _HomeActionCard(icon: Icons.task_alt, title: 'Daily Task', subtitle: 'Complete today\'s tasks')),
+              SizedBox(width: 10),
+              Expanded(child: _HomeActionCard(icon: Icons.celebration, title: 'Event', subtitle: 'Join active events')),
+            ],
           ),
           const SizedBox(height: 22),
-          Row(children: [const Expanded(child: Text('Popular Rooms 🔥', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900))), Text('See All ›', style: TextStyle(color: Color(0xFFFF5DE0), fontWeight: FontWeight.w700))]),
+          Row(
+            children: const [
+              Expanded(child: Text('Popular Rooms 🔥', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900))),
+              Text('See All ›', style: TextStyle(color: Color(0xFFFF5DE0), fontWeight: FontWeight.w700)),
+            ],
+          ),
           const SizedBox(height: 12),
           const RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Chat • Friends • Fun'),
           const RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Games • Challenge • Win'),
           const RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music • Vibes • Party'),
-          const SizedBox(height: 10),
-          _NeonPanel(
-            padding: EdgeInsets.zero,
-            child: SizedBox(height: 120, child: Center(child: Text('GOOD VIBES\nONLY ♥', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFFF0B9FF), letterSpacing: 2)))),
-          ),
         ],
       ),
     );
   }
 }
 
-class RoomsTab extends StatelessWidget {
-  const RoomsTab({super.key});
+class _HomeActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _HomeActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF171125),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF7138FF)),
+        boxShadow: const [BoxShadow(color: Color(0x331F00FF), blurRadius: 12)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
+              ),
+            ),
+            child: Icon(icon, color: Colors.white),
+          ),
+          const SizedBox(height: 10),
+          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900)),
+          const SizedBox(height: 4),
+          Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+}
+
+class RoomsTab extends StatefulWidget {
+  const RoomsTab({super.key});
+
+  @override
+  State<RoomsTab> createState() => _RoomsTabState();
+}
+
+class _RoomsTabState extends State<RoomsTab> {
+  int selectedRoomTab = 0;
+
+  List<Widget> _roomListForSelectedTab() {
+    switch (selectedRoomTab) {
+      case 1:
+        return const [
+          RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
+          RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
+          RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
+        ];
+      case 2:
+        return const [
+          RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax • Talk • Be Yourself'),
+          RoomTile('Love Corner 💕', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
+          RoomTile('New Friends ✨', '620 online', Icons.auto_awesome, subtitle: 'Meet new people'),
+        ];
+      case 3:
+        return const [
+          RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Rooms with your friends'),
+          RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax with friends'),
+        ];
+      default:
+        return const [
+          RoomTile('Friends Forever 💜', '2.4K online', Icons.people, subtitle: 'Make new friends & enjoy chat'),
+          RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games, subtitle: 'Play games & win rewards'),
+          RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note, subtitle: 'Music, Vibes & Party'),
+          RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round, subtitle: 'Relax • Talk • Be Yourself'),
+          RoomTile('Love Corner 💕', '756 online', Icons.favorite, subtitle: 'Sweet talks & more'),
+        ];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const titles = ['All Rooms', 'Popular Rooms', 'New Rooms', 'With Friends'];
+    const icons = [Icons.public, Icons.local_fire_department, Icons.fiber_new, Icons.people_alt];
+
     return _NeonBackground(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          const Text(
-            'Rooms',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-
+          const Text('Rooms', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
           const SizedBox(height: 14),
-
-          TextField(
+          const TextField(
             decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search),
               hintText: 'Search rooms...',
-              suffixIcon: const Icon(Icons.tune),
+              suffixIcon: Icon(Icons.tune),
             ),
-          ),
 
-          const SizedBox(height: 18),
-
-          // =====================================================
-          // MAIN ROOM OPTIONS
-          // =====================================================
-
-          Row(
-            children: [
-              Expanded(
-                child: _roomMainButton(
-                  context,
-                  'All Rooms',
-                  Icons.public,
-                  false,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _roomMainButton(
-                  context,
-                  'Popular Rooms',
-                  Icons.local_fire_department,
-                  true,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          Row(
-            children: [
-              Expanded(
-                child: _roomMainButton(
-                  context,
-                  'New Rooms',
-                  Icons.fiber_new,
-                  false,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _roomMainButton(
-                  context,
-                  'Your Room',
-                  Icons.meeting_room,
-                  false,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          // =====================================================
-          // ALL ROOMS
-          // =====================================================
-
-          const Text(
-            'All Rooms',
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          const RoomTile(
-            'Friends Forever 💜',
-            '2.4K online',
-            Icons.people,
-            subtitle: 'Make new friends & enjoy chat',
-          ),
-
-          const RoomTile(
-            'Gaming Zone 🎮',
-            '1.8K online',
-            Icons.games,
-            subtitle: 'Play games & win rewards',
-          ),
-
-          const RoomTile(
-            'Music Lovers 🎵',
-            '1.2K online',
-            Icons.music_note,
-            subtitle: 'Music, Vibes & Party',
-          ),
-
-          const RoomTile(
-            'Chill Zone 🌙',
-            '980 online',
-            Icons.nightlight_round,
-            subtitle: 'Relax • Talk • Be Yourself',
-          ),
-
-          const RoomTile(
-            'Love Corner 💕',
-            '756 online',
-            Icons.favorite,
-            subtitle: 'Sweet talks & more',
-          ),
-
-          const SizedBox(height: 12),
-
-          // =====================================================
-          // YOUR ROOM
-          // =====================================================
-
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const YourRoomPage(),
-                ),
-              );
-            },
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 28,
-              ),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF171126),
-                    Color(0xFF0D0917),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: const Color(0xFF8B42FF),
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x553F00FF),
-                    blurRadius: 18,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 58,
-                    height: 58,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF7138FF),
-                          Color(0xFFE52DD4),
-                        ],
                       ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x665B1CFF),
-                          blurRadius: 16,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.meeting_room,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-
-                  const SizedBox(width: 15),
-
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Your Room',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          'My Room • Recently Joined • Joined Rooms • With Friends',
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white70,
-                    size: 18,
-                  ),
-                ],
-              ),
-            ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(child: _roomMainButton(titles[0], icons[0], 0)),
+              const SizedBox(width: 8),
+              Expanded(child: _roomMainButton(titles[1], icons[1], 1)),
+            ],
           ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _roomMainButton(titles[2], icons[2], 2)),
+              const SizedBox(width: 8),
+              Expanded(child: _roomMainButton(titles[3], icons[3], 3)),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(titles[selectedRoomTab], style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 12),
+          ..._roomListForSelectedTab(),
         ],
       ),
     );
   }
 
-  Widget _roomMainButton(
-    BuildContext context,
-    String title,
-    IconData icon,
-    bool highlighted,
-  ) {
+  Widget _roomMainButton(String title, IconData icon, int index) {
+    final highlighted = selectedRoomTab == index;
     return GestureDetector(
-      onTap: () {
-        if (title == 'Popular Rooms') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const PopularRoomsPage(),
-            ),
-          );
-        } else if (title == 'New Rooms') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const NewRoomsPage(),
-            ),
-          );
-        } else if (title == 'Your Room') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const YourRoomPage(),
-            ),
-          );
-        }
-      },
+      onTap: () => setState(() => selectedRoomTab = index),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 15,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
         decoration: BoxDecoration(
           gradient: highlighted
-              ? const LinearGradient(
-                  colors: [
-                    Color(0xFF7138FF),
-                    Color(0xFFE52DD4),
-                  ],
-                )
+              ? const LinearGradient(colors: [Color(0xFF7138FF), Color(0xFFE52DD4)])
               : null,
-          color: highlighted
-              ? null
-              : const Color(0xFF171125),
+          color: highlighted ? null : const Color(0xFF171125),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFF7138FF),
-          ),
+          border: Border.all(color: const Color(0xFF7138FF)),
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
+            Icon(icon, color: Colors.white, size: 24),
             const SizedBox(height: 7),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
       ),
     );
   }
 }
-
-
-// ============================================================
-// POPULAR ROOMS PAGE
-// ============================================================
 
 class PopularRoomsPage extends StatelessWidget {
   const PopularRoomsPage({super.key});
@@ -3236,6 +3116,7 @@ Future<void> ensureUserId() async {
                 itemCount: avatars.length,
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
+
                   crossAxisCount: 4,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
