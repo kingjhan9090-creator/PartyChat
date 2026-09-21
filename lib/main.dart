@@ -931,6 +931,7 @@ class PartyChatData {
       'name': otherData['name'] ?? 'Party User',
       'email': otherData['email'] ?? '',
       'photoURL': otherData['photoURL'] ?? '',
+      'photoBase64': otherData['photoBase64'] ?? '',
       'avatar': otherData['avatar'] ?? '',
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -1050,6 +1051,8 @@ class PartyChatData {
           fromData['email'] ?? '',
       'photoURL':
           fromData['photoURL'] ?? '',
+      'photoBase64':
+          fromData['photoBase64'] ?? '',
       'avatar':
           fromData['avatar'] ?? '',
       'status': 'pending',
@@ -1112,6 +1115,8 @@ class PartyChatData {
             other['email'] ?? '',
         'photoURL':
             other['photoURL'] ?? '',
+        'photoBase64':
+            other['photoBase64'] ?? '',
         'avatar':
             other['avatar'] ?? '',
         'createdAt':
@@ -1129,6 +1134,8 @@ class PartyChatData {
             me['email'] ?? '',
         'photoURL':
             me['photoURL'] ?? '',
+        'photoBase64':
+            me['photoBase64'] ?? '',
         'avatar':
             me['avatar'] ?? '',
         'createdAt':
@@ -1485,6 +1492,8 @@ class PartyChatData {
           fromData['name'] ?? 'Party User',
       'inviterPhoto':
           fromData['photoURL'] ?? '',
+      'inviterPhotoBase64':
+          fromData['photoBase64'] ?? '',
       'status': 'pending',
       'createdAt':
           FieldValue.serverTimestamp(),
@@ -1557,16 +1566,16 @@ class _PartyChatAppState extends State<PartyChatApp> {
             brightness: Brightness.dark,
             scaffoldBackgroundColor: const Color(0xFF05030B),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF7B35FF),
+              seedColor: const Color(0xFF7C3AED),
               brightness: Brightness.dark,
             ).copyWith(
-              primary: const Color(0xFFC05CFF),
-              secondary: const Color(0xFFFF2BD6),
+              primary: const Color(0xFFFFC83D),
+              secondary: const Color(0xFF9B5CFF),
               surface: const Color(0xFF10091D),
             ),
             navigationBarTheme: const NavigationBarThemeData(
               backgroundColor: Color(0xFF0C0915),
-              indicatorColor: Color(0xFF7138A5),
+              indicatorColor: Color(0xFF6E3BCB),
               height: 78,
               labelTextStyle: WidgetStatePropertyAll(
                 TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
@@ -1582,15 +1591,15 @@ class _PartyChatAppState extends State<PartyChatApp> {
               fillColor: const Color(0xFF0F0B1A),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(18)),
-                borderSide: BorderSide(color: Color(0xFF5B2A92)),
+                borderSide: BorderSide(color: Color(0xFF4D397A)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(18)),
-                borderSide: BorderSide(color: Color(0xFF3C2160)),
+                borderSide: BorderSide(color: Color(0xFF34274A)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(18)),
-                borderSide: BorderSide(color: Color(0xFFB65CFF), width: 1.5),
+                borderSide: BorderSide(color: Color(0xFFFFC83D), width: 1.5),
               ),
             ),
             useMaterial3: true,
@@ -1632,7 +1641,7 @@ class _NeonBackground extends StatelessWidget {
             left: -100,
             child: _GlowOrb(
               size: 260,
-              color: const Color(0xFF7A2CFF),
+              color: const Color(0xFF8B5CF6),
             ),
           ),
           Positioned(
@@ -1640,7 +1649,7 @@ class _NeonBackground extends StatelessWidget {
             right: -100,
             child: _GlowOrb(
               size: 300,
-              color: const Color(0xFFFF21D4),
+              color: const Color(0xFF8B5CF6),
             ),
           ),
           child,
@@ -1699,10 +1708,10 @@ class _NeonPanel extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF211033), Color(0xFF0B0713)],
+          colors: [Color(0xFF1C1628), Color(0xFF0B0713)],
         ),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: const Color(0xFF9B4DFF), width: 1.2),
+        border: Border.all(color: const Color(0xFF9B5CFF), width: 1.2),
         boxShadow: const [
           BoxShadow(
             color: Color(0x774F00FF),
@@ -1733,7 +1742,7 @@ class _NeonAction extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         gradient: const LinearGradient(
-          colors: [Color(0xFF6E2DFF), Color(0xFFFF20D0)],
+          colors: [Color(0xFF6E3BCB), Color(0xFF8B5CF6)],
         ),
         boxShadow: const [
           BoxShadow(color: Color(0x884F00FF), blurRadius: 20, spreadRadius: 1),
@@ -1820,7 +1829,7 @@ class _SplashPageState extends State<SplashPage> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF7B35FF), Color(0xFFFF2BD6)],
+                      colors: [Color(0xFF7C3AED), Color(0xFF9B5CFF)],
                     ),
                     boxShadow: const [
                       BoxShadow(color: Color(0xAA8C2DFF), blurRadius: 45, spreadRadius: 8),
@@ -1844,7 +1853,7 @@ class _SplashPageState extends State<SplashPage> {
                   style: const TextStyle(color: Colors.white70, fontSize: 16),
                 ),
                 const SizedBox(height: 18),
-                const Text('GOOD VIBES ONLY', style: TextStyle(letterSpacing: 4, color: Color(0xFFD8B7FF), fontWeight: FontWeight.w700)),
+                const Text('GOOD VIBES ONLY', style: TextStyle(letterSpacing: 4, color: Color(0xFFD8C2FF), fontWeight: FontWeight.w700)),
               ],
             ),
           ),
@@ -1876,7 +1885,7 @@ class WelcomePage extends StatelessWidget {
                   height: 112,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(colors: [Color(0xFF7338FF), Color(0xFFFF2BD6)]),
+                    gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF9B5CFF)]),
                     boxShadow: const [BoxShadow(color: Color(0xAA9B35FF), blurRadius: 42, spreadRadius: 6)],
                   ),
                   child: const Icon(Icons.groups_rounded, size: 60),
@@ -1911,7 +1920,7 @@ class WelcomePage extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                      side: const BorderSide(color: Color(0xFFB65CFF)),
+                      side: const BorderSide(color: Color(0xFFFFC83D)),
                     ),
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
                     child: Text(AppLanguage.text('login'), style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -2314,24 +2323,55 @@ class _LoginPageState extends State<LoginPage> {
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
-
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
   int selected = 0;
-
+  bool switchingTab = false;
+  Timer? _tabTimer;
   final pages = const [HomeTab(), RoomsTab(), GamesTab(), WalletTab(), ProfileTab()];
+
+  @override
+  void dispose() {
+    _tabTimer?.cancel();
+    super.dispose();
+  }
+
+  void _selectTab(int value) {
+    if (value == selected || switchingTab) return;
+    setState(() => switchingTab = true);
+    _tabTimer?.cancel();
+    _tabTimer = Timer(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() {
+        selected = value;
+        switchingTab = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: SafeArea(bottom: false, child: pages[selected]),
+      body: Stack(
+        children: [
+          SafeArea(bottom: false, child: pages[selected]),
+          IgnorePointer(
+            ignoring: !switchingTab,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 160),
+              opacity: switchingTab ? 1 : 0,
+              child: const Align(alignment: Alignment.topCenter, child: _PartyTabLoadingBar()),
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: selected,
-        onDestinationSelected: (value) => setState(() => selected = value),
+        onDestinationSelected: _selectTab,
         destinations: [
           NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: AppLanguage.text('home')),
           NavigationDestination(icon: const Icon(Icons.forum_outlined), selectedIcon: const Icon(Icons.forum), label: AppLanguage.text('rooms')),
@@ -2344,51 +2384,106 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
+class _PartyTabLoadingBar extends StatefulWidget {
+  const _PartyTabLoadingBar();
+  @override
+  State<_PartyTabLoadingBar> createState() => _PartyTabLoadingBarState();
+}
+
+class _PartyTabLoadingBarState extends State<_PartyTabLoadingBar> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 850))..repeat(reverse: true);
+  @override
+  void dispose() { _controller.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 4,
+      width: double.infinity,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) => FractionallySizedBox(
+          alignment: Alignment(-1 + (_controller.value * 2), 0),
+          widthFactor: .42,
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(colors: [Color(0xFF9B5CFF), Color(0xFFFFC83D), Color(0xFF9B5CFF)]),
+              boxShadow: [BoxShadow(color: Color(0x99FFC83D), blurRadius: 12, spreadRadius: 1)],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /* ============================================================
    HOME
    ============================================================ */
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
-
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     return _NeonBackground(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 100),
         children: [
-          const Text(
-            'Home',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
-          ),
+          if (uid != null)
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+              builder: (context, snapshot) => _HomeHeader(data: snapshot.data?.data() ?? <String, dynamic>{}),
+            )
+          else
+            const _HomeHeader(data: <String, dynamic>{}),
+          const SizedBox(height: 18),
+          const _HomeBalanceRow(),
           const SizedBox(height: 20),
-          _HomeBigBox(
-            title: 'New Update',
-            icon: Icons.campaign_rounded,
-            subtitle: 'See what is new in PartyChat',
-          ),
+          _HomeBigBox(title: 'New Update', icon: Icons.campaign_rounded, subtitle: 'See what is new in PartyChat'),
           const SizedBox(height: 14),
-          _HomeBigBox(
-            title: 'Event',
-            icon: Icons.celebration_rounded,
-            subtitle: 'Join the latest PartyChat event',
-          ),
+          _HomeBigBox(title: 'Event', icon: Icons.celebration_rounded, subtitle: 'Join the latest PartyChat event'),
           const SizedBox(height: 14),
-          _HomeBigBox(
-            title: 'Free Reward',
-            icon: Icons.card_giftcard_rounded,
-            subtitle: 'Collect your free daily reward',
-          ),
+          _HomeBigBox(title: 'Free Reward', icon: Icons.card_giftcard_rounded, subtitle: 'Collect your free daily reward'),
           const SizedBox(height: 14),
-          _HomeBigBox(
-            title: 'Daily Task',
-            icon: Icons.task_alt_rounded,
-            subtitle: 'Complete today\'s tasks',
-          ),
+          _HomeBigBox(title: 'Daily Task', icon: Icons.task_alt_rounded, subtitle: 'Complete today\'s tasks'),
         ],
       ),
     );
   }
+}
+
+class _HomeHeader extends StatelessWidget {
+  final Map<String, dynamic> data;
+  const _HomeHeader({required this.data});
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Text('Home', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900))),
+        _NetworkOrAvatar(photoUrl: data['photoURL'] as String?, photoBase64: data['photoBase64'] as String?, avatar: data['avatar'] as String?, radius: 22),
+      ],
+    );
+  }
+}
+
+class _HomeBalanceRow extends StatelessWidget {
+  const _HomeBalanceRow();
+  Widget _box(IconData icon, String value, String label, Color color) => Expanded(
+    child: Container(
+      height: 46,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(color: const Color(0xFF0D0A12), borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withOpacity(.55))),
+      child: Row(children: [
+        Icon(icon, size: 18, color: color), const SizedBox(width: 7),
+        Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(value, style: TextStyle(fontWeight: FontWeight.w900, color: color)),
+          Text(label, style: const TextStyle(fontSize: 10, color: Colors.white54)),
+        ])),
+      ]),
+    ),
+  );
+  @override
+  Widget build(BuildContext context) => Row(children: [_box(Icons.monetization_on_rounded, '12,580', 'Coins', const Color(0xFFFFC83D)), const SizedBox(width: 10), _box(Icons.diamond_rounded, '2,450', 'Diamonds', const Color(0xFFB78CFF))]);
 }
 
 class _HomeBigBox extends StatelessWidget {
@@ -2410,10 +2505,10 @@ class _HomeBigBox extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF211331), Color(0xFF100B1A)],
+          colors: [Color(0xFF1C1628), Color(0xFF100B1A)],
         ),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF7138FF), width: 1.2),
+        border: Border.all(color: const Color(0xFF7B3FF2), width: 1.2),
         boxShadow: const [
           BoxShadow(color: Color(0x443F00FF), blurRadius: 18, spreadRadius: 1),
         ],
@@ -2426,7 +2521,7 @@ class _HomeBigBox extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: const LinearGradient(
-                colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
+                colors: [Color(0xFF7B3FF2), Color(0xFFD6A84F)],
               ),
               boxShadow: const [
                 BoxShadow(color: Color(0x665B1CFF), blurRadius: 18),
@@ -2493,32 +2588,29 @@ class _RoomsTabState extends State<RoomsTab> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Rooms',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Search',
-                icon: const Icon(Icons.search_rounded, size: 28),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PartyChatSearchPage(),
-                    ),
-                  );
-                },
-              ),
-            ],
+          const Text(
+            'Rooms',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PartyChatSearchPage())),
+            child: Container(
+              height: 54,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D0A12),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFF7B3FF2), width: 1.1),
+              ),
+              child: const Row(children: [
+                Icon(Icons.search_rounded, color: Color(0xFFFFC83D)),
+                SizedBox(width: 10),
+                Expanded(child: Text('Search users or rooms', style: TextStyle(color: Colors.white54, fontSize: 15))),
+              ]),
+            ),
+          ),
+          const SizedBox(height: 18),
           _buildMainTabs(),
           if (selectedMainTab == 3) ...[
             const SizedBox(height: 14),
@@ -2546,12 +2638,12 @@ class _RoomsTabState extends State<RoomsTab> {
                 decoration: BoxDecoration(
                   gradient: selected
                       ? const LinearGradient(
-                          colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
+                          colors: [Color(0xFF7B3FF2), Color(0xFFD6A84F)],
                         )
                       : null,
                   color: selected ? null : const Color(0xFF171125),
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: const Color(0xFF7138FF)),
+                  border: Border.all(color: const Color(0xFF7B3FF2)),
                 ),
                 child: Text(
                   mainTabs[index],
@@ -2581,10 +2673,10 @@ class _RoomsTabState extends State<RoomsTab> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 11),
                 decoration: BoxDecoration(
-                  color: selected ? const Color(0xFF2B1940) : const Color(0xFF120D1C),
+                  color: selected ? const Color(0xFF241A33) : const Color(0xFF120D1C),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: selected ? const Color(0xFFE52DD4) : const Color(0xFF493060),
+                    color: selected ? const Color(0xFFD6A84F) : const Color(0xFF40344F),
                   ),
                 ),
                 child: Text(
@@ -2672,6 +2764,183 @@ class _RoomsTabState extends State<RoomsTab> {
   }
 }
 
+
+class SimpleUserProfilePage extends StatelessWidget {
+  final String uid;
+  const SimpleUserProfilePage({super.key, required this.uid});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF05030B),
+      appBar: AppBar(),
+      body: _NeonBackground(
+        child: FutureBuilder<Map<String, dynamic>?>(
+          future: PartyChatData.userData(uid),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
+            final data = snapshot.data ?? <String, dynamic>{};
+            final name = data['name']?.toString() ?? 'Party User';
+            final publicId = data['userId']?.toString() ?? uid;
+            return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+              _NetworkOrAvatar(photoUrl: data['photoURL'] as String?, photoBase64: data['photoBase64'] as String?, avatar: data['avatar'] as String?, radius: 72),
+              const SizedBox(height: 20),
+              Text(name, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 8),
+              Text('UID: $publicId', style: const TextStyle(color: Colors.white60, fontSize: 15)),
+            ]));
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class PartyChatSearchPage extends StatefulWidget {
+  const PartyChatSearchPage({super.key});
+  @override
+  State<PartyChatSearchPage> createState() => _PartyChatSearchPageState();
+}
+
+class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
+  final controller = TextEditingController();
+  final focusNode = FocusNode();
+  List<Map<String, dynamic>> userResults = [];
+  List<Map<String, String>> roomResults = [];
+  bool searching = false;
+  String lastQuery = '';
+
+  static const rooms = [
+    {'title': 'Friends Forever 💜', 'online': '2.4K online'},
+    {'title': 'Gaming Zone 🎮', 'online': '1.8K online'},
+    {'title': 'Music Lovers 🎵', 'online': '1.2K online'},
+    {'title': 'Chill Zone 🌙', 'online': '980 online'},
+    {'title': 'New Friends 🌟', 'online': '320 online'},
+    {'title': 'Fresh Talk 💬', 'online': '210 online'},
+    {'title': 'New Vibes 🎵', 'online': '145 online'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) focusNode.requestFocus(); });
+  }
+  @override
+  void dispose() { controller.dispose(); focusNode.dispose(); super.dispose(); }
+
+  Future<void> _search(String raw) async {
+    final query = raw.trim();
+    if (query.isEmpty) {
+      setState(() { lastQuery = ''; userResults = []; roomResults = []; searching = false; });
+      return;
+    }
+    setState(() { searching = true; lastQuery = query; });
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    Map<String, dynamic>? exactUser;
+    try { exactUser = await PartyChatData.findUserByUid(query); } catch (_) {}
+    List<Map<String, dynamic>> nameMatches = [];
+    try { nameMatches = await PartyChatData.searchUsersByName(query); } catch (_) {}
+    final q = query.toLowerCase();
+    final roomsFound = rooms.where((room) => room['title']!.toLowerCase().contains(q)).toList();
+    final users = <Map<String, dynamic>>[];
+    if (exactUser != null) {
+      users.add(exactUser);
+    } else if (!roomsFound.any((room) => room['title']!.toLowerCase() == q)) {
+      for (final item in nameMatches) {
+        final name = (item['name'] ?? '').toString().toLowerCase();
+        if (!name.contains(q)) continue;
+        final id = item['uid']?.toString();
+        if (id != null && users.every((x) => x['uid']?.toString() != id)) users.add(item);
+      }
+    }
+    if (uid != null) users.removeWhere((item) => item['uid']?.toString() == uid);
+    if (!mounted || query != lastQuery) return;
+    setState(() { userResults = users; roomResults = roomsFound; searching = false; });
+  }
+
+  Future<bool> _requestPending(String myUid, String otherUid) async {
+    if ((await PartyChatData.friends(myUid).doc(otherUid).get()).exists) return true;
+    if ((await PartyChatData.friendRequests(myUid).doc(otherUid).get()).exists) return true;
+    return (await PartyChatData.friendRequests(otherUid).doc(myUid).get()).exists;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF05030B),
+      appBar: AppBar(title: const Text('Search')),
+      body: _NeonBackground(child: ListView(padding: const EdgeInsets.fromLTRB(18, 16, 18, 30), children: [
+        TextField(
+          controller: controller,
+          focusNode: focusNode,
+          textInputAction: TextInputAction.search,
+          onSubmitted: _search,
+          onChanged: (value) { if (value.trim().isEmpty) _search(''); },
+          decoration: InputDecoration(
+            hintText: 'Search by UID, name or room name',
+            prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFFFC83D)),
+            suffixIcon: IconButton(icon: const Icon(Icons.arrow_forward_rounded, color: Color(0xFFFFC83D)), onPressed: () => _search(controller.text)),
+          ),
+        ),
+        const SizedBox(height: 18),
+        if (searching) const SizedBox(width: double.infinity, child: LinearProgressIndicator(minHeight: 3)),
+        if (!searching && lastQuery.isNotEmpty && userResults.isEmpty && roomResults.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 80), child: Center(child: Text('No matching result.', style: TextStyle(color: Colors.white54)))),
+        if (userResults.isNotEmpty) ...[
+          const Text('Users', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 8),
+          ...userResults.map((data) {
+            final otherUid = data['uid']?.toString() ?? '';
+            final name = data['name']?.toString() ?? 'Party User';
+            final publicId = data['userId']?.toString() ?? otherUid;
+            final myUid = FirebaseAuth.instance.currentUser?.uid;
+            return Card(
+              color: const Color(0xFF0D0A12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Color(0xFF3B2A55))),
+              child: ListTile(
+                leading: GestureDetector(
+                  onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: otherUid))),
+                  child: _NetworkOrAvatar(photoUrl: data['photoURL'] as String?, photoBase64: data['photoBase64'] as String?, avatar: data['avatar'] as String?, radius: 24),
+                ),
+                title: Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                subtitle: Text('ID: $publicId'),
+                trailing: myUid == null ? null : FutureBuilder<bool>(
+                  future: _requestPending(myUid, otherUid),
+                  builder: (context, snapshot) {
+                    final pending = snapshot.data ?? false;
+                    return IconButton(
+                      icon: Icon(pending ? Icons.check_circle_rounded : Icons.person_add_alt_1_rounded, color: pending ? const Color(0xFFFFC83D) : const Color(0xFF9B5CFF)),
+                      onPressed: pending ? null : () async {
+                        try { await PartyChatData.sendFriendRequest(fromUid: myUid, toUid: otherUid); if (context.mounted) setState(() {}); }
+                        catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
+                      },
+                    );
+                  },
+                ),
+                onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: otherUid))),
+              ),
+            );
+          }),
+        ],
+        if (roomResults.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          const Text('Rooms', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 8),
+          ...roomResults.map((room) => Card(
+            color: const Color(0xFF0D0A12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Color(0xFF3B2A55))),
+            child: ListTile(
+              leading: const CircleAvatar(backgroundColor: Color(0xFF241A33), child: Icon(Icons.meeting_room_rounded, color: Color(0xFFFFC83D))),
+              title: Text(room['title']!, style: const TextStyle(fontWeight: FontWeight.w800)),
+              subtitle: Text(room['online']!),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Color(0xFFFFC83D)),
+              onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RoomPage(title: room['title']!, online: room['online']!))),
+            ),
+          )),
+        ],
+      ])),
+    );
+  }
+}
 
 // ============================================================
 // POPULAR ROOMS PAGE
@@ -2854,7 +3123,7 @@ class YourRoomPage extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: const Color(0xFF7138FF),
+                    color: const Color(0xFF7B3FF2),
                   ),
                   boxShadow: const [
                     BoxShadow(
@@ -2870,7 +3139,7 @@ class YourRoomPage extends StatelessWidget {
                       Icon(
                         Icons.meeting_room,
                         size: 52,
-                        color: Color(0xFFD65CFF),
+                        color: Color(0xFFFFC83D),
                       ),
                       SizedBox(height: 12),
                       Text(
@@ -2929,7 +3198,7 @@ class YourRoomPage extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: const Color(0xFFD65CFF),
+              color: const Color(0xFFFFC83D),
               size: 23,
             ),
             const SizedBox(height: 6),
@@ -2973,7 +3242,7 @@ class MyRoomPage extends StatelessWidget {
                   const Icon(
                     Icons.meeting_room,
                     size: 60,
-                    color: Color(0xFFD65CFF),
+                    color: Color(0xFFFFC83D),
                   ),
                   const SizedBox(height: 15),
                   const Text(
@@ -3110,11 +3379,11 @@ class RoomTile extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [Color(0xFF171126), Color(0xFF0D0917)]),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF7138FF)),
+        border: Border.all(color: const Color(0xFF7B3FF2)),
         boxShadow: const [BoxShadow(color: Color(0x331C00FF), blurRadius: 12)],
       ),
       child: Row(children: [
-        Container(width: 52, height: 52, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFF7138FF), Color(0xFFE52DD4)]), boxShadow: const [BoxShadow(color: Color(0x665B1CFF), blurRadius: 14)]), child: Icon(icon, color: Colors.white)),
+        Container(width: 52, height: 52, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFF7B3FF2), Color(0xFFD6A84F)]), boxShadow: const [BoxShadow(color: Color(0x665B1CFF), blurRadius: 14)]), child: Icon(icon, color: Colors.white)),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
@@ -3135,7 +3404,7 @@ class RoomPage extends StatefulWidget {
   final String title;
   final String online;
 
-  late final String userId =
+  late final String userId = FirebaseAuth.instance.currentUser?.uid ??
       'party_user_${DateTime.now().millisecondsSinceEpoch}';
 
   RoomPage({
@@ -3150,6 +3419,26 @@ class RoomPage extends StatefulWidget {
 
 class _RoomPageState extends State<RoomPage> {
   bool micOn = false;
+  String roomUserName = 'Party User';
+  String? roomPhotoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRoomProfile();
+  }
+
+  Future<void> _loadRoomProfile() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final data = await PartyChatData.userData(uid);
+    if (!mounted || data == null) return;
+    setState(() {
+      roomUserName = data['name']?.toString() ?? 'Party User';
+      roomPhotoUrl = data['photoURL']?.toString();
+    });
+  }
+
   bool isSpeaking = false;
   bool speakerOn = true;
 
@@ -3276,9 +3565,11 @@ class _RoomPageState extends State<RoomPage> {
             appID: zegoAppId,
             appSign: zegoAppSign,
             userID: widget.userId,
-            userName: 'Party User',
+            userName: roomUserName,
             roomID: roomId,
-            config: ZegoUIKitPrebuiltLiveAudioRoomConfig.host(),
+            config: (ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
+              ..seat.avatarBuilder = (context, size, user, extraInfo) => _ZegoFirebaseAvatar(userId: user?.id ?? '', size: size)
+              ..userAvatarUrl = (roomPhotoUrl != null && roomPhotoUrl!.length <= 64) ? roomPhotoUrl : null),
           ),
           Positioned(
             top: 42,
@@ -3315,6 +3606,28 @@ class _RoomPageState extends State<RoomPage> {
   }
 }
 
+class _ZegoFirebaseAvatar extends StatelessWidget {
+  final String userId;
+  final Size size;
+  const _ZegoFirebaseAvatar({required this.userId, required this.size});
+  @override
+  Widget build(BuildContext context) {
+    if (userId.isEmpty) return CircleAvatar(radius: size.width / 2, backgroundColor: const Color(0xFF241A33), child: const Icon(Icons.person_rounded, color: Color(0xFFFFC83D)));
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: PartyChatData.userData(userId),
+      builder: (context, snapshot) {
+        final data = snapshot.data ?? <String, dynamic>{};
+        final b64 = data['photoBase64']?.toString();
+        final url = data['photoURL']?.toString();
+        ImageProvider<Object>? image;
+        if (b64 != null && b64.isNotEmpty) { try { image = MemoryImage(base64Decode(b64)); } catch (_) {} }
+        if (image == null && url != null && url.isNotEmpty) image = NetworkImage(url);
+        return CircleAvatar(radius: size.width / 2, backgroundColor: const Color(0xFF241A33), backgroundImage: image, child: image == null ? const Icon(Icons.person_rounded, color: Color(0xFFFFC83D)) : null);
+      },
+    );
+  }
+}
+
 class RoomInviteFriendsPage extends StatelessWidget {
   final String roomId;
   final String roomTitle;
@@ -3336,7 +3649,7 @@ class RoomInviteFriendsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Add friends first.'));
           return ListView.builder(
@@ -3393,33 +3706,27 @@ class GamesTab extends StatelessWidget {
   static const List<Map<String, String>> games = [
     {
       'title': 'Ludo',
-      'tag': 'BOARD',
-      'image':
-          'https://commons.wikimedia.org/wiki/Special:FilePath/Ludo_board(1).png',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Ludo_board_game.jpg',
     },
     {
       'title': 'Carrom',
-      'tag': 'CLASSIC',
-      'image':
-          'https://commons.wikimedia.org/wiki/Special:FilePath/Carrom_board.jpg',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Carrom_board.jpg',
     },
     {
       'title': '8 Ball Pool',
-      'tag': 'POOL',
-      'image':
-          'https://opengameart.org/sites/default/files/pool_table_complete_12-02-2016.png',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/8ballpool.jpg',
     },
     {
       'title': 'Quiz',
-      'tag': 'TRIVIA',
-      'image':
-          'https://commons.wikimedia.org/wiki/Special:FilePath/Quiz_competition_image.jpg',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Quiz_competition_image.jpg',
     },
     {
       'title': 'Bubble Shooter',
-      'tag': 'ARCADE',
-      'image':
-          'https://commons.wikimedia.org/wiki/Special:FilePath/Bubbles_game.JPG',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Bubbles_game.JPG',
+    },
+    {
+      'title': 'Chess',
+      'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Chess_board.png',
     },
   ];
 
@@ -3427,19 +3734,18 @@ class GamesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return _NeonBackground(
       child: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 100),
+        padding: const EdgeInsets.fromLTRB(18, 22, 18, 100),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: .82,
+          childAspectRatio: .88,
         ),
         itemCount: games.length,
         itemBuilder: (context, index) {
           final game = games[index];
           return GameCard(
             title: game['title']!,
-            tag: game['tag']!,
             imageUrl: game['image']!,
           );
         },
@@ -3450,162 +3756,111 @@ class GamesTab extends StatelessWidget {
 
 class GameCard extends StatelessWidget {
   final String title;
-  final String tag;
   final String imageUrl;
 
   const GameCard({
     super.key,
     required this.title,
-    required this.tag,
     required this.imageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF7138FF), width: 1.1),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x551F00FF),
-            blurRadius: 18,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
+    return _NeonPanel(
+      padding: EdgeInsets.zero,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(19),
-        child: Material(
-          color: const Color(0xFF0E0918),
-          child: InkWell(
-            onTap: () {},
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF31145E),
-                            Color(0xFF120A20),
-                          ],
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.sports_esports,
-                        size: 54,
-                        color: Colors.white70,
-                      ),
-                    );
-                  },
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF25103F),
-                            Color(0xFF0E0918),
-                          ],
-                        ),
-                      ),
-                      child: Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    );
-                  },
-                ),
-                const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0x12000000),
-                        Color(0x33000000),
-                        Color(0xEE05030B),
-                      ],
-                      stops: [0.0, 0.48, 1.0],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC080510),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFFB65CFF),
-                      ),
-                    ),
-                    child: Text(
-                      tag,
-                      style: const TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 12,
-                  right: 12,
-                  bottom: 12,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 36,
-                        height: 36,
+        borderRadius: BorderRadius.circular(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
                         decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
                           gradient: LinearGradient(
                             colors: [
-                              Color(0xFF7138FF),
-                              Color(0xFFE52DD4),
+                              Color(0xFF7B3FF2),
+                              Color(0xFFD6A84F),
                             ],
                           ),
                         ),
                         child: const Icon(
-                          Icons.play_arrow_rounded,
+                          Icons.sports_esports,
+                          size: 48,
                           color: Colors.white,
-                          size: 22,
+                        ),
+                      );
+                    },
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF21182F),
+                              Color(0xFF120A20),
+                            ],
+                          ),
+                        ),
+                        child: const Center(
+                          child: LinearProgressIndicator(minHeight: 3),
+                        ),
+                      );
+                    },
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(10, 24, 10, 10),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Color(0xCC05030B),
+                          ],
                         ),
                       ),
-                    ],
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 9, 10, 11),
+              child: Text(
+                AppLanguage.text('play_now'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFD8C2FF),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
 
 class WalletTab extends StatelessWidget {
   const WalletTab({super.key});
@@ -3628,15 +3883,15 @@ class WalletTab extends StatelessWidget {
             ]),
             const SizedBox(height: 6),
             const Row(children: [
-              Text('2,450', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF29B6F6))),
+              Text('2,450', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFFB78CFF))),
               SizedBox(width: 6),
-              Text('Diamonds', style: TextStyle(fontSize: 17, color: Color(0xFF29B6F6))),
+              Text('Diamonds', style: TextStyle(fontSize: 17, color: Color(0xFFB78CFF))),
             ]),
           ])),
           const SizedBox(height: 14),
           SizedBox(width: double.infinity, child: _NeonAction(label: '＋  Recharge', onPressed: () {})),
           const SizedBox(height: 10),
-          OutlinedButton.icon(style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), side: const BorderSide(color: Color(0xFFB65CFF))), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TransactionHistoryPage())), icon: const Icon(Icons.history), label: const Text('Transaction History', style: TextStyle(fontWeight: FontWeight.w800))),
+          OutlinedButton.icon(style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), side: const BorderSide(color: Color(0xFFFFC83D))), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TransactionHistoryPage())), icon: const Icon(Icons.history), label: const Text('Transaction History', style: TextStyle(fontWeight: FontWeight.w800))),
           const SizedBox(height: 18),
           const Text('Quick Actions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
           const SizedBox(height: 10),
@@ -3651,7 +3906,7 @@ class WalletTab extends StatelessWidget {
   }
 
   Widget _walletAction(IconData icon, String label) {
-    return _NeonPanel(padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6), child: Column(children: [Icon(icon, color: const Color(0xFFE3B7FF)), const SizedBox(height: 6), Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700))]));
+    return _NeonPanel(padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6), child: Column(children: [Icon(icon, color: const Color(0xFFD8C2FF)), const SizedBox(height: 6), Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700))]));
   }
 }
 
@@ -4109,7 +4364,7 @@ Future<void> ensureUserId() async {
       margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), color: const Color(0xFF0F0B19)),
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFFE2C2FF)),
+        leading: Icon(icon, color: const Color(0xFFD8C2FF)),
         title: Text(AppLanguage.text(titleKey), style: const TextStyle(fontWeight: FontWeight.w700)),
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
           if (unread > 0) Container(constraints: const BoxConstraints(minWidth: 22, minHeight: 22), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), alignment: Alignment.center, child: Text(unread > 99 ? '99+' : '$unread', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
@@ -4132,7 +4387,7 @@ Future<void> ensureUserId() async {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          Row(children: [const Icon(Icons.person_rounded, size: 30, color: Color(0xFFE3B7FF)), const SizedBox(width: 10), const Expanded(child: Text('Profile', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900))), IconButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())), icon: const Icon(Icons.settings))]),
+          Row(children: [const Icon(Icons.person_rounded, size: 30, color: Color(0xFFD8C2FF)), const SizedBox(width: 10), const Expanded(child: Text('Profile', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900))), IconButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())), icon: const Icon(Icons.settings))]),
           const SizedBox(height: 10),
           _NeonPanel(
             child: Column(children: [
@@ -4145,7 +4400,7 @@ Future<void> ensureUserId() async {
                     onTap: image == null ? null : () => _showPhotoZoom(context, image),
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [Color(0xFFFF3ED7), Color(0xFF7A35FF)])),
+                      decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [Color(0xFFFF3ED7), Color(0xFF7C3AED)])),
                       child: CircleAvatar(radius: 48, backgroundImage: image, child: image == null ? const Icon(Icons.person, size: 50) : null),
                     ),
                   );
@@ -4258,130 +4513,44 @@ Future<void> ensureUserId() async {
 
 class FriendRequestsPage extends StatelessWidget {
   const FriendRequestsPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Please login first.')),
-      );
-    }
-
+    if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLanguage.text('friend_requests')),
-      ),
+      appBar: AppBar(title: Text(AppLanguage.text('friend_requests'))),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: PartyChatData.friendRequestsStream(user.uid),
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('Could not load friend requests.'),
-            );
-          }
-
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
+          if (snapshot.hasError) return const Center(child: Text('Could not load friend requests.'));
+          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
           final docs = snapshot.data!.docs;
-
-          if (docs.isEmpty) {
-            return const Center(child: Text('No friend requests yet.'));
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: docs.length,
+          if (docs.isEmpty) return const Center(child: Text('No friend requests yet.'));
+          return ListView.separated(
+            padding: const EdgeInsets.all(12), itemCount: docs.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final request = docs[index].data();
-              final requesterUid =
-                  request['requesterUid']?.toString() ??
-                  request['uid']?.toString() ??
-                  docs[index].id;
-
+              final requesterUid = request['uid']?.toString() ?? docs[index].id;
               return FutureBuilder<Map<String, dynamic>?>(
                 future: PartyChatData.userData(requesterUid),
-                builder: (context, userSnapshot) {
-                  final latest = userSnapshot.data ?? request;
-                  final name =
-                      latest['name']?.toString() ?? 'Party User';
-                  final photo =
-                      latest['photoURL']?.toString() ?? '';
-                  final avatar =
-                      latest['avatar']?.toString() ?? '';
-
-                  return ListTile(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SimpleUserProfilePage(
-                            uid: requesterUid,
-                            name: name,
-                            photoUrl: photo,
-                            avatar: avatar,
-                          ),
-                        ),
-                      );
-                    },
-                    leading: _NetworkOrAvatar(
-                      photoUrl: photo,
-                      avatar: avatar,
-                    ),
-                    title: Text(
-                      name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
+                builder: (context, profileSnapshot) {
+                  final data = profileSnapshot.data ?? request;
+                  final name = data['name']?.toString() ?? 'Party User';
+                  return Card(
+                    color: const Color(0xFF0D0A12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Color(0xFF3B2A55))),
+                    child: ListTile(
+                      leading: GestureDetector(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: requesterUid))),
+                        child: _NetworkOrAvatar(photoUrl: data['photoURL'] as String?, photoBase64: data['photoBase64'] as String?, avatar: data['avatar'] as String?, radius: 24),
                       ),
-                    ),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(
-                          tooltip: 'Accept',
-                          icon: const Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                          ),
-                          onPressed: () async {
-                            try {
-                              await PartyChatData.acceptFriendRequest(
-                                uid: user.uid,
-                                requesterUid: requesterUid,
-                              );
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                        IconButton(
-                          tooltip: 'Reject',
-                          icon: const Icon(
-                            Icons.cancel,
-                            color: Colors.redAccent,
-                          ),
-                          onPressed: () async {
-                            try {
-                              await PartyChatData.rejectFriendRequest(
-                                uid: user.uid,
-                                requesterUid: requesterUid,
-                              );
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ],
+                      title: Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                      trailing: Wrap(children: [
+                        IconButton(icon: const Icon(Icons.check_circle_rounded, color: Color(0xFFFFC83D)), onPressed: () async { try { await PartyChatData.acceptFriendRequest(uid: user.uid, requesterUid: requesterUid); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); } }),
+                        IconButton(icon: const Icon(Icons.cancel_rounded, color: Color(0xFF9B5CFF)), onPressed: () async { try { await PartyChatData.rejectFriendRequest(uid: user.uid, requesterUid: requesterUid); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); } }),
+                      ]),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: requesterUid))),
                     ),
                   );
                 },
@@ -4393,6 +4562,10 @@ class FriendRequestsPage extends StatelessWidget {
     );
   }
 }
+
+/* ============================================================
+   ROOM INVITES
+   ============================================================ */
 
 class RoomInvitesPage extends StatelessWidget {
   const RoomInvitesPage({super.key});
@@ -4409,7 +4582,7 @@ class RoomInvitesPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load room invites.'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No room invites yet.'));
           return ListView.builder(
@@ -4417,23 +4590,30 @@ class RoomInvitesPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final doc = docs[index];
               final d = doc.data();
-              return ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.meeting_room)),
-                title: Text(d['roomTitle'] ?? 'PartyChat Room'),
-                subtitle: Text('${d['inviterName'] ?? 'Someone'} ne invite kiya.'),
-                trailing: FilledButton(
-                  onPressed: () async {
-                    await doc.reference.update({'status': 'accepted'});
-                    if (!context.mounted) return;
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => RoomPage(
-                        title: d['roomTitle'] ?? 'PartyChat Room',
-                        online: 'Live',
-                      ),
-                    ));
-                  },
-                  child: const Text('Join'),
-                ),
+              final inviterUid = d['inviterUid']?.toString();
+              return FutureBuilder<Map<String, dynamic>?>(
+                future: inviterUid == null ? Future.value(null) : PartyChatData.userData(inviterUid),
+                builder: (context, profileSnapshot) {
+                  final profile = profileSnapshot.data ?? d;
+                  return ListTile(
+                    leading: _NetworkOrAvatar(
+                      photoUrl: profile['photoURL'] as String? ?? d['inviterPhoto'] as String?,
+                      photoBase64: profile['photoBase64'] as String? ?? d['inviterPhotoBase64'] as String?,
+                      avatar: profile['avatar'] as String?,
+                      radius: 24,
+                    ),
+                    title: Text(d['roomTitle'] ?? 'PartyChat Room'),
+                    subtitle: Text('${profile['name'] ?? d['inviterName'] ?? 'Someone'} ne invite kiya.'),
+                    trailing: FilledButton(
+                      onPressed: () async {
+                        await doc.reference.update({'status': 'accepted'});
+                        if (!context.mounted) return;
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => RoomPage(title: d['roomTitle'] ?? 'PartyChat Room', online: 'Live')));
+                      },
+                      child: const Text('Join'),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -4462,7 +4642,7 @@ class FriendMessagesPage extends StatelessWidget {
         stream: ref.orderBy('lastMessageAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load chats.'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No messages yet.'));
           return ListView.builder(
@@ -4517,7 +4697,7 @@ class GiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No gifts yet.'));
           return ListView.builder(
@@ -4556,7 +4736,7 @@ class MyGiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Your sent gifts will appear here.'));
           return ListView.builder(
@@ -4583,563 +4763,49 @@ class MyGiftsPage extends StatelessWidget {
    FRIENDS + FIND FRIENDS
    ============================================================ */
 
-/* ============================================================
-   USER SEARCH + MINI PROFILE
-   ============================================================ */
-
-class PartyChatSearchPage extends StatefulWidget {
-  const PartyChatSearchPage({super.key});
-
-  @override
-  State<PartyChatSearchPage> createState() => _PartyChatSearchPageState();
-}
-
-class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
-  final controller = TextEditingController();
-  String? mode;
-  bool searching = false;
-  List<Map<String, dynamic>> userResults = [];
-  List<Map<String, String>> roomResults = [];
-  final Set<String> pendingRequests = <String>{};
-
-  static const List<Map<String, String>> rooms = [
-    {
-      'title': 'Friends Forever 💜',
-      'online': '2.4K online',
-      'subtitle': 'Make new friends & enjoy chat',
-    },
-    {
-      'title': 'Gaming Zone 🎮',
-      'online': '1.8K online',
-      'subtitle': 'Play games & enjoy together',
-    },
-    {
-      'title': 'Music Lovers 🎵',
-      'online': '1.2K online',
-      'subtitle': 'Music • Vibes • Party',
-    },
-    {
-      'title': 'Chill Zone 🌙',
-      'online': '980 online',
-      'subtitle': 'Relax • Talk • Be Yourself',
-    },
-  ];
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  String get hint {
-    if (mode == 'uid') return 'Enter UID';
-    if (mode == 'name') return 'Enter Name';
-    return 'Enter Room Name';
-  }
-
-  Future<void> _search() async {
-    final query = controller.text.trim().toLowerCase();
-    if (query.isEmpty) return;
-
-    setState(() {
-      searching = true;
-      userResults = [];
-      roomResults = [];
-    });
-
-    try {
-      if (mode == 'uid') {
-        final user = await PartyChatData.findUserByUid(query);
-        if (user != null) {
-          userResults = [user];
-        }
-      } else if (mode == 'name') {
-        final users = await PartyChatData.searchUsersByName(query);
-        userResults = users.where((user) {
-          final name = user['name']?.toString().toLowerCase() ?? '';
-          return name.contains(query);
-        }).toList();
-      } else {
-        roomResults = rooms.where((room) {
-          final title = room['title']!.toLowerCase();
-          return title.contains(query);
-        }).toList();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => searching = false);
-      }
-    }
-  }
-
-  void _selectUser(Map<String, dynamic> data) {
-    final uid = data['uid']?.toString() ?? '';
-    if (uid.isEmpty) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SimpleUserProfilePage(
-          uid: uid,
-          name: data['name']?.toString() ?? 'Party User',
-          photoUrl: data['photoURL']?.toString() ?? '',
-          avatar: data['avatar']?.toString() ?? '',
-        ),
-      ),
-    );
-  }
-
-  void _selectRoom(Map<String, String> room) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => RoomPage(
-          title: room['title'] ?? 'Room',
-          online: room['online'] ?? '',
-        ),
-      ),
-    );
-  }
-
-  Widget _searchButton({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1D1230), Color(0xFF0D0917)],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF7138FF)),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 5,
-        ),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [Color(0xFF7138FF), Color(0xFFE52DD4)],
-            ),
-          ),
-          child: Icon(icon, color: Colors.white),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.w900),
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => setState(() {
-          mode = value;
-          controller.clear();
-          userResults = [];
-          roomResults = [];
-        }),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search'),
-        actions: [
-          if (mode != null)
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => setState(() {
-                mode = null;
-                controller.clear();
-                userResults = [];
-                roomResults = [];
-              }),
-            ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          child: mode == null
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      'Search',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Choose one search type',
-                      style: TextStyle(color: Colors.white54),
-                    ),
-                    const SizedBox(height: 20),
-                    _searchButton(
-                      icon: Icons.badge_outlined,
-                      title: 'UID Search',
-                      value: 'uid',
-                    ),
-                    _searchButton(
-                      icon: Icons.person_search,
-                      title: 'Name Search',
-                      value: 'name',
-                    ),
-                    _searchButton(
-                      icon: Icons.meeting_room_outlined,
-                      title: 'Room Search',
-                      value: 'room',
-                    ),
-                  ],
-                )
-              : Column(
-                  children: [
-                    TextField(
-                      controller: controller,
-                      autofocus: true,
-                      textInputAction: TextInputAction.search,
-                      onSubmitted: (_) => _search(),
-                      decoration: InputDecoration(
-                        hintText: hint,
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.arrow_forward_rounded),
-                          onPressed: _search,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Expanded(
-                      child: searching
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          : _buildResults(),
-                    ),
-                  ],
-                ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResults() {
-    if (mode == 'room') {
-      if (roomResults.isEmpty) {
-        return const Center(child: Text('No matching rooms found.'));
-      }
-
-      return ListView.builder(
-        itemCount: roomResults.length,
-        itemBuilder: (context, index) {
-          final room = roomResults[index];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF171126), Color(0xFF0D0917)],
-              ),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF7138FF)),
-            ),
-            child: ListTile(
-              onTap: () => _selectRoom(room),
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFF7138FF),
-                child: Icon(Icons.meeting_room, color: Colors.white),
-              ),
-              title: Text(
-                room['title'] ?? 'Room',
-                style: const TextStyle(fontWeight: FontWeight.w900),
-              ),
-              subtitle: Text(
-                room['online'] ?? '',
-                style: const TextStyle(color: Color(0xFF43F5B0)),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-            ),
-          );
-        },
-      );
-    }
-
-    if (userResults.isEmpty) {
-      return const Center(child: Text('No matching users found.'));
-    }
-
-    final currentUid = FirebaseAuth.instance.currentUser?.uid;
-
-    return ListView.builder(
-      itemCount: userResults.length,
-      itemBuilder: (context, index) {
-        final data = userResults[index];
-        final uid = data['uid']?.toString() ?? '';
-        if (uid == currentUid) return const SizedBox.shrink();
-
-        final name = data['name']?.toString() ?? 'Party User';
-        final photo = data['photoURL']?.toString() ?? '';
-        final avatar = data['avatar']?.toString() ?? '';
-
-        return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          future: currentUid == null
-              ? null
-              : PartyChatData.friendRequests(currentUid).doc(uid).get(),
-          builder: (context, snapshot) {
-            final pending =
-                pendingRequests.contains(uid) ||
-                (snapshot.data?.exists ?? false);
-
-            return ListTile(
-              onTap: () => _selectUser(data),
-              leading: _NetworkOrAvatar(
-                photoUrl: photo,
-                avatar: avatar,
-              ),
-              title: Text(
-                name,
-                style: const TextStyle(fontWeight: FontWeight.w800),
-              ),
-              subtitle: Text(
-                'UID: ${data['userId'] ?? uid}',
-                style: const TextStyle(color: Colors.white54),
-              ),
-              trailing: IconButton(
-                icon: Icon(
-                  pending
-                      ? Icons.check_circle_rounded
-                      : Icons.person_add_rounded,
-                  color: pending
-                      ? Colors.greenAccent
-                      : Colors.white,
-                ),
-                onPressed: pending || currentUid == null
-                    ? null
-                    : () async {
-                        try {
-                          await PartyChatData.sendFriendRequest(
-                            fromUid: currentUid,
-                            toUid: uid,
-                          );
-                          if (mounted) {
-                            setState(() => pendingRequests.add(uid));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Friend request sent successfully.',
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
-                          }
-                        }
-                      },
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class SimpleUserProfilePage extends StatelessWidget {
-  final String uid;
-  final String name;
-  final String photoUrl;
-  final String avatar;
-
-  const SimpleUserProfilePage({
-    super.key,
-    required this.uid,
-    required this.name,
-    this.photoUrl = '',
-    this.avatar = '',
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: PartyChatData.userData(uid),
-        builder: (context, snapshot) {
-          final data = snapshot.data ?? {};
-          final currentName = data['name']?.toString() ?? name;
-          final currentPhoto =
-              data['photoURL']?.toString() ?? photoUrl;
-          final currentAvatar =
-              data['avatar']?.toString() ?? avatar;
-          final publicUid =
-              data['userId']?.toString() ?? uid;
-
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _NetworkOrAvatar(
-                    photoUrl: currentPhoto,
-                    avatar: currentAvatar,
-                    radius: 64,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    currentName,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'UID: $publicUid',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white60,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   FRIENDS
-   ============================================================ */
-
-class FriendsPage extends StatelessWidget {
+class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
+  @override
+  State<FriendsPage> createState() => _FriendsPageState();
+}
 
+class _FriendsPageState extends State<FriendsPage> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Please login first.')),
-      );
-    }
-
+    if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLanguage.text('friends')),
-      ),
+      appBar: AppBar(title: Text(AppLanguage.text('friends'))),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: PartyChatData.friendsStream(user.uid),
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('Could not load friends.'),
-            );
-          }
-
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
+          if (snapshot.hasError) return const Center(child: Text('Could not load friends.'));
+          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
           final docs = snapshot.data!.docs;
-
-          if (docs.isEmpty) {
-            return const Center(child: Text('No friends yet.'));
-          }
-
-          return ListView.builder(
+          if (docs.isEmpty) return const Center(child: Text('No friends yet.'));
+          return ListView.separated(
+            padding: const EdgeInsets.all(12),
             itemCount: docs.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final data = docs[index].data();
-              final uid =
-                  data['uid']?.toString() ?? docs[index].id;
-              final name =
-                  data['name']?.toString() ?? 'Friend';
-              final photo =
-                  data['photoURL']?.toString() ?? '';
-              final avatar =
-                  data['avatar']?.toString() ?? '';
-
-              return ListTile(
-                leading: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SimpleUserProfilePage(
-                          uid: uid,
-                          name: name,
-                          photoUrl: photo,
-                          avatar: avatar,
-                        ),
-                      ),
-                    );
-                  },
-                  child: _NetworkOrAvatar(
-                    photoUrl: photo,
-                    avatar: avatar,
+              final uid = data['uid']?.toString() ?? docs[index].id;
+              final name = data['name']?.toString() ?? 'Friend';
+              return Card(
+                color: const Color(0xFF0D0A12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Color(0xFF3B2A55))),
+                child: ListTile(
+                  leading: GestureDetector(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: uid))),
+                    child: _NetworkOrAvatar(photoUrl: data['photoURL'] as String?, photoBase64: data['photoBase64'] as String?, avatar: data['avatar'] as String?, radius: 24),
                   ),
-                ),
-                title: Text(name),
-                trailing: Wrap(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.message),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChatPage(
-                              otherUid: uid,
-                              otherName: name,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.card_giftcard),
-                      onPressed: () => _giftDialog(
-                        context,
-                        user.uid,
-                        uid,
-                        name,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.block),
-                      onPressed: () => _block(
-                        context,
-                        user.uid,
-                        uid,
-                        data,
-                      ),
-                    ),
-                  ],
+                  title: Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  trailing: Wrap(children: [
+                    IconButton(icon: const Icon(Icons.message_rounded, color: Color(0xFFFFC83D)), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChatPage(otherUid: uid, otherName: name)))),
+                    IconButton(icon: const Icon(Icons.card_giftcard_rounded, color: Color(0xFF9B5CFF)), onPressed: () => _giftDialog(context, user.uid, uid, name)),
+                    IconButton(icon: const Icon(Icons.block_rounded, color: Colors.white60), onPressed: () => _block(context, user.uid, uid, data)),
+                  ]),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: uid))),
                 ),
               );
             },
@@ -5149,88 +4815,32 @@ class FriendsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _giftDialog(
-    BuildContext context,
-    String fromUid,
-    String toUid,
-    String name,
-  ) async {
-    final gifts = [
-      {'name': 'Rose 🌹', 'cost': 10},
-      {'name': 'Heart ❤️', 'cost': 50},
-      {'name': 'Crown 👑', 'cost': 100},
-      {'name': 'Diamond 💎', 'cost': 500},
-    ];
-
+  Future<void> _giftDialog(BuildContext context, String fromUid, String toUid, String name) async {
+    final gifts = [{'name':'Rose 🌹','cost':10},{'name':'Heart ❤️','cost':50},{'name':'Crown 👑','cost':100},{'name':'Diamond 💎','cost':500}];
     await showModalBottomSheet(
       context: context,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            children: gifts.map((gift) {
-              return ListTile(
-                leading: const Icon(Icons.card_giftcard),
-                title: Text('${gift['name']}'),
-                subtitle: Text('${gift['cost']} coins'),
-                onTap: () async {
-                  Navigator.pop(sheetContext);
-                  try {
-                    await PartyChatData.sendGift(
-                      fromUid: fromUid,
-                      toUid: toUid,
-                      giftName: gift['name'].toString(),
-                      cost: gift['cost'] as int,
-                    );
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Gift sent to $name.'),
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(e.toString())),
-                      );
-                    }
-                  }
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
+      backgroundColor: const Color(0xFF0D0A12),
+      builder: (_) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Padding(padding: const EdgeInsets.all(16), child: Text('Gift for $name', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+        ...gifts.map((gift) => ListTile(title: Text(gift['name'] as String), trailing: Text('${gift['cost']} coins'), onTap: () async {
+          try {
+            await PartyChatData.sendGift(fromUid: fromUid, toUid: toUid, giftName: gift['name'] as String, cost: gift['cost'] as int);
+            if (context.mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gift sent successfully.'))); }
+          } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
+        })),
+      ])),
     );
   }
 
-  Future<void> _block(
-    BuildContext context,
-    String uid,
-    String otherUid,
-    Map<String, dynamic> data,
-  ) async {
-    try {
-      await PartyChatData.blockUser(
-        uid: uid,
-        otherUid: otherUid,
-        otherData: data,
-      );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User blocked.')),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
-    }
+  Future<void> _block(BuildContext context, String uid, String otherUid, Map<String, dynamic> data) async {
+    try { await PartyChatData.blockUser(uid: uid, otherUid: otherUid, otherData: data); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User blocked successfully.'))); }
+    catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
   }
 }
+
+/* ============================================================
+   CHAT
+   ============================================================ */
 
 class ChatPage extends StatefulWidget {
   final String otherUid;
@@ -5271,7 +4881,7 @@ class _ChatPageState extends State<ChatPage> {
               stream: ref.orderBy('createdAt', descending: false).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) return const Center(child: Text('Could not load messages.'));
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('Say hello 👋'));
                 return ListView.builder(
@@ -5286,7 +4896,7 @@ class _ChatPageState extends State<ChatPage> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: mine ? const Color(0xFF8D3DFF) : const Color(0xFF201C2C),
+                          color: mine ? const Color(0xFF7C3AED) : const Color(0xFF201C2C),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(d['text'] ?? ''),
@@ -5345,27 +4955,17 @@ class _ChatPageState extends State<ChatPage> {
 
 class _NetworkOrAvatar extends StatelessWidget {
   final String? photoUrl;
+  final String? photoBase64;
   final String? avatar;
   final double radius;
-
-  const _NetworkOrAvatar({
-    required this.photoUrl,
-    required this.avatar,
-    this.radius = 20,
-  });
-
+  const _NetworkOrAvatar({required this.photoUrl, required this.avatar, this.photoBase64, this.radius = 20});
   @override
   Widget build(BuildContext context) {
-    if (photoUrl != null && photoUrl!.isNotEmpty) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundImage: NetworkImage(photoUrl!),
-      );
-    }
-    return CircleAvatar(
-      radius: radius,
-      child: const Icon(Icons.person),
-    );
+    ImageProvider<Object>? image;
+    if (photoBase64 != null && photoBase64!.isNotEmpty) { try { image = MemoryImage(base64Decode(photoBase64!)); } catch (_) {} }
+    if (image == null && photoUrl != null && photoUrl!.isNotEmpty) image = NetworkImage(photoUrl!);
+    if (image != null) return CircleAvatar(radius: radius, backgroundImage: image);
+    return CircleAvatar(radius: radius, backgroundColor: const Color(0xFF241A33), child: Icon(Icons.person_rounded, color: const Color(0xFFFFC83D), size: radius * .9));
   }
 }
 
@@ -6280,7 +5880,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               );
               if (!snapshot.hasData) return const Padding(
                 padding: EdgeInsets.all(20),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(child: LinearProgressIndicator(minHeight: 3)),
               );
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Padding(
@@ -6339,7 +5939,7 @@ class BlockedUsersPage extends StatelessWidget {
         stream: ref.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load blocked users.'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No blocked users.'));
           return ListView.builder(
