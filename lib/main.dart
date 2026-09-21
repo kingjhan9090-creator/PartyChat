@@ -750,27 +750,175 @@ class ProfileUnreadService {
   }
 }
 
-class PartyChatData {
-  static FirebaseFirestore get db => FirebaseFirestore.instance;
 
-  static DocumentReference<Map<String, dynamic>> userDoc(String uid) =>
+
+
+/* ============================================================
+   PARTY CHAT DATA
+   ============================================================ */
+
+class PartyChatData {
+  static FirebaseFirestore get db =>
+      FirebaseFirestore.instance;
+
+  static DocumentReference<Map<String, dynamic>> userDoc(
+    String uid,
+  ) =>
       db.collection('users').doc(uid);
 
-  static CollectionReference<Map<String, dynamic>> friends(String uid) =>
+  static CollectionReference<Map<String, dynamic>> friends(
+    String uid,
+  ) =>
       userDoc(uid).collection('friends');
 
-  static CollectionReference<Map<String, dynamic>> blocked(String uid) =>
+  static CollectionReference<Map<String, dynamic>> blocked(
+    String uid,
+  ) =>
       userDoc(uid).collection('blockedUsers');
 
-  static Future<Map<String, dynamic>?> userData(String uid) async {
+  static CollectionReference<Map<String, dynamic>> friendRequests(
+    String uid,
+  ) =>
+      userDoc(uid).collection('friendRequests');
+
+  static Future<Map<String, dynamic>?> userData(
+    String uid,
+  ) async {
     final snap = await userDoc(uid).get();
+
+    if (!snap.exists) return null;
+
     return snap.data();
   }
 
-  static Future<bool> isBlockedEither(String a, String b) async {
-    final aBlocksB = await blocked(a).doc(b).get();
-    if (aBlocksB.exists) return true;
-    final bBlocksA = await blocked(b).doc(a).get();
+  /* ============================================================
+     FIND USER BY UID / USER ID
+     ============================================================ */
+
+  static Future<Map<String, dynamic>?> findUserByUid(
+    String search,
+  ) async {
+    final value = search.trim();
+
+    if (value.isEmpty) return null;
+
+    final directDoc = await userDoc(value).get();
+
+    if (directDoc.exists) {
+      final data = directDoc.data();
+
+      if (data != null) {
+        return {
+          'uid': directDoc.id,
+          ...data,
+        };
+      }
+    }
+
+    final snapshot = await db
+        .collection('users')
+        .where('userId', isEqualTo: value)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isEmpty) {
+      return null;
+    }
+
+    final doc = snapshot.docs.first;
+
+    return {
+      'uid': doc.id,
+      ...doc.data(),
+    };
+  }
+
+  /* ============================================================
+     SEARCH USER BY NAME / UID
+     ============================================================ */
+
+  static Future<List<Map<String, dynamic>>> searchUsersByName(
+    String searchText,
+  ) async {
+    final search = searchText.trim().toLowerCase();
+
+    if (search.isEmpty) return [];
+
+    final snapshot = await db
+        .collection('users')
+        .limit(100)
+        .get();
+
+    return snapshot.docs
+        .where((doc) {
+          final data = doc.data();
+
+          final name =
+              (data['name'] ?? '').toString().toLowerCase();
+
+          final userId =
+              (data['userId'] ?? '').toString().toLowerCase();
+
+          final documentId =
+              doc.id.toLowerCase();
+
+          return name.contains(search) ||
+              userId.contains(search) ||
+              documentId.contains(search);
+        })
+        .map((doc) {
+          return {
+            'uid': doc.id,
+            ...doc.data(),
+          };
+        })
+        .toList();
+  }
+
+  /* ============================================================
+     FIND USER
+     ============================================================ */
+
+  static Future<Map<String, dynamic>?> findUser(
+    String search,
+  ) async {
+    final value = search.trim();
+
+    if (value.isEmpty) return null;
+
+    final uidUser = await findUserByUid(value);
+
+    if (uidUser != null) {
+      return uidUser;
+    }
+
+    final users = await searchUsersByName(value);
+
+    if (users.isEmpty) {
+      return null;
+    }
+
+    return users.first;
+  }
+
+  /* ============================================================
+     BLOCK SYSTEM
+     ============================================================ */
+
+  static Future<bool> isBlockedEither(
+    String a,
+    String b,
+  ) async {
+    final aBlocksB =
+        await blocked(a).doc(b).get();
+
+    if (aBlocksB.exists) {
+      return true;
+    }
+
+    final bBlocksA =
+        await blocked(b).doc(a).get();
+
     return bBlocksA.exists;
   }
 
@@ -786,109 +934,300 @@ class PartyChatData {
       'avatar': otherData['avatar'] ?? '',
       'createdAt': FieldValue.serverTimestamp(),
     });
-    await friends(uid).doc(otherUid).delete();
-    await friends(otherUid).doc(uid).delete();
-    await userDoc(otherUid).collection('friendRequests').doc(uid).delete();
-    await userDoc(uid).collection('friendRequests').doc(otherUid).delete();
+
+    await friends(uid)
+        .doc(otherUid)
+        .delete();
+
+    await friends(otherUid)
+        .doc(uid)
+        .delete();
+
+    await friendRequests(otherUid)
+        .doc(uid)
+        .delete();
+
+    await friendRequests(uid)
+        .doc(otherUid)
+        .delete();
   }
 
-  static Future<void> unblockUser(String uid, String otherUid) async {
-    await blocked(uid).doc(otherUid).delete();
+  static Future<void> unblockUser(
+    String uid,
+    String otherUid,
+  ) async {
+    await blocked(uid)
+        .doc(otherUid)
+        .delete();
   }
+
+  /* ============================================================
+     SEND FRIEND REQUEST
+     ============================================================ */
 
   static Future<void> sendFriendRequest({
     required String fromUid,
     required String toUid,
   }) async {
-    if (fromUid == toUid) return;
-    if (await isBlockedEither(fromUid, toUid)) {
-      throw Exception('This user is blocked.');
+    final senderUid = fromUid.trim();
+    final receiverUid = toUid.trim();
+
+    if (senderUid.isEmpty ||
+        receiverUid.isEmpty) {
+      throw Exception(
+        'Invalid user ID.',
+      );
     }
 
-    final existingFriend = await friends(fromUid).doc(toUid).get();
+    if (senderUid == receiverUid) {
+      throw Exception(
+        'You cannot send a friend request to yourself.',
+      );
+    }
+
+    final receiver =
+        await userDoc(receiverUid).get();
+
+    if (!receiver.exists) {
+      throw Exception(
+        'User not found.',
+      );
+    }
+
+    if (await isBlockedEither(
+      senderUid,
+      receiverUid,
+    )) {
+      throw Exception(
+        'This user is blocked.',
+      );
+    }
+
+    final existingFriend =
+        await friends(senderUid)
+            .doc(receiverUid)
+            .get();
+
     if (existingFriend.exists) {
-      throw Exception('This user is already a friend.');
+      throw Exception(
+        'This user is already your friend.',
+      );
     }
 
-    final requestRef = userDoc(toUid).collection('friendRequests').doc(fromUid);
-    final existingRequest = await requestRef.get();
+    final existingRequest =
+        await friendRequests(receiverUid)
+            .doc(senderUid)
+            .get();
+
     if (existingRequest.exists) {
-      throw Exception('Friend request has already been sent.');
+      throw Exception(
+        'Friend request has already been sent.',
+      );
     }
 
-    final fromData = await userData(fromUid) ?? {};
-    await requestRef.set({
-      'requesterUid': fromUid,
-      'name': fromData['name'] ?? 'Party User',
-      'email': fromData['email'] ?? '',
-      'photoURL': fromData['photoURL'] ?? '',
-      'avatar': fromData['avatar'] ?? '',
+    final reverseRequest =
+        await friendRequests(senderUid)
+            .doc(receiverUid)
+            .get();
+
+    if (reverseRequest.exists) {
+      throw Exception(
+        'This user has already sent you a friend request.',
+      );
+    }
+
+    final fromData =
+        await userData(senderUid) ?? {};
+
+    await friendRequests(receiverUid)
+        .doc(senderUid)
+        .set({
+      'requesterUid': senderUid,
+      'uid': senderUid,
+      'name':
+          fromData['name'] ?? 'Party User',
+      'email':
+          fromData['email'] ?? '',
+      'photoURL':
+          fromData['photoURL'] ?? '',
+      'avatar':
+          fromData['avatar'] ?? '',
       'status': 'pending',
-      'createdAt': FieldValue.serverTimestamp(),
+      'createdAt':
+          FieldValue.serverTimestamp(),
     });
 
     await ProfileUnreadService.createNotification(
-      uid: toUid,
+      uid: receiverUid,
       type: 'friendRequests',
       title: 'New Friend Request',
-      message: '${fromData['name'] ?? 'Someone'} sent you a friend request.',
-      actorUid: fromUid,
-      actorName: fromData['name'] ?? 'Party User',
-      actorPhoto: fromData['photoURL'] ?? '',
+      message:
+          '${fromData['name'] ?? 'Someone'} sent you a friend request.',
+      actorUid: senderUid,
+      actorName:
+          fromData['name'] ?? 'Party User',
+      actorPhoto:
+          fromData['photoURL'] ?? '',
     );
   }
+
+  /* ============================================================
+     ACCEPT FRIEND REQUEST
+     ============================================================ */
 
   static Future<void> acceptFriendRequest({
     required String uid,
     required String requesterUid,
   }) async {
-    if (await isBlockedEither(uid, requesterUid)) {
-      throw Exception('You cannot add a blocked user as a friend.');
+    if (await isBlockedEither(
+      uid,
+      requesterUid,
+    )) {
+      throw Exception(
+        'You cannot add a blocked user as a friend.',
+      );
     }
 
-    final me = await userData(uid) ?? {};
-    final other = await userData(requesterUid) ?? {};
+    final me =
+        await userData(uid) ?? {};
+
+    final other =
+        await userData(requesterUid) ?? {};
+
     final batch = db.batch();
 
-    batch.set(friends(uid).doc(requesterUid), {
-      'uid': requesterUid,
-      'name': other['name'] ?? 'Party User',
-      'email': other['email'] ?? '',
-      'photoURL': other['photoURL'] ?? '',
-      'avatar': other['avatar'] ?? '',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-    batch.set(friends(requesterUid).doc(uid), {
-      'uid': uid,
-      'name': me['name'] ?? 'Party User',
-      'email': me['email'] ?? '',
-      'photoURL': me['photoURL'] ?? '',
-      'avatar': me['avatar'] ?? '',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-    batch.delete(userDoc(uid).collection('friendRequests').doc(requesterUid));
+    final myFriendRef =
+        friends(uid).doc(requesterUid);
+
+    final otherFriendRef =
+        friends(requesterUid).doc(uid);
+
+    batch.set(
+      myFriendRef,
+      {
+        'uid': requesterUid,
+        'name':
+            other['name'] ?? 'Party User',
+        'email':
+            other['email'] ?? '',
+        'photoURL':
+            other['photoURL'] ?? '',
+        'avatar':
+            other['avatar'] ?? '',
+        'createdAt':
+            FieldValue.serverTimestamp(),
+      },
+    );
+
+    batch.set(
+      otherFriendRef,
+      {
+        'uid': uid,
+        'name':
+            me['name'] ?? 'Party User',
+        'email':
+            me['email'] ?? '',
+        'photoURL':
+            me['photoURL'] ?? '',
+        'avatar':
+            me['avatar'] ?? '',
+        'createdAt':
+            FieldValue.serverTimestamp(),
+      },
+    );
+
+    batch.delete(
+      friendRequests(uid)
+          .doc(requesterUid),
+    );
+
     await batch.commit();
 
     await ProfileUnreadService.createNotification(
       uid: requesterUid,
       type: 'friends',
       title: 'Friend Request Accepted',
-      message: '${me['name'] ?? 'Party User'} accepted your friend request.',
+      message:
+          '${me['name'] ?? 'Party User'} accepted your friend request.',
       actorUid: uid,
-      actorName: me['name'] ?? 'Party User',
-      actorPhoto: me['photoURL'] ?? '',
+      actorName:
+          me['name'] ?? 'Party User',
+      actorPhoto:
+          me['photoURL'] ?? '',
     );
   }
+
+  /* ============================================================
+     REJECT FRIEND REQUEST
+     ============================================================ */
 
   static Future<void> rejectFriendRequest({
     required String uid,
     required String requesterUid,
   }) async {
-    await userDoc(uid).collection('friendRequests').doc(requesterUid).delete();
+    await friendRequests(uid)
+        .doc(requesterUid)
+        .delete();
   }
 
-  static String chatId(String a, String b) {
+  /* ============================================================
+     REMOVE FRIEND
+     ============================================================ */
+
+  static Future<void> removeFriend({
+    required String uid,
+    required String otherUid,
+  }) async {
+    final batch = db.batch();
+
+    batch.delete(
+      friends(uid).doc(otherUid),
+    );
+
+    batch.delete(
+      friends(otherUid).doc(uid),
+    );
+
+    await batch.commit();
+  }
+
+  /* ============================================================
+     FRIEND REQUEST STREAM
+     ============================================================ */
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>>
+      friendRequestsStream(
+    String uid,
+  ) {
+    return friendRequests(uid)
+        .where(
+          'status',
+          isEqualTo: 'pending',
+        )
+        .snapshots();
+  }
+
+  /* ============================================================
+     FRIENDS STREAM
+     ============================================================ */
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>>
+      friendsStream(
+    String uid,
+  ) {
+    return friends(uid).snapshots();
+  }
+
+  /* ============================================================
+     PRIVATE CHAT
+     ============================================================ */
+
+  static String chatId(
+    String a,
+    String b,
+  ) {
     final ids = [a, b]..sort();
+
     return '${ids[0]}_${ids[1]}';
   }
 
@@ -898,49 +1237,84 @@ class PartyChatData {
     required String text,
   }) async {
     final clean = text.trim();
+
     if (clean.isEmpty) return;
-    if (await isBlockedEither(fromUid, toUid)) {
-      throw Exception('Messaging is blocked.');
+
+    if (await isBlockedEither(
+      fromUid,
+      toUid,
+    )) {
+      throw Exception(
+        'Messaging is blocked.',
+      );
     }
 
-    final id = chatId(fromUid, toUid);
-    final fromData = await userData(fromUid) ?? {};
-    final chat = db.collection('chats').doc(id);
+    final id =
+        chatId(fromUid, toUid);
 
-    await chat.collection('messages').add({
+    final fromData =
+        await userData(fromUid) ?? {};
+
+    final chat =
+        db.collection('chats').doc(id);
+
+    await chat
+        .collection('messages')
+        .add({
       'senderUid': fromUid,
       'receiverUid': toUid,
       'text': clean,
-      'createdAt': FieldValue.serverTimestamp(),
+      'createdAt':
+          FieldValue.serverTimestamp(),
       'isRead': false,
     });
 
-    final summary = {
-      'chatId': id,
-      'otherUid': fromUid,
-      'lastMessage': clean,
-      'lastMessageAt': FieldValue.serverTimestamp(),
-          };
-    await userDoc(toUid).collection('chats').doc(id).set({
-      ...summary,
-      'otherUid': fromUid,
-    }, SetOptions(merge: true));
-    await userDoc(fromUid).collection('chats').doc(id).set({
-      ...summary,
-      'otherUid': toUid,
-    }, SetOptions(merge: true));
+    await userDoc(toUid)
+        .collection('chats')
+        .doc(id)
+        .set(
+      {
+        'chatId': id,
+        'otherUid': fromUid,
+        'lastMessage': clean,
+        'lastMessageAt':
+            FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
+
+    await userDoc(fromUid)
+        .collection('chats')
+        .doc(id)
+        .set(
+      {
+        'chatId': id,
+        'otherUid': toUid,
+        'lastMessage': clean,
+        'lastMessageAt':
+            FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
 
     await ProfileUnreadService.createNotification(
       uid: toUid,
       type: 'friendMessages',
       title: 'New Message',
-      message: '${fromData['name'] ?? 'Friend'}: $clean',
+      message:
+          '${fromData['name'] ?? 'Friend'}: $clean',
       actorUid: fromUid,
-      actorName: fromData['name'] ?? 'Party User',
-      actorPhoto: fromData['photoURL'] ?? '',
+      actorName:
+          fromData['name'] ?? 'Party User',
+      actorPhoto:
+          fromData['photoURL'] ?? '',
       chatId: id,
     );
   }
+
+  /* ============================================================
+     GIFTS
+     ============================================================ */
 
   static Future<void> sendGift({
     required String fromUid,
@@ -948,69 +1322,137 @@ class PartyChatData {
     required String giftName,
     required int cost,
   }) async {
-    if (fromUid == toUid) throw Exception('You cannot send a gift to yourself.');
-    if (await isBlockedEither(fromUid, toUid)) {
-      throw Exception('Gifts are blocked.');
+    if (fromUid == toUid) {
+      throw Exception(
+        'You cannot send a gift to yourself.',
+      );
     }
 
-    final senderRef = userDoc(fromUid);
-    final receiverRef = userDoc(toUid);
-    final senderData = await senderRef.get();
-    final receiverData = await receiverRef.get();
-    final sender = senderData.data() ?? {};
-    final receiver = receiverData.data() ?? {};
-    final coins = (sender['coins'] is num) ? (sender['coins'] as num).toInt() : 0;
+    if (await isBlockedEither(
+      fromUid,
+      toUid,
+    )) {
+      throw Exception(
+        'Gifts are blocked.',
+      );
+    }
+
+    final senderRef =
+        userDoc(fromUid);
+
+    final receiverRef =
+        userDoc(toUid);
+
+    final senderData =
+        await senderRef.get();
+
+    final receiverData =
+        await receiverRef.get();
+
+    final sender =
+        senderData.data() ?? {};
+
+    final receiver =
+        receiverData.data() ?? {};
+
+    final coins =
+        sender['coins'] is num
+            ? (sender['coins'] as num).toInt()
+            : 0;
 
     if (coins < cost) {
-      throw Exception('Not enough coins.');
+      throw Exception(
+        'Not enough coins.',
+      );
     }
 
-    final giftRef = receiverRef.collection('gifts').doc();
-    final sentRef = senderRef.collection('sentGifts').doc();
+    final giftRef =
+        receiverRef
+            .collection('gifts')
+            .doc();
+
+    final sentRef =
+        senderRef
+            .collection('sentGifts')
+            .doc();
+
     final batch = db.batch();
 
-    batch.update(senderRef, {'coins': coins - cost});
+    batch.update(
+      senderRef,
+      {
+        'coins': coins - cost,
+      },
+    );
+
     final giftData = {
       'giftName': giftName,
       'cost': cost,
       'senderUid': fromUid,
-      'senderName': sender['name'] ?? 'Party User',
+      'senderName':
+          sender['name'] ?? 'Party User',
       'receiverUid': toUid,
-      'receiverName': receiver['name'] ?? 'Party User',
-      'createdAt': FieldValue.serverTimestamp(),
+      'receiverName':
+          receiver['name'] ?? 'Party User',
+      'createdAt':
+          FieldValue.serverTimestamp(),
     };
-    batch.set(giftRef, giftData);
-    batch.set(sentRef, giftData);
+
     batch.set(
-      senderRef.collection('transactions').doc(),
+      giftRef,
+      giftData,
+    );
+
+    batch.set(
+      sentRef,
+      giftData,
+    );
+
+    batch.set(
+      senderRef
+          .collection('transactions')
+          .doc(),
       {
         'type': 'gift_sent',
         'amount': -cost,
         'giftName': giftName,
-        'createdAt': FieldValue.serverTimestamp(),
+        'createdAt':
+            FieldValue.serverTimestamp(),
       },
     );
+
     await batch.commit();
 
     await ProfileUnreadService.createNotification(
       uid: toUid,
       type: 'gifts',
       title: 'New Gift 🎁',
-      message: '${sender['name'] ?? 'Party User'} sent you $giftName.',
+      message:
+          '${sender['name'] ?? 'Party User'} sent you $giftName.',
       actorUid: fromUid,
-      actorName: sender['name'] ?? 'Party User',
-      actorPhoto: sender['photoURL'] ?? '',
+      actorName:
+          sender['name'] ?? 'Party User',
+      actorPhoto:
+          sender['photoURL'] ?? '',
     );
+
     await ProfileUnreadService.createNotification(
       uid: fromUid,
       type: 'myGifts',
       title: 'Gift Sent 🎁',
-      message: 'You sent $giftName successfully.',
+      message:
+          'You sent $giftName successfully.',
       actorUid: toUid,
-      actorName: receiver['name'] ?? 'Party User',
-      actorPhoto: receiver['photoURL'] ?? '',
+      actorName:
+          receiver['name'] ?? 'Party User',
+      actorPhoto:
+          receiver['photoURL'] ?? '',
     );
   }
+
+  /* ============================================================
+     ROOM INVITE
+     ============================================================ */
 
   static Future<void> sendRoomInvite({
     required String fromUid,
@@ -1018,34 +1460,63 @@ class PartyChatData {
     required String roomId,
     required String roomTitle,
   }) async {
-    if (await isBlockedEither(fromUid, toUid)) {
-      throw Exception('Invites are blocked.');
+    if (await isBlockedEither(
+      fromUid,
+      toUid,
+    )) {
+      throw Exception(
+        'Invites are blocked.',
+      );
     }
-    final fromData = await userData(fromUid) ?? {};
-    final inviteRef = userDoc(toUid).collection('roomInvites').doc();
+
+    final fromData =
+        await userData(fromUid) ?? {};
+
+    final inviteRef =
+        userDoc(toUid)
+            .collection('roomInvites')
+            .doc();
+
     await inviteRef.set({
       'roomId': roomId,
       'roomTitle': roomTitle,
       'inviterUid': fromUid,
-      'inviterName': fromData['name'] ?? 'Party User',
-      'inviterPhoto': fromData['photoURL'] ?? '',
+      'inviterName':
+          fromData['name'] ?? 'Party User',
+      'inviterPhoto':
+          fromData['photoURL'] ?? '',
       'status': 'pending',
-      'createdAt': FieldValue.serverTimestamp(),
+      'createdAt':
+          FieldValue.serverTimestamp(),
     });
+
     await ProfileUnreadService.createNotification(
       uid: toUid,
       type: 'roomInvites',
       title: 'Room Invite',
-      message: '${fromData['name'] ?? 'Party User'} sent you a room invitation.',
+      message:
+          '${fromData['name'] ?? 'Party User'} sent you a room invitation.',
       actorUid: fromUid,
-      actorName: fromData['name'] ?? 'Party User',
-      actorPhoto: fromData['photoURL'] ?? '',
+      actorName:
+          fromData['name'] ?? 'Party User',
+      actorPhoto:
+          fromData['photoURL'] ?? '',
       roomId: roomId,
     );
   }
 }
 
+Important: "PartyChatData" ki purani class poori ki poori replace karni hai. "PartyChatApp" se pehle class khatam honi chahiye, aur "PartyChatApp" ko change nahi karna.
 
+Iske baad abhi build mat chalao. Pehle save/commit karo; phir build result dekhte hain.
+
+
+
+
+
+
+    
+      
 /* ============================================================
    APP
    ============================================================ */
