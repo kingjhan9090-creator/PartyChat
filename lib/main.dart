@@ -16,6 +16,111 @@
     const int zegoAppId = int.fromEnvironment('ZEGO_APP_ID');
     const String zegoAppSign = String.fromEnvironment('ZEGO_APP_SIGN');
 
+class PartyLoading extends StatefulWidget {
+  const PartyLoading({super.key});
+
+  @override
+  State<PartyLoading> createState() => _PartyLoadingState();
+}
+
+class _PartyLoadingState extends State<PartyLoading>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFF050307),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 74,
+            height: 74,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Stack(
+                  alignment: Alignment.center,
+                  children: List.generate(12, (index) {
+                    final angle =
+                        (index * 3.14159265359 * 2 / 12) -
+                        (_controller.value * 3.14159265359 * 2);
+
+                    final x = 25 * math.cos(angle);
+                    final y = 25 * math.sin(angle);
+
+                    final opacity =
+                        0.25 + (0.75 * ((index + 1) / 12));
+
+                    final isGold = index % 3 == 0;
+
+                    return Transform.translate(
+                      offset: Offset(x, y),
+                      child: Opacity(
+                        opacity: opacity.clamp(0.0, 1.0),
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isGold
+                                ? const Color(0xFFFFC928)
+                                : const Color(0xFFB65CFF),
+                            boxShadow: [
+                              BoxShadow(
+                                color: isGold
+                                    ? const Color(0xFFFFC928)
+                                    : const Color(0xFFB65CFF),
+                                blurRadius: 10,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 18),
+          const Text(
+            'LOADING...',
+            style: TextStyle(
+              color: Color(0xFFFFC928),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
     Future<void> main() async {
       WidgetsFlutterBinding.ensureInitialized();
 
