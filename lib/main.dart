@@ -1526,6 +1526,138 @@ class PartyChatData {
 /* ============================================================
    APP
    ============================================================ */
+
+class PartyColors {
+  static const black = Color(0xFF050307);
+  static const black2 = Color(0xFF0C0814);
+  static const panel = Color(0xFF151020);
+  static const panel2 = Color(0xFF20152F);
+  static const purple = Color(0xFF7A2CFF);
+  static const purpleBright = Color(0xFFB65CFF);
+  static const purpleDark = Color(0xFF42137D);
+  static const gold = Color(0xFFFFC928);
+  static const goldBright = Color(0xFFFFE47A);
+  static const goldDark = Color(0xFFB97900);
+  static const text = Color(0xFFFFFBF1);
+  static const muted = Color(0xFFB8AEC6);
+}
+
+class PartyLogo extends StatelessWidget {
+  final double size;
+  final bool wordmark;
+  const PartyLogo({super.key, this.size = 110, this.wordmark = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(width: size, height: size, child: CustomPaint(painter: _PartyLogoPainter())),
+        if (wordmark) ...[
+          const SizedBox(height: 10),
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(fontSize: 31, fontWeight: FontWeight.w900),
+              children: [
+                TextSpan(text: 'Party', style: TextStyle(color: PartyColors.gold)),
+                TextSpan(text: 'Chat', style: TextStyle(color: PartyColors.purpleBright)),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _PartyLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final scale = size.width / 120.0;
+    canvas.save();
+    canvas.translate(c.dx, c.dy);
+    canvas.scale(scale);
+
+    final glow = Paint()
+      ..color = PartyColors.gold.withOpacity(.18)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
+    canvas.drawCircle(Offset.zero, 39, glow);
+
+    final crown = Paint()..color = PartyColors.gold..style = PaintingStyle.fill;
+    final crownPath = Path()
+      ..moveTo(-30, -28)..lineTo(-21, -6)..lineTo(-8, -27)..lineTo(0, -4)
+      ..lineTo(10, -27)..lineTo(21, -6)..lineTo(30, -28)..lineTo(24, 2)
+      ..lineTo(-24, 2)..close();
+    canvas.drawPath(crownPath, crown);
+
+    final bubble = Paint()..color = PartyColors.black..style = PaintingStyle.fill;
+    final bubbleBorder = Paint()
+      ..color = PartyColors.gold
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5;
+    final r = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(-39, -9, 78, 58),
+      const Radius.circular(25),
+    );
+    canvas.drawRRect(r, bubble);
+    canvas.drawRRect(r, bubbleBorder);
+
+    final dot = Paint()..color = PartyColors.gold;
+    canvas.drawCircle(const Offset(-16, 19), 5, dot);
+    canvas.drawCircle(const Offset(0, 19), 5, dot);
+    canvas.drawCircle(const Offset(16, 19), 5, dot);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class PartyAvatarShowcase extends StatelessWidget {
+  const PartyAvatarShowcase({super.key});
+
+  Widget avatar(String asset, double size) {
+    return Container(
+      width: size + 8,
+      height: size + 8,
+      padding: const EdgeInsets.all(3),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(colors: [PartyColors.gold, PartyColors.purpleBright]),
+        boxShadow: [BoxShadow(color: Color(0x66B65CFF), blurRadius: 18, spreadRadius: 2)],
+      ),
+      child: ClipOval(child: Image.asset(asset, fit: BoxFit.cover)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 205,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          Positioned(bottom: 0, left: 18, child: avatar('assets/avatar1_pakistan_female-2.png', 92)),
+          Positioned(bottom: 0, right: 18, child: avatar('assets/avatar4_russia_female.png', 92)),
+          Positioned(bottom: 3, child: avatar('assets/avatar2_uae_male.png', 132)),
+        ],
+      ),
+    );
+  }
+}
+
+String partyMessageTime(dynamic value) {
+  if (value is Timestamp) {
+    final d = value.toDate().toLocal();
+    final hour = d.hour % 12 == 0 ? 12 : d.hour % 12;
+    final minute = d.minute.toString().padLeft(2, '0');
+    final suffix = d.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $suffix';
+  }
+  return '--:--';
+}
+
 class PartyChatApp extends StatefulWidget {
   const PartyChatApp({super.key});
 
@@ -1564,42 +1696,60 @@ class _PartyChatAppState extends State<PartyChatApp> {
           title: 'PartyChat',
           theme: ThemeData(
             brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF05030B),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF7C3AED),
-              brightness: Brightness.dark,
-            ).copyWith(
-              primary: const Color(0xFFFFC83D),
-              secondary: const Color(0xFF9B5CFF),
-              surface: const Color(0xFF10091D),
+            scaffoldBackgroundColor: PartyColors.black,
+            canvasColor: PartyColors.black,
+            colorScheme: const ColorScheme.dark(
+              primary: PartyColors.gold,
+              secondary: PartyColors.purpleBright,
+              surface: PartyColors.panel,
+              onPrimary: Colors.black,
+              onSecondary: Colors.white,
             ),
-            navigationBarTheme: const NavigationBarThemeData(
-              backgroundColor: Color(0xFF0C0915),
-              indicatorColor: Color(0xFF6E3BCB),
-              height: 78,
-              labelTextStyle: WidgetStatePropertyAll(
-                TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-              ),
+            navigationBarTheme: NavigationBarThemeData(
+              backgroundColor: PartyColors.black2,
+              indicatorColor: PartyColors.purpleDark,
+              height: 76,
+              iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
+                color: states.contains(WidgetState.selected) ? PartyColors.gold : Colors.white70,
+              )),
+              labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(
+                color: states.contains(WidgetState.selected) ? PartyColors.gold : Colors.white70,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              )),
             ),
             appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent,
+              backgroundColor: PartyColors.black,
               elevation: 0,
               centerTitle: false,
+              foregroundColor: PartyColors.text,
+              titleTextStyle: TextStyle(color: PartyColors.text, fontSize: 20, fontWeight: FontWeight.w900),
             ),
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
-              fillColor: const Color(0xFF0F0B1A),
+              fillColor: PartyColors.black2,
+              labelStyle: const TextStyle(color: Colors.white70),
+              hintStyle: const TextStyle(color: Colors.white54),
+              prefixIconColor: PartyColors.gold,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(18)),
-                borderSide: BorderSide(color: Color(0xFF4D397A)),
+                borderSide: BorderSide(color: PartyColors.purpleDark),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(18)),
-                borderSide: BorderSide(color: Color(0xFF34274A)),
+                borderSide: BorderSide(color: Color(0xFF46345D)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(18)),
-                borderSide: BorderSide(color: Color(0xFFFFC83D), width: 1.5),
+                borderSide: BorderSide(color: PartyColors.gold, width: 1.6),
+              ),
+            ),
+            filledButtonTheme: FilledButtonThemeData(
+              style: FilledButton.styleFrom(
+                backgroundColor: PartyColors.gold,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w900),
               ),
             ),
             useMaterial3: true,
@@ -1614,57 +1764,34 @@ class _PartyChatAppState extends State<PartyChatApp> {
 class _NeonBackground extends StatelessWidget {
   final Widget child;
   final bool scrollable;
-
-  const _NeonBackground({
-    required this.child,
-    this.scrollable = false,
-  });
+  const _NeonBackground({required this.child, this.scrollable = false});
 
   @override
   Widget build(BuildContext context) {
-    final content = Container(
+    return Container(
       decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.topRight,
-          radius: 1.25,
-          colors: [
-            Color(0xFF1A0A31),
-            Color(0xFF080510),
-            Color(0xFF05030B),
-          ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [PartyColors.black, Color(0xFF090512), PartyColors.black],
         ),
       ),
       child: Stack(
         children: [
-          Positioned(
-            top: -120,
-            left: -100,
-            child: _GlowOrb(
-              size: 260,
-              color: const Color(0xFF8B5CF6),
-            ),
-          ),
-          Positioned(
-            bottom: -150,
-            right: -100,
-            child: _GlowOrb(
-              size: 300,
-              color: const Color(0xFF8B5CF6),
-            ),
-          ),
+          Positioned(top: -100, left: -110, child: _GlowOrb(size: 300, color: PartyColors.purple)),
+          Positioned(top: 40, right: -150, child: _GlowOrb(size: 340, color: PartyColors.gold)),
+          Positioned(bottom: -170, left: -80, child: _GlowOrb(size: 330, color: PartyColors.purpleBright)),
+          Positioned(bottom: -130, right: -120, child: _GlowOrb(size: 280, color: PartyColors.goldDark)),
           child,
         ],
       ),
     );
-
-    return scrollable ? content : content;
   }
 }
 
 class _GlowOrb extends StatelessWidget {
   final double size;
   final Color color;
-
   const _GlowOrb({required this.size, required this.color});
 
   @override
@@ -1675,14 +1802,8 @@ class _GlowOrb extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: color.withOpacity(0.11),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.20),
-              blurRadius: 115,
-              spreadRadius: 25,
-            ),
-          ],
+          color: color.withOpacity(.035),
+          boxShadow: [BoxShadow(color: color.withOpacity(.16), blurRadius: 115, spreadRadius: 25)],
         ),
       ),
     );
@@ -1693,12 +1814,7 @@ class _NeonPanel extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double radius;
-
-  const _NeonPanel({
-    required this.child,
-    this.padding = const EdgeInsets.all(16),
-    this.radius = 20,
-  });
+  const _NeonPanel({required this.child, this.padding = const EdgeInsets.all(16), this.radius = 20});
 
   @override
   Widget build(BuildContext context) {
@@ -1708,158 +1824,48 @@ class _NeonPanel extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1C1628), Color(0xFF0B0713)],
+          colors: [PartyColors.panel2, PartyColors.black2],
         ),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: const Color(0xFF9B5CFF), width: 1.2),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x774F00FF),
-            blurRadius: 20,
-            spreadRadius: 1,
-          ),
-        ],
+        border: Border.all(color: PartyColors.gold.withOpacity(.62), width: 1.1),
+        boxShadow: const [BoxShadow(color: Color(0x553F00A8), blurRadius: 22, spreadRadius: 1)],
       ),
       child: child,
     );
   }
 }
 
-class _PartyLoading extends StatefulWidget {
+class _NeonAction extends StatelessWidget {
   final String label;
-  const _PartyLoading({this.label = 'LOADING...'});
-
-  @override
-  State<_PartyLoading> createState() => _PartyLoadingState();
-}
-
-class _PartyLoadingState extends State<_PartyLoading>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 42,
-          height: 42,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _controller.value * math.pi * 2,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 3.2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFC83D)),
-                  backgroundColor: Color(0xFF3B245E),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 9),
-        Text(
-          widget.label,
-          style: const TextStyle(
-            color: Color(0xFFFFC83D),
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.4,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _LoadingOverlay extends StatelessWidget {
-  const _LoadingOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xD9080610),
-      child: const Center(child: _PartyLoading()),
-    );
-  }
-}
-
-class _NeonAction extends StatefulWidget {
-  final String label;
-  final FutureOr<void> Function() onPressed;
+  final VoidCallback onPressed;
   final IconData? icon;
-
-  const _NeonAction({
-    required this.label,
-    required this.onPressed,
-    this.icon,
-  });
-
-  @override
-  State<_NeonAction> createState() => _NeonActionState();
-}
-
-class _NeonActionState extends State<_NeonAction> {
-  bool loading = false;
-
-  Future<void> _run() async {
-    if (loading) return;
-    setState(() => loading = true);
-    try {
-      await widget.onPressed();
-    } finally {
-      if (mounted) setState(() => loading = false);
-    }
-  }
+  const _NeonAction({required this.label, required this.onPressed, this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF5A2FA8), Color(0xFF8B5CF6)],
-        ),
-        border: Border.all(color: const Color(0xFFFFC83D), width: 1.1),
-        boxShadow: const [
-          BoxShadow(color: Color(0x884F00FF), blurRadius: 20, spreadRadius: 1),
-          BoxShadow(color: Color(0x55FFC83D), blurRadius: 18),
-        ],
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(18)),
+        gradient: LinearGradient(colors: [PartyColors.gold, PartyColors.goldBright]),
+        boxShadow: [BoxShadow(color: Color(0x66FFB800), blurRadius: 18, spreadRadius: 1)],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: _run,
+          onTap: onPressed,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            child: loading
-                ? const Center(child: SizedBox(height: 52, child: _PartyLoading()))
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.icon != null) ...[
-                        Icon(widget.icon, size: 18),
-                        const SizedBox(width: 7),
-                      ],
-                      Text(
-                        widget.label,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                    ],
-                  ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 18, color: Colors.black),
+                  const SizedBox(width: 7),
+                ],
+                Text(label, style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.black)),
+              ],
+            ),
           ),
         ),
       ),
@@ -1873,7 +1879,6 @@ class _NeonActionState extends State<_NeonAction> {
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
-
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
@@ -1882,25 +1887,17 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-
     Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
-
       final user = FirebaseAuth.instance.currentUser;
-
       if (user != null) {
         await AppLanguage.load();
         await ProfileUnreadService.ensure(user.uid);
       }
-
       if (!mounted) return;
-
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) =>
-              user != null ? const MainPage() : const WelcomePage(),
-        ),
+        MaterialPageRoute(builder: (_) => user != null ? const MainPage() : const WelcomePage()),
       );
     });
   }
@@ -1909,46 +1906,47 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _NeonBackground(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 132,
-                  height: 132,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF7C3AED), Color(0xFF9B5CFF)],
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const PartyLogo(size: 128),
+                  const SizedBox(height: 10),
+                  Text(
+                    AppLanguage.text('chat_play_make_friends'),
+                    style: const TextStyle(color: PartyColors.text, fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'GOOD VIBES ONLY',
+                    style: TextStyle(
+                      letterSpacing: 4,
+                      color: PartyColors.goldBright,
+                      fontWeight: FontWeight.w700,
                     ),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0xAA8C2DFF), blurRadius: 45, spreadRadius: 8),
-                    ],
                   ),
-                  child: const Icon(Icons.auto_awesome, size: 68, color: Colors.white),
-                ),
-                const SizedBox(height: 28),
-                RichText(
-                  text: const TextSpan(
-                    style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900),
-                    children: [
-                      TextSpan(text: 'Party', style: TextStyle(color: Colors.white)),
-                      TextSpan(text: 'Chat', style: TextStyle(color: Color(0xFFFFC83D))),
-                    ],
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: 140,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: const LinearProgressIndicator(
+                        minHeight: 5,
+                        backgroundColor: PartyColors.purpleDark,
+                        valueColor: AlwaysStoppedAnimation<Color>(PartyColors.gold),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  AppLanguage.text('chat_play_make_friends'),
-                  style: const TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-                const SizedBox(height: 18),
-                const _PartyLoading(),
-                const SizedBox(height: 18),
-                const Text('GOOD VIBES ONLY', style: TextStyle(letterSpacing: 4, color: Color(0xFFFFC83D), fontWeight: FontWeight.w700)),
-              ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'LOADING...',
+                    style: TextStyle(letterSpacing: 3.2, color: PartyColors.goldBright, fontWeight: FontWeight.w800, fontSize: 11),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1970,35 +1968,14 @@ class WelcomePage extends StatelessWidget {
       body: _NeonBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+            padding: const EdgeInsets.fromLTRB(22, 30, 22, 22),
             child: Column(
               children: [
-                const Spacer(),
-                Container(
-                  width: 112,
-                  height: 112,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF9B5CFF)]),
-                    boxShadow: const [BoxShadow(color: Color(0xAA9B35FF), blurRadius: 42, spreadRadius: 6)],
-                  ),
-                  child: const Icon(Icons.groups_rounded, size: 60),
-                ),
-                const SizedBox(height: 26),
-                RichText(
-                  text: const TextSpan(
-                    style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900),
-                    children: [
-                      TextSpan(text: 'Party', style: TextStyle(color: Colors.white)),
-                      TextSpan(text: 'Chat', style: TextStyle(color: Color(0xFFFFC83D))),
-                    ],
-                  ),
-                ),
+                const Spacer(flex: 2),
+                const PartyLogo(size: 88),
+                const SizedBox(height: 14),
+                const PartyAvatarShowcase(),
                 const SizedBox(height: 12),
-                Text(AppLanguage.text('welcome_to_partychat'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 8),
-                Text(AppLanguage.text('chat_play_make_friends'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white60, fontSize: 16)),
-                const Spacer(),
                 SizedBox(
                   width: double.infinity,
                   child: _NeonAction(
@@ -2007,20 +1984,25 @@ class WelcomePage extends StatelessWidget {
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                      side: const BorderSide(color: Color(0xFFFFC83D)),
+                      side: const BorderSide(color: PartyColors.gold, width: 1.3),
+                      foregroundColor: Colors.white,
                     ),
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
-                    child: Text(AppLanguage.text('login'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                    child: Text(AppLanguage.text('login'), style: const TextStyle(fontWeight: FontWeight.w900)),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                Text(AppLanguage.text('welcome_to_partychat'), style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(AppLanguage.text('chat_play_make_friends'), style: const TextStyle(color: PartyColors.purpleBright, fontSize: 13)),
+                const Spacer(),
               ],
             ),
           ),
@@ -2043,7 +2025,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool signup = false;
-  bool loading = false;
   Future<String> generateUniqueUserId() async {
   final random = math.Random();
   final usersRef = FirebaseFirestore.instance.collection('users');
@@ -2058,7 +2039,6 @@ class _LoginPageState extends State<LoginPage> {
         .get();
 
     if (existing.docs.isEmpty) {
-      
       return userId;
     }
   }
@@ -2078,7 +2058,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> continueToApp() async {
-    if (loading) return;
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final name = nameController.text.trim();
@@ -2106,7 +2085,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      if (mounted) setState(() => loading = true);
       UserCredential credential;
 
       if (signup) {
@@ -2165,7 +2143,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } catch (e) {
-      if (mounted) setState(() => loading = false);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2177,9 +2154,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> continueWithGoogle() async {
-    if (loading) return;
     try {
-      if (mounted) setState(() => loading = true);
       final GoogleSignInAccount? googleUser =
           await GoogleSignIn(
         serverClientId:
@@ -2230,7 +2205,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } catch (e) {
-      if (mounted) setState(() => loading = false);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2244,181 +2218,149 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          SafeArea(
-            child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 30,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 30),
-              const Icon(
-                Icons.chat_bubble_rounded,
-                size: 75,
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                'PartyChat',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Welcome to PartyChat',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        setState(() {
-                          signup = false;
-                        });
-                      },
-                      child: const Text('Login'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          signup = true;
-                        });
-                      },
-                      child: const Text('Sign Up'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: continueWithGoogle,
-                  icon: const Icon(
-                    Icons.g_mobiledata,
-                    size: 30,
-                  ),
-                  label: const Text(
-                    'Continue with Google',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.facebook),
-                  label: const Text(
-                    'Continue with Facebook',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.close),
-                  label: const Text(
-                    'Continue with Twitter / X',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.phone_android),
-                  label: const Text(
-                    'Continue with Mobile Number',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              if (signup)
-                TextField(
-                  controller: nameController,
-                  maxLength: 20,
-                  decoration: InputDecoration(
-                    labelText: AppLanguage.text('username'),
-                    prefixIcon: const Icon(Icons.person),
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              if (signup) const SizedBox(height: 14),
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: AppLanguage.text('email'),
-                  prefixIcon: const Icon(Icons.email),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: passwordController,
-                obscureText: obscurePassword,
-                decoration: InputDecoration(
-                  labelText: AppLanguage.text('password'),
-                  prefixIcon: const Icon(Icons.lock),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              SizedBox(
-                height: 52,
-                child: FilledButton(
-                  onPressed: continueToApp,
+      body: _NeonBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 10),
+                const Center(child: PartyLogo(size: 76)),
+                const SizedBox(height: 12),
+                const Center(
                   child: Text(
-                    signup
-                        ? AppLanguage.text('create_account')
-                        : AppLanguage.text('login'),
+                    'Welcome to PartyChat',
+                    style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    signup = true;
-                  });
-                },
-                child: const Text(
-                  'Create New Account',
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () => setState(() => signup = false),
+                        child: const Text('Login'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: PartyColors.purpleBright),
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () => setState(() => signup = true),
+                        child: const Text('Sign Up'),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: PartyColors.gold),
+                      foregroundColor: PartyColors.text,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    ),
+                    onPressed: continueWithGoogle,
+                    icon: const Icon(Icons.g_mobiledata, size: 30, color: PartyColors.gold),
+                    label: const Text('Continue with Google'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: PartyColors.purpleDark),
+                      foregroundColor: PartyColors.text,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    ),
+                    onPressed: () {},
+                    icon: const Icon(Icons.facebook, color: PartyColors.purpleBright),
+                    label: const Text('Continue with Facebook'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: PartyColors.purpleDark),
+                      foregroundColor: PartyColors.text,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    ),
+                    onPressed: () {},
+                    icon: const Icon(Icons.close, color: PartyColors.gold),
+                    label: const Text('Continue with Twitter / X'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: PartyColors.purpleDark),
+                      foregroundColor: PartyColors.text,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    ),
+                    onPressed: () {},
+                    icon: const Icon(Icons.phone_android, color: PartyColors.gold),
+                    label: const Text('Continue with Mobile Number'),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                if (signup)
+                  TextField(
+                    controller: nameController,
+                    maxLength: 20,
+                    decoration: InputDecoration(
+                      labelText: AppLanguage.text('username'),
+                      prefixIcon: const Icon(Icons.person),
+                    ),
+                  ),
+                if (signup) const SizedBox(height: 14),
+                TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: AppLanguage.text('email'),
+                    prefixIcon: const Icon(Icons.email),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: passwordController,
+                  obscureText: obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: AppLanguage.text('password'),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(obscurePassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () => setState(() => obscurePassword = !obscurePassword),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  height: 52,
+                  child: _NeonAction(
+                    label: signup ? AppLanguage.text('create_account') : AppLanguage.text('login'),
+                    onPressed: continueToApp,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => setState(() => signup = true),
+                  child: const Text('Create New Account', style: TextStyle(color: PartyColors.goldBright, fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
           ),
         ),
-          ),
-          if (loading) const Positioned.fill(child: _LoadingOverlay()),
-        ],
       ),
     );
   }
@@ -2450,7 +2392,7 @@ class _MainPageState extends State<MainPage> {
     if (value == selected || switchingTab) return;
     setState(() => switchingTab = true);
     _tabTimer?.cancel();
-    _tabTimer = Timer(const Duration(milliseconds: 450), () {
+    _tabTimer = Timer(const Duration(seconds: 1), () {
       if (!mounted) return;
       setState(() {
         selected = value;
@@ -2466,8 +2408,14 @@ class _MainPageState extends State<MainPage> {
       body: Stack(
         children: [
           SafeArea(bottom: false, child: pages[selected]),
-          if (switchingTab)
-            const Positioned.fill(child: _LoadingOverlay()),
+          IgnorePointer(
+            ignoring: !switchingTab,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 160),
+              opacity: switchingTab ? 1 : 0,
+              child: const Align(alignment: Alignment.topCenter, child: _PartyTabLoadingBar()),
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -2507,7 +2455,7 @@ class _PartyTabLoadingBarState extends State<_PartyTabLoadingBar> with SingleTic
           widthFactor: .42,
           child: Container(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [Color(0xFF9B5CFF), Color(0xFFFFC83D), Color(0xFF9B5CFF)]),
+              gradient: LinearGradient(colors: [PartyColors.purpleBright, Color(0xFFFFC83D), PartyColors.purpleBright]),
               boxShadow: [BoxShadow(color: Color(0x99FFC83D), blurRadius: 12, spreadRadius: 1)],
             ),
           ),
@@ -2872,13 +2820,13 @@ class SimpleUserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF05030B),
+      backgroundColor: const PartyColors.black,
       appBar: AppBar(),
       body: _NeonBackground(
         child: FutureBuilder<Map<String, dynamic>?>(
           future: PartyChatData.userData(uid),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return const Center(child: _PartyLoading());
+            if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
             final data = snapshot.data ?? <String, dynamic>{};
             final name = data['name']?.toString() ?? 'Party User';
             final publicId = data['userId']?.toString() ?? uid;
@@ -2967,7 +2915,7 @@ class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF05030B),
+      backgroundColor: const PartyColors.black,
       appBar: AppBar(title: const Text('Search')),
       body: _NeonBackground(child: ListView(padding: const EdgeInsets.fromLTRB(18, 16, 18, 30), children: [
         TextField(
@@ -2983,7 +2931,7 @@ class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
           ),
         ),
         const SizedBox(height: 18),
-        if (searching) const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Center(child: _PartyLoading())),
+        if (searching) const SizedBox(width: double.infinity, child: LinearProgressIndicator(minHeight: 3)),
         if (!searching && lastQuery.isNotEmpty && userResults.isEmpty && roomResults.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 80), child: Center(child: Text('No matching result.', style: TextStyle(color: Colors.white54)))),
         if (userResults.isNotEmpty) ...[
@@ -3009,7 +2957,7 @@ class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
                   builder: (context, snapshot) {
                     final pending = snapshot.data ?? false;
                     return IconButton(
-                      icon: Icon(pending ? Icons.check_circle_rounded : Icons.person_add_alt_1_rounded, color: pending ? const Color(0xFFFFC83D) : const Color(0xFF9B5CFF)),
+                      icon: Icon(pending ? Icons.check_circle_rounded : Icons.person_add_alt_1_rounded, color: pending ? const Color(0xFFFFC83D) : const PartyColors.purpleBright),
                       onPressed: pending ? null : () async {
                         try { await PartyChatData.sendFriendRequest(fromUid: myUid, toUid: otherUid); if (context.mounted) setState(() {}); }
                         catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
@@ -3124,7 +3072,7 @@ class NewRoomsPage extends StatelessWidget {
           ],
         ),
       ),
-    );
+         );
   }
 }
 
@@ -3557,18 +3505,16 @@ class _RoomPageState extends State<RoomPage> {
         height: 58,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: micOn
-              ? Colors.white
-              : Colors.grey.shade800,
+          color: micOn ? PartyColors.gold : PartyColors.panel,
           boxShadow: isSpeaking
               ? [
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.9),
+                    color: PartyColors.gold.withOpacity(0.9),
                     blurRadius: 22,
                     spreadRadius: 7,
                   ),
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.35),
+                    color: PartyColors.purpleBright.withOpacity(0.35),
                     blurRadius: 40,
                     spreadRadius: 12,
                   ),
@@ -3577,7 +3523,7 @@ class _RoomPageState extends State<RoomPage> {
         ),
         child: Icon(
           micOn ? Icons.mic : Icons.mic_off,
-          color: micOn ? Colors.black : Colors.white,
+          color: micOn ? Colors.black : PartyColors.text,
           size: 29,
         ),
       ),
@@ -3716,7 +3662,21 @@ class _ZegoFirebaseAvatar extends StatelessWidget {
   const _ZegoFirebaseAvatar({required this.userId, required this.size});
   @override
   Widget build(BuildContext context) {
-    if (userId.isEmpty) return CircleAvatar(radius: size.width / 2, backgroundColor: const Color(0xFF241A33), child: const Icon(Icons.person_rounded, color: Color(0xFFFFC83D)));
+    if (userId.isEmpty) {
+      return Container(
+        width: size.width,
+        height: size.height,
+        padding: const EdgeInsets.all(2.5),
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(colors: [PartyColors.gold, PartyColors.purpleBright]),
+        ),
+        child: const CircleAvatar(
+          backgroundColor: PartyColors.panel,
+          child: Icon(Icons.person_rounded, color: PartyColors.gold),
+        ),
+      );
+    }
     return FutureBuilder<Map<String, dynamic>?>(
       future: PartyChatData.userData(userId),
       builder: (context, snapshot) {
@@ -3726,7 +3686,21 @@ class _ZegoFirebaseAvatar extends StatelessWidget {
         ImageProvider<Object>? image;
         if (b64 != null && b64.isNotEmpty) { try { image = MemoryImage(base64Decode(b64)); } catch (_) {} }
         if (image == null && url != null && url.isNotEmpty) image = NetworkImage(url);
-        return CircleAvatar(radius: size.width / 2, backgroundColor: const Color(0xFF241A33), backgroundImage: image, child: image == null ? const Icon(Icons.person_rounded, color: Color(0xFFFFC83D)) : null);
+        return Container(
+          width: size.width,
+          height: size.height,
+          padding: const EdgeInsets.all(2.5),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(colors: [PartyColors.gold, PartyColors.purpleBright]),
+            boxShadow: [BoxShadow(color: Color(0x554F00FF), blurRadius: 12, spreadRadius: 1)],
+          ),
+          child: CircleAvatar(
+            backgroundColor: PartyColors.panel,
+            backgroundImage: image,
+            child: image == null ? const Icon(Icons.person_rounded, color: PartyColors.gold) : null,
+          ),
+        );
       },
     );
   }
@@ -3753,7 +3727,7 @@ class RoomInviteFriendsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ref.snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Add friends first.'));
           return ListView.builder(
@@ -3913,7 +3887,7 @@ class GameCard extends StatelessWidget {
                           ),
                         ),
                         child: const Center(
-                          child: const _PartyLoading(),
+                          child: LinearProgressIndicator(minHeight: 3),
                         ),
                       );
                     },
@@ -4119,11 +4093,10 @@ Future<void> ensureUserId() async {
           ),
         );
       },
-
-          );
+    );
   }
 
-  Future<void> _pickGallery(
+   Future<void> _pickGallery(
     BuildContext context,
     DocumentReference<Map<String, dynamic>> userDoc,
   ) async {
@@ -4505,7 +4478,7 @@ Future<void> ensureUserId() async {
                     onTap: image == null ? null : () => _showPhotoZoom(context, image),
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [Color(0xFFFF3ED7), Color(0xFF7C3AED)])),
+                      decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [PartyColors.gold, PartyColors.purple])),
                       child: CircleAvatar(radius: 48, backgroundImage: image, child: image == null ? const Icon(Icons.person, size: 50) : null),
                     ),
                   );
@@ -4628,7 +4601,7 @@ class FriendRequestsPage extends StatelessWidget {
         stream: PartyChatData.friendRequestsStream(user.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load friend requests.'));
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friend requests yet.'));
           return ListView.separated(
@@ -4653,7 +4626,7 @@ class FriendRequestsPage extends StatelessWidget {
                       title: Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
                       trailing: Wrap(children: [
                         IconButton(icon: const Icon(Icons.check_circle_rounded, color: Color(0xFFFFC83D)), onPressed: () async { try { await PartyChatData.acceptFriendRequest(uid: user.uid, requesterUid: requesterUid); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); } }),
-                        IconButton(icon: const Icon(Icons.cancel_rounded, color: Color(0xFF9B5CFF)), onPressed: () async { try { await PartyChatData.rejectFriendRequest(uid: user.uid, requesterUid: requesterUid); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); } }),
+                        IconButton(icon: const Icon(Icons.cancel_rounded, color: PartyColors.purpleBright), onPressed: () async { try { await PartyChatData.rejectFriendRequest(uid: user.uid, requesterUid: requesterUid); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); } }),
                       ]),
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: requesterUid))),
                     ),
@@ -4687,7 +4660,7 @@ class RoomInvitesPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load room invites.'));
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No room invites yet.'));
           return ListView.builder(
@@ -4747,7 +4720,7 @@ class FriendMessagesPage extends StatelessWidget {
         stream: ref.orderBy('lastMessageAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load chats.'));
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No messages yet.'));
           return ListView.builder(
@@ -4802,7 +4775,7 @@ class GiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No gifts yet.'));
           return ListView.builder(
@@ -4841,7 +4814,7 @@ class MyGiftsPage extends StatelessWidget {
         stream: ref.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('Your sent gifts will appear here.'));
           return ListView.builder(
@@ -4885,7 +4858,7 @@ class _FriendsPageState extends State<FriendsPage> {
         stream: PartyChatData.friendsStream(user.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load friends.'));
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No friends yet.'));
           return ListView.separated(
@@ -4907,7 +4880,7 @@ class _FriendsPageState extends State<FriendsPage> {
                   title: Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
                   trailing: Wrap(children: [
                     IconButton(icon: const Icon(Icons.message_rounded, color: Color(0xFFFFC83D)), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChatPage(otherUid: uid, otherName: name)))),
-                    IconButton(icon: const Icon(Icons.card_giftcard_rounded, color: Color(0xFF9B5CFF)), onPressed: () => _giftDialog(context, user.uid, uid, name)),
+                    IconButton(icon: const Icon(Icons.card_giftcard_rounded, color: PartyColors.purpleBright), onPressed: () => _giftDialog(context, user.uid, uid, name)),
                     IconButton(icon: const Icon(Icons.block_rounded, color: Colors.white60), onPressed: () => _block(context, user.uid, uid, data)),
                   ]),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: uid))),
@@ -4986,7 +4959,7 @@ class _ChatPageState extends State<ChatPage> {
               stream: ref.orderBy('createdAt', descending: false).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) return const Center(child: Text('Could not load messages.'));
-                if (!snapshot.hasData) return const Center(child: _PartyLoading());
+                if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('Say hello 👋'));
                 return ListView.builder(
@@ -4995,26 +4968,41 @@ class _ChatPageState extends State<ChatPage> {
                   itemBuilder: (context, index) {
                     final d = docs[index].data();
                     final mine = d['senderUid'] == user.uid;
+                    final time = partyMessageTime(d['createdAt']);
                     return Align(
                       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        constraints: const BoxConstraints(maxWidth: 310),
+                        margin: const EdgeInsets.only(bottom: 9),
+                        padding: const EdgeInsets.fromLTRB(14, 10, 14, 7),
                         decoration: BoxDecoration(
-                          color: mine ? const Color(0xFF7C3AED) : const Color(0xFF08080B),
-                          borderRadius: BorderRadius.circular(16),
+                          gradient: mine
+                              ? const LinearGradient(colors: [PartyColors.purple, PartyColors.purpleBright])
+                              : const LinearGradient(colors: [PartyColors.panel, PartyColors.black2]),
+                          border: Border.all(
+                            color: mine
+                                ? PartyColors.purpleBright.withOpacity(.55)
+                                : PartyColors.gold.withOpacity(.25),
+                          ),
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(17),
+                            topRight: const Radius.circular(17),
+                            bottomLeft: Radius.circular(mine ? 17 : 5),
+                            bottomRight: Radius.circular(mine ? 5 : 17),
+                          ),
+                          boxShadow: const [BoxShadow(color: Color(0x331D0060), blurRadius: 12)],
                         ),
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
-                            Text(d['text'] ?? ''),
+                            Text(d['text'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 15)),
                             const SizedBox(height: 4),
                             Text(
-                              _formatMessageTime(d['createdAt']),
+                              time,
                               style: TextStyle(
+                                color: mine ? Colors.white70 : PartyColors.goldBright,
                                 fontSize: 10,
-                                color: mine ? Colors.white70 : Colors.white54,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
@@ -5066,17 +5054,6 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-}
-
-String _formatMessageTime(dynamic value) {
-  DateTime? date;
-  if (value is Timestamp) date = value.toDate().toLocal();
-  if (value is DateTime) date = value.toLocal();
-  if (date == null) return '';
-  final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
-  final minute = date.minute.toString().padLeft(2, '0');
-  final period = date.hour >= 12 ? 'PM' : 'AM';
-  return '$hour:$minute $period';
 }
 
 /* ============================================================
@@ -5912,52 +5889,41 @@ class _PrivacyPageState
    LANGUAGE PAGE
    ============================================================ */
 
-class LanguagePage extends StatefulWidget {
+class LanguagePage extends StatelessWidget {
   const LanguagePage({super.key});
-
-  @override
-  State<LanguagePage> createState() => _LanguagePageState();
-}
-
-class _LanguagePageState extends State<LanguagePage> {
-  bool saving = false;
-
-  Future<void> _select(String language) async {
-    if (saving) return;
-    setState(() => saving = true);
-    try {
-      await AppLanguage.change(language);
-    } finally {
-      if (mounted) setState(() => saving = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLanguage.text('language'))),
-      body: Stack(
-        children: [
-          ValueListenableBuilder<String>(
-            valueListenable: AppLanguage.current,
-            builder: (context, selectedLanguage, child) {
-              return ListView.builder(
-                itemCount: AppLanguage.languages.length,
-                itemBuilder: (context, index) {
-                  final language = AppLanguage.languages[index];
-                  return ListTile(
-                    title: Text(language),
-                    trailing: language == selectedLanguage
-                        ? const Icon(Icons.check, color: Color(0xFFFFC83D))
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('language'),
+        ),
+      ),
+      body: ValueListenableBuilder<String>(
+        valueListenable: AppLanguage.current,
+        builder: (context, selectedLanguage, child) {
+          return ListView.builder(
+            itemCount: AppLanguage.languages.length,
+            itemBuilder: (context, index) {
+              final language =
+                  AppLanguage.languages[index];
+
+              return ListTile(
+                title: Text(language),
+                trailing:
+                    language == selectedLanguage
+                        ? const Icon(Icons.check)
                         : null,
-                    onTap: () => _select(language),
+                onTap: () async {
+                  await AppLanguage.change(
+                    language,
                   );
                 },
               );
             },
-          ),
-          if (saving) const Positioned.fill(child: _LoadingOverlay()),
-        ],
+          );
+        },
       ),
     );
   }
@@ -6021,7 +5987,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               );
               if (!snapshot.hasData) return const Padding(
                 padding: EdgeInsets.all(20),
-                child: const Center(child: _PartyLoading()),
+                child: Center(child: LinearProgressIndicator(minHeight: 3)),
               );
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Padding(
@@ -6080,7 +6046,7 @@ class BlockedUsersPage extends StatelessWidget {
         stream: ref.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Could not load blocked users.'));
-          if (!snapshot.hasData) return const Center(child: _PartyLoading());
+          if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
           final docs = snapshot.data!.docs;
           if (docs.isEmpty) return const Center(child: Text('No blocked users.'));
           return ListView.builder(
