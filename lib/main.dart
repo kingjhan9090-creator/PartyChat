@@ -2417,11 +2417,11 @@ class _PartyLoadingState extends State<PartyLoading>
                       height: 52,
                       child: _NeonAction(
                         label: signup ? AppLanguage.text('create_account') : AppLanguage.text('login'),
-                        onPressed: authBusy
-    ? null
-    : () {
-        continueToApp();
-      },
+                        onPressed: () {
+  if (!authBusy) {
+    continueToApp();
+  }
+},
                       ),
                     ),
                     const SizedBox(height: 12),
