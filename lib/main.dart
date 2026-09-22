@@ -2216,7 +2216,6 @@ class _PartyLoadingState extends State<PartyLoading>
                   'userId': userId,
                   'photoURL': '',
                   'language': AppLanguage.current.value,
-                  'role': 'user',
                   'coins': 12580,
                   'diamonds': 2450,
                   'createdAt': FieldValue.serverTimestamp(),
@@ -2286,25 +2285,17 @@ class _PartyLoadingState extends State<PartyLoading>
           final user = userCredential.user;
 
           if (user != null) {
-            final userRef = FirebaseFirestore.instance
+            await FirebaseFirestore.instance
                 .collection('users')
-                .doc(user.uid);
-            final existingUser = await userRef.get();
-
-            final userData = <String, dynamic>{
-              'name': user.displayName ?? '',
-              'email': user.email ?? '',
-              'photoURL': user.photoURL ?? '',
-              'language': AppLanguage.current.value,
-              'createdAt': FieldValue.serverTimestamp(),
-            };
-
-            if (!existingUser.exists) {
-              userData['role'] = 'user';
-            }
-
-            await userRef.set(
-              userData,
+                .doc(user.uid)
+                .set(
+              {
+                'name': user.displayName ?? '',
+                'email': user.email ?? '',
+                'photoURL': user.photoURL ?? '',
+                'language': AppLanguage.current.value,
+                'createdAt': FieldValue.serverTimestamp(),
+              },
               SetOptions(merge: true),
             );
 
@@ -2455,8 +2446,8 @@ class _PartyLoadingState extends State<PartyLoading>
                         prefixIcon: const Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(obscurePassword ? Icons.visibility : Icons.visibility_off),
-                         onPressed: () => setState(() => obscurePassword = !obscurePassword),
-                                        ),
+                          onPressed: () => setState(() => obscurePassword = !obscurePassword),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -3685,7 +3676,7 @@ class _PartyLoadingState extends State<PartyLoading>
             setState(() {
               isSpeaking = speaking;
             });
-            }
+          }
         });
       }
 
@@ -3729,7 +3720,6 @@ class _PartyLoadingState extends State<PartyLoading>
           messageController.clear();
         });
       }
-
       @override
       void dispose() {
         soundLevelSubscription?.cancel();
@@ -4971,6 +4961,7 @@ class _PartyLoadingState extends State<PartyLoading>
               );
             },
           ),
+
         );
       }
     }
@@ -6075,237 +6066,98 @@ class _PartyLoadingState extends State<PartyLoading>
        ============================================================ */
 
     class NotificationsPage extends StatefulWidget {
-  const NotificationsPage({super.key});
+      const NotificationsPage({super.key});
 
-  @override
-  State<NotificationsPage> createState() => _NotificationsPageState();
-}
-
-class _NotificationsPageState extends State<NotificationsPage> {
-  bool messages = true;
-  bool announcements = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadNotificationSettings();
-  }
-
-  Future<void> _loadNotificationSettings() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final data = doc.data();
-
-      if (!mounted) return;
-
-      setState(() {
-        messages = data?['messageNotifications'] ?? true;
-        announcements = data?['announcementNotifications'] ?? true;
-      });
-    } catch (e) {
-      debugPrint('Notification settings load failed: $e');
-    }
-  }
-
-  Future<void> _saveNotificationSetting(
-    String field,
-    bool value,
-  ) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set(
-        {
-          field: value,
-        },
-        SetOptions(merge: true),
-      );
-    } catch (e) {
-      debugPrint('Notification setting save failed: $e');
-    }
-  }
-
-  Future<void> _markAllRead() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    await ProfileUnreadService.markRead(
-      user.uid,
-      'notifications',
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text('Please login first.'),
-        ),
-      );
+      @override
+      State<NotificationsPage> createState() => _NotificationsPageState();
     }
 
-    final ref = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('notifications');
+    class _NotificationsPageState extends State<NotificationsPage> {
+      bool messages = true;
+      bool announcements = true;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLanguage.text('notifications'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: _markAllRead,
-            child: const Text('Read all'),
+      Future<void> _markAllRead() async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) return;
+        await ProfileUnreadService.markRead(user.uid, 'notifications');
+      }
+
+      @override
+      Widget build(BuildContext context) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
+        final ref = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('notifications');
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(AppLanguage.text('notifications')),
+            actions: [
+              TextButton(onPressed: _markAllRead, child: const Text('Read all')),
+            ],
           ),
-        ],
-      ),
-      body: ListView(
-        children: [
-          SwitchListTile(
-            title: Text(
-              AppLanguage.text('messages'),
-            ),
-            subtitle: const Text(
-              'Message notifications on/off',
-            ),
-            value: messages,
-            onChanged: (value) {
-              setState(() {
-                messages = value;
-              });
-
-              _saveNotificationSetting(
-                'messageNotifications',
-                value,
-              );
-            },
-          ),
-          SwitchListTile(
-            title: Text(
-              AppLanguage.text('announcements'),
-            ),
-            subtitle: const Text(
-              'PartyChat announcements on/off',
-            ),
-            value: announcements,
-            onChanged: (value) {
-              setState(() {
-                announcements = value;
-              });
-
-              _saveNotificationSetting(
-                'announcementNotifications',
-                value,
-              );
-            },
-          ),
-          const Divider(),
-          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: ref
-                .orderBy(
-                  'createdAt',
-                  descending: true,
-                )
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Text(
-                    'Could not load notifications.',
-                  ),
-                );
-              }
-
-              if (!snapshot.hasData) {
-                return const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Center(
-                    child: LinearProgressIndicator(
-                      minHeight: 3,
-                    ),
-                  ),
-                );
-              }
-
-              final docs = snapshot.data!.docs;
-
-              if (docs.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Center(
-                    child: Text(
-                      'No notifications yet.',
-                    ),
-                  ),
-                );
-              }
-
-              return Column(
-                children: docs.map((doc) {
-                  final data = doc.data();
-                  final read = data['isRead'] == true;
-
-                  return ListTile(
-                    tileColor: read
-                        ? null
-                        : const Color(0xFF15111F),
-                    leading: Icon(
-                      read
-                          ? Icons.notifications_none
-                          : Icons.notifications_active,
-                    ),
-                    title: Text(
-                      data['title'] ?? 'Notification',
-                    ),
-                    subtitle: Text(
-                      data['message'] ?? '',
-                    ),
-                    trailing: read
-                        ? null
-                        : const CircleAvatar(
-                            radius: 5,
-                            backgroundColor: Colors.red,
-                          ),
-                    onTap: () async {
-                      await doc.reference.update({
-                        'isRead': true,
-                        'readAt':
-                            FieldValue.serverTimestamp(),
-                      });
-
-                      await ProfileUnreadService.markRead(
-                        user.uid,
-                        data['badgeKey'] ?? 'notifications',
-                      );
-                    },
+          body: ListView(
+            children: [
+              SwitchListTile(
+                title: Text(AppLanguage.text('messages')),
+                subtitle: const Text('Message notifications on/off'),
+                value: messages,
+                onChanged: (v) => setState(() => messages = v),
+              ),
+              SwitchListTile(
+                title: Text(AppLanguage.text('announcements')),
+                subtitle: const Text('PartyChat announcements on/off'),
+                value: announcements,
+                onChanged: (v) => setState(() => announcements = v),
+              ),
+              const Divider(),
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: ref.orderBy('createdAt', descending: true).snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) return const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text('Could not load notifications.'),
                   );
-                }).toList(),
-              );
-            },
+                  if (!snapshot.hasData) return const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: LinearProgressIndicator(minHeight: 3)),
+                  );
+                  final docs = snapshot.data!.docs;
+                  if (docs.isEmpty) return const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: Text('No notifications yet.')),
+                  );
+                  return Column(
+                    children: docs.map((doc) {
+                      final d = doc.data();
+                      final read = d['isRead'] == true;
+                      return ListTile(
+                        tileColor: read ? null : const Color(0xFF15111F),
+                        leading: Icon(
+                          read ? Icons.notifications_none : Icons.notifications_active,
+                        ),
+                        title: Text(d['title'] ?? 'Notification'),
+                        subtitle: Text(d['message'] ?? ''),
+                        trailing: read ? null : const CircleAvatar(
+                          radius: 5,
+                          backgroundColor: Colors.red,
+                        ),
+                        onTap: () async {
+                          await doc.reference.update({
+                            'isRead': true,
+                            'readAt': FieldValue.serverTimestamp(),
+                          });
+                          await ProfileUnreadService.markRead(user.uid, d['badgeKey'] ?? 'notifications');
+                        },
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-}
-                  
+        );
+      }
+    }
 
     /* ============================================================
        BLOCKED USERS
@@ -6360,31 +6212,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
 
     /* ============================================================
-       HELP CENTER
-       ============================================================ */
-
-class PartyChatRoleService {
-  static Future<String> getCurrentRole() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return 'guest';
-
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      return doc.data()?['role']?.toString().toLowerCase() ?? 'user';
-    } catch (e) {
-      debugPrint('Role load failed: $e');
-      return 'user';
-    }
-  }
-
-  static bool canManageSupport(String role) {
-    return role == 'owner' || role == 'admin';
-  }
-}
+   HELP CENTER
+   ============================================================ */
 
 class HelpCenterPage extends StatefulWidget {
   const HelpCenterPage({super.key});
@@ -6409,37 +6238,44 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   final faqs = const [
     {
       'question': 'How do I change my profile name?',
-      'answer': 'Open Profile, tap your name and follow the name change option.',
+      'answer':
+          'Open Profile, tap your name and follow the name change option.',
       'category': 'Account & Login',
     },
     {
       'question': 'How do I send a friend request?',
-      'answer': 'Search for a user and tap the Add Friend button.',
+      'answer':
+          'Search for a user and tap the Add Friend button.',
       'category': 'Friends & Chat',
     },
     {
       'question': 'How do I join a room?',
-      'answer': 'Open Rooms and select the room you want to join.',
+      'answer':
+          'Open Rooms and select the room you want to join.',
       'category': 'Rooms',
     },
     {
       'question': 'How do I send a gift?',
-      'answer': 'Open a room, select a user and choose a gift from the gift panel.',
+      'answer':
+          'Open a room, select a user and choose a gift from the gift panel.',
       'category': 'Gifts',
     },
     {
       'question': 'How do I recharge my wallet?',
-      'answer': 'Open Wallet and choose the available recharge option.',
+      'answer':
+          'Open Wallet and choose the available recharge option.',
       'category': 'Wallet & Payments',
     },
     {
       'question': 'How do I protect my account?',
-      'answer': 'Use a strong password and review your privacy and security settings.',
+      'answer':
+          'Use a strong password and review your privacy and security settings.',
       'category': 'Privacy & Security',
     },
     {
       'question': 'How do I report a problem?',
-      'answer': 'Open Contact Support and submit your problem to PartyChat Support.',
+      'answer':
+          'Open Contact Support and submit your problem to PartyChat Support.',
       'category': 'Report a Problem',
     },
   ];
@@ -6455,31 +6291,34 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login first.')),
+        const SnackBar(
+          content: Text('Please login first.'),
+        ),
       );
       return;
     }
 
     final subjectController = TextEditingController();
     final messageController = TextEditingController();
+
     XFile? selectedImage;
-    bool submitting = false;
+    bool uploading = false;
 
     final result = await showDialog<bool>(
       context: context,
-      barrierDismissible: !submitting,
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             Future<void> pickScreenshot() async {
               final picker = ImagePicker();
+
               final image = await picker.pickImage(
                 source: ImageSource.gallery,
                 imageQuality: 80,
                 maxWidth: 1600,
               );
 
-              if (image != null && dialogContext.mounted) {
+              if (image != null) {
                 setDialogState(() {
                   selectedImage = image;
                 });
@@ -6487,20 +6326,25 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
             }
 
             Future<void> submitTicket() async {
-              final subject = subjectController.text.trim();
-              final message = messageController.text.trim();
+              final subject =
+                  subjectController.text.trim();
+
+              final message =
+                  messageController.text.trim();
 
               if (subject.isEmpty || message.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Please enter a subject and describe your problem.'),
+                    content: Text(
+                      'Please enter a subject and describe your problem.',
+                    ),
                   ),
                 );
                 return;
               }
 
               setDialogState(() {
-                submitting = true;
+                uploading = true;
               });
 
               try {
@@ -6514,19 +6358,23 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                   final fileName =
                       '${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-                  final storageRef = FirebaseStorage.instance
-                      .ref()
-                      .child('supportScreenshots')
-                      .child(user.uid)
-                      .child(ticketRef.id)
-                      .child(fileName);
+                  final storageRef =
+                      FirebaseStorage.instance
+                          .ref()
+                          .child('supportScreenshots')
+                          .child(user.uid)
+                          .child(ticketRef.id)
+                          .child(fileName);
 
                   await storageRef.putData(
                     await selectedImage!.readAsBytes(),
-                    SettableMetadata(contentType: 'image/jpeg'),
+                    SettableMetadata(
+                      contentType: 'image/jpeg',
+                    ),
                   );
 
-                  screenshotUrl = await storageRef.getDownloadURL();
+                  screenshotUrl =
+                      await storageRef.getDownloadURL();
                 }
 
                 await ticketRef.set({
@@ -6536,48 +6384,54 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                   'message': message,
                   'screenshotUrl': screenshotUrl,
                   'status': 'Open',
-                  'createdAt': FieldValue.serverTimestamp(),
-                  'updatedAt': FieldValue.serverTimestamp(),
-                });
-
-                await ticketRef.collection('messages').add({
-                  'senderId': user.uid,
-                  'senderType': 'user',
-                  'message': message,
-                  'createdAt': FieldValue.serverTimestamp(),
+                  'createdAt':
+                      FieldValue.serverTimestamp(),
+                  'updatedAt':
+                      FieldValue.serverTimestamp(),
                 });
 
                 if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext, true);
+                  Navigator.pop(
+                    dialogContext,
+                    true,
+                  );
                 }
               } catch (e) {
-                if (dialogContext.mounted) {
-                  setDialogState(() {
-                    submitting = false;
-                  });
+                setDialogState(() {
+                  uploading = false;
+                });
 
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text('Ticket submission failed: $e')),
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Ticket upload failed: $e',
+                      ),
+                    ),
                   );
                 }
               }
             }
 
             return AlertDialog(
-              title: const Text('Contact Support'),
+              title: const Text(
+                'Contact Support',
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: subjectController,
-                      enabled: !submitting,
-                      decoration: const InputDecoration(labelText: 'Subject'),
+                      enabled: !uploading,
+                      decoration: const InputDecoration(
+                        labelText: 'Subject',
+                      ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: messageController,
-                      enabled: !submitting,
+                      enabled: !uploading,
                       maxLines: 5,
                       decoration: const InputDecoration(
                         labelText: 'Describe your problem',
@@ -6585,8 +6439,11 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                     ),
                     const SizedBox(height: 14),
                     OutlinedButton.icon(
-                      onPressed: submitting ? null : pickScreenshot,
-                      icon: const Icon(Icons.image_outlined),
+                      onPressed:
+                          uploading ? null : pickScreenshot,
+                      icon: const Icon(
+                        Icons.image_outlined,
+                      ),
                       label: Text(
                         selectedImage == null
                             ? 'Attach Screenshot'
@@ -6595,11 +6452,13 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                     ),
                     if (selectedImage != null)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding:
+                            const EdgeInsets.only(top: 8),
                         child: Text(
                           selectedImage!.name,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          overflow:
+                              TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: PartyColors.gold,
                             fontSize: 12,
@@ -6611,18 +6470,25 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
               ),
               actions: [
                 TextButton(
-                  onPressed: submitting
+                  onPressed: uploading
                       ? null
-                      : () => Navigator.pop(dialogContext, false),
+                      : () => Navigator.pop(
+                            dialogContext,
+                            false,
+                          ),
                   child: const Text('Cancel'),
                 ),
                 FilledButton(
-                  onPressed: submitting ? null : submitTicket,
-                  child: submitting
+                  onPressed:
+                      uploading ? null : submitTicket,
+                  child: uploading
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child:
+                              CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text('Submit'),
                 ),
@@ -6639,7 +6505,9 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     if (result == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Support request submitted successfully.'),
+          content: Text(
+            'Support request submitted successfully.',
+          ),
         ),
       );
     }
@@ -6652,26 +6520,30 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   ) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(question),
-        content: Text(answer),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+      builder: (_) {
+        return AlertDialog(
+          title: Text(question),
+          content: Text(answer),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 
   void _showCategory(String category) {
-    final categoryFaqs = faqs.where((faq) => faq['category'] == category);
+    final categoryFaqs = faqs.where(
+      (faq) => faq['category'] == category,
+    );
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (sheetContext) {
+      builder: (context) {
         return SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(16),
@@ -6688,11 +6560,16 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
               ...categoryFaqs.map(
                 (faq) => Card(
                   child: ListTile(
-                    leading: const Icon(Icons.question_answer_outlined),
+                    leading: const Icon(
+                      Icons.question_answer_outlined,
+                    ),
                     title: Text(faq['question']!),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                    ),
                     onTap: () {
-                      Navigator.pop(sheetContext);
+                      Navigator.pop(context);
+
                       _showFaq(
                         this.context,
                         faq['question']!,
@@ -6711,18 +6588,30 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final query = searchController.text.trim().toLowerCase();
-    final filteredFaqs = faqs.where((faq) {
-      if (query.isEmpty) return true;
+    final query =
+        searchController.text.trim().toLowerCase();
 
-      return faq['question']!.toLowerCase().contains(query) ||
-          faq['answer']!.toLowerCase().contains(query) ||
-          faq['category']!.toLowerCase().contains(query);
+    final filteredFaqs = faqs.where((faq) {
+      if (query.isEmpty) {
+        return true;
+      }
+
+      return faq['question']!
+              .toLowerCase()
+              .contains(query) ||
+          faq['answer']!
+              .toLowerCase()
+              .contains(query) ||
+          faq['category']!
+              .toLowerCase()
+              .contains(query);
     }).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLanguage.text('help_center')),
+        title: Text(
+          AppLanguage.text('help_center'),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -6731,7 +6620,9 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
             controller: searchController,
             decoration: InputDecoration(
               hintText: 'Search help',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(
+                Icons.search,
+              ),
               suffixIcon: searchController.text.isEmpty
                   ? null
                   : IconButton(
@@ -6739,103 +6630,120 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                         searchController.clear();
                         setState(() {});
                       },
-                      icon: const Icon(Icons.clear),
+                      icon: const Icon(
+                        Icons.clear,
+                      ),
                     ),
             ),
-            onChanged: (_) => setState(() {}),
+            onChanged: (_) {
+              setState(() {});
+            },
           ),
           const SizedBox(height: 20),
           const Text(
             'Help Categories',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           ...categories.map(
             (category) => Card(
               child: ListTile(
-                leading: const Icon(Icons.help_outline),
+                leading: const Icon(
+                  Icons.help_outline,
+                ),
                 title: Text(category),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showCategory(category),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                ),
+                onTap: () {
+                  _showCategory(category);
+                },
               ),
             ),
           ),
           const SizedBox(height: 20),
           const Text(
             'Frequently Asked Questions',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           if (filteredFaqs.isEmpty)
             const Padding(
               padding: EdgeInsets.all(16),
-              child: Center(child: Text('No help articles found.')),
+              child: Center(
+                child: Text(
+                  'No help articles found.',
+                ),
+              ),
             ),
           ...filteredFaqs.map(
             (faq) => Card(
               child: ListTile(
-                leading: const Icon(Icons.question_answer_outlined),
-                title: Text(faq['question']!),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showFaq(
-                  context,
-                  faq['question']!,
-                  faq['answer']!,
+                leading: const Icon(
+                  Icons.question_answer_outlined,
                 ),
+                title: Text(faq['question']!),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                ),
+                onTap: () {
+                  _showFaq(
+                    context,
+                    faq['question']!,
+                    faq['answer']!,
+                  );
+                },
               ),
             ),
           ),
           const SizedBox(height: 20),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.support_agent),
-              title: const Text('Contact Support'),
-              subtitle: const Text('Create a support request'),
-              trailing: const Icon(Icons.chevron_right),
+              leading: const Icon(
+                Icons.support_agent,
+              ),
+              title: const Text(
+                'Contact Support',
+              ),
+              subtitle: const Text(
+                'Create a support request',
+              ),
+              trailing: const Icon(
+                Icons.chevron_right,
+              ),
               onTap: _createTicket,
             ),
           ),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.receipt_long),
-              title: const Text('My Requests'),
-              subtitle: const Text('View your support requests'),
-              trailing: const Icon(Icons.chevron_right),
+              leading: const Icon(
+                Icons.receipt_long,
+              ),
+              title: const Text(
+                'My Requests',
+              ),
+              subtitle: const Text(
+                'View your support requests',
+              ),
+              trailing: const Icon(
+                Icons.chevron_right,
+              ),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const MySupportRequestsPage(),
+                    builder: (_) =>
+                        const MySupportRequestsPage(),
                   ),
                 );
               },
             ),
-          ),
-          FutureBuilder<String>(
-            future: PartyChatRoleService.getCurrentRole(),
-            builder: (context, snapshot) {
-              final role = snapshot.data ?? 'user';
-              if (!PartyChatRoleService.canManageSupport(role)) {
-                return const SizedBox.shrink();
-              }
-
-              return Card(
-                child: ListTile(
-                  leading: const Icon(Icons.admin_panel_settings),
-                  title: const Text('Admin Support Panel'),
-                  subtitle: Text('Signed in as $role'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AdminSupportPanelPage(),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
           ),
         ],
       ),
@@ -6843,9 +6751,14 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   }
 }
 
+
 /* ============================================================
-   MY SUPPORT REQUESTS
-   ============================================================ */
+       MY SUPPORT REQUESTS
+       ============================================================ */
+
+
+
+
 
 class MySupportRequestsPage extends StatelessWidget {
   const MySupportRequestsPage({super.key});
@@ -6856,21 +6769,29 @@ class MySupportRequestsPage extends StatelessWidget {
 
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('My Requests')),
-        body: const Center(child: Text('Please login first.')),
+        appBar: AppBar(
+          title: const Text('My Requests'),
+        ),
+        body: const Center(
+          child: Text('Please login first.'),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Requests')),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      appBar: AppBar(
+        title: const Text('My Requests'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('supportTickets')
             .where('userId', isEqualTo: user.uid)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const PartyLoading();
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
           if (snapshot.hasError) {
@@ -6882,15 +6803,22 @@ class MySupportRequestsPage extends StatelessWidget {
             );
           }
 
-          final docs = [...(snapshot.data?.docs ?? [])];
+          final docs = snapshot.data?.docs ?? [];
 
           if (docs.isEmpty) {
-            return const Center(child: Text('No support requests yet.'));
+            return const Center(
+              child: Text(
+                'No support requests yet.',
+              ),
+            );
           }
 
           docs.sort((a, b) {
-            final aTime = a.data()['createdAt'];
-            final bTime = b.data()['createdAt'];
+            final aData = a.data() as Map<String, dynamic>;
+            final bData = b.data() as Map<String, dynamic>;
+
+            final aTime = aData['createdAt'];
+            final bTime = bData['createdAt'];
 
             if (aTime is Timestamp && bTime is Timestamp) {
               return bTime.compareTo(aTime);
@@ -6904,16 +6832,24 @@ class MySupportRequestsPage extends StatelessWidget {
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final doc = docs[index];
-              final data = doc.data();
-              final subject = data['subject']?.toString() ?? 'Support Request';
-              final message = data['message']?.toString() ?? '';
-              final status = data['status']?.toString() ?? 'Open';
+              final data = doc.data() as Map<String, dynamic>;
+
+              final subject =
+                  data['subject']?.toString() ?? 'Support Request';
+
+              final message =
+                  data['message']?.toString() ?? '';
+
+              final status =
+                  data['status']?.toString() ?? 'Open';
+
               final createdAt = data['createdAt'];
-              final screenshotUrl = data['screenshotUrl']?.toString() ?? '';
 
               String dateText = '';
+
               if (createdAt is Timestamp) {
                 final date = createdAt.toDate().toLocal();
+
                 dateText =
                     '${date.day}/${date.month}/${date.year} '
                     '${date.hour.toString().padLeft(2, '0')}:'
@@ -6926,18 +6862,28 @@ class MySupportRequestsPage extends StatelessWidget {
                   contentPadding: const EdgeInsets.all(16),
                   leading: CircleAvatar(
                     backgroundColor: PartyColors.purpleDark,
-                    child: const Icon(Icons.support_agent, color: PartyColors.gold),
+                    child: const Icon(
+                      Icons.support_agent,
+                      color: PartyColors.gold,
+                    ),
                   ),
                   title: Text(
                     subject,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
                       children: [
-                        Text(message, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        Text(
+                          message,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           status,
@@ -6958,25 +6904,19 @@ class MySupportRequestsPage extends StatelessWidget {
                             ),
                           ),
                         ],
-                        if (screenshotUrl.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Screenshot attached',
-                            style: TextStyle(
-                              color: PartyColors.gold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SupportTicketPage(ticketId: doc.id),
+                        builder: (_) => SupportTicketPage(
+                          ticketId: doc.id,
+                        ),
                       ),
                     );
                   },
@@ -6990,9 +6930,12 @@ class MySupportRequestsPage extends StatelessWidget {
   }
 }
 
+
+
+
 /* ============================================================
-   SUPPORT TICKET
-   ============================================================ */
+       SUPPORT TICKET
+       ============================================================ */
 
 class SupportTicketPage extends StatefulWidget {
   final String ticketId;
@@ -7003,7 +6946,8 @@ class SupportTicketPage extends StatefulWidget {
   });
 
   @override
-  State<SupportTicketPage> createState() => _SupportTicketPageState();
+  State<SupportTicketPage> createState() =>
+      _SupportTicketPageState();
 }
 
 class _SupportTicketPageState extends State<SupportTicketPage> {
@@ -7016,8 +6960,9 @@ class _SupportTicketPageState extends State<SupportTicketPage> {
     super.dispose();
   }
 
-  Future<void> _sendReply(String senderType) async {
+  Future<void> _sendReply() async {
     final message = replyController.text.trim();
+
     if (message.isEmpty || sending) return;
 
     setState(() {
@@ -7025,25 +6970,31 @@ class _SupportTicketPageState extends State<SupportTicketPage> {
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('Please login first.');
-
       await FirebaseFirestore.instance
           .collection('supportTickets')
           .doc(widget.ticketId)
           .collection('messages')
           .add({
-        'senderId': user.uid,
-        'senderType': senderType,
+        'senderId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'senderType': 'user',
         'message': message,
         'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      await FirebaseFirestore.instance
+          .collection('supportTickets')
+          .doc(widget.ticketId)
+          .update({
+        'updatedAt': FieldValue.serverTimestamp(),
       });
 
       replyController.clear();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Reply could not be sent: $e')),
+          SnackBar(
+            content: Text('Reply send nahi ho saki: $e'),
+          ),
         );
       }
     } finally {
@@ -7055,227 +7006,193 @@ class _SupportTicketPageState extends State<SupportTicketPage> {
     }
   }
 
-  Widget _messageBubble(Map<String, dynamic> data) {
-    final senderType = data['senderType']?.toString() ?? 'user';
-    final isUser = senderType == 'user';
-    final message = data['message']?.toString() ?? '';
-
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        constraints: const BoxConstraints(maxWidth: 320),
-        decoration: BoxDecoration(
-          color: isUser ? PartyColors.purpleDark : PartyColors.panel,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isUser ? PartyColors.purpleBright : PartyColors.goldDark,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            Text(
-              isUser ? 'You' : 'PartyChat Support',
-              style: TextStyle(
-                color: isUser ? PartyColors.goldBright : PartyColors.gold,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(message),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Support Request')),
-      body: FutureBuilder<String>(
-        future: PartyChatRoleService.getCurrentRole(),
-        builder: (context, roleSnapshot) {
-          final role = roleSnapshot.data ?? 'user';
-          final isAdmin = PartyChatRoleService.canManageSupport(role);
-          final senderType = isAdmin ? 'admin' : 'user';
+      appBar: AppBar(
+        title: const Text('Support Request'),
+      ),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('supportTickets')
+            .doc(widget.ticketId)
+            .snapshots(),
+        builder: (context, ticketSnapshot) {
+          if (ticketSnapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-          return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: FirebaseFirestore.instance
-                .collection('supportTickets')
-                .doc(widget.ticketId)
-                .snapshots(),
-            builder: (context, ticketSnapshot) {
-              if (ticketSnapshot.connectionState == ConnectionState.waiting) {
-                return const PartyLoading();
-              }
+          if (!ticketSnapshot.hasData ||
+              !ticketSnapshot.data!.exists) {
+            return const Center(
+              child: Text('Support request not found.'),
+            );
+          }
 
-              if (ticketSnapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Failed to load support request.\n${ticketSnapshot.error}',
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }
+          final ticket =
+              ticketSnapshot.data!.data()
+                  as Map<String, dynamic>;
 
-              final ticket = ticketSnapshot.data;
-              if (ticket == null || !ticket.exists) {
-                return const Center(child: Text('Support request not found.'));
-              }
+          final subject =
+              ticket['subject']?.toString() ?? 'Support Request';
 
-              final data = ticket.data() ?? {};
-              final subject = data['subject']?.toString() ?? 'Support Request';
-              final message = data['message']?.toString() ?? '';
-              final status = data['status']?.toString() ?? 'Open';
-              final screenshotUrl = data['screenshotUrl']?.toString() ?? '';
+          final message =
+              ticket['message']?.toString() ?? '';
 
-              return Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  subject,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(message),
-                                const SizedBox(height: 14),
-                                Text(
-                                  'Status: $status',
-                                  style: const TextStyle(
-                                    color: PartyColors.gold,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                if (screenshotUrl.isNotEmpty) ...[
-                                  const SizedBox(height: 16),
-                                  const Text(
-                                    'Screenshot',
-                                    style: TextStyle(
-                                      color: PartyColors.gold,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: Image.network(
-                                      screenshotUrl,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: Text('Screenshot could not be loaded.'),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Conversation',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                          stream: FirebaseFirestore.instance
-                              .collection('supportTickets')
-                              .doc(widget.ticketId)
-                              .collection('messages')
-                              .orderBy('createdAt')
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const SizedBox(
-                                height: 90,
-                                child: Center(child: CircularProgressIndicator()),
-                              );
-                            }
+          final status =
+              ticket['status']?.toString() ?? 'Open';
 
-                            if (snapshot.hasError) {
-                              return Text('Failed to load conversation.\n${snapshot.error}');
-                            }
-
-                            final messages = snapshot.data?.docs ?? [];
-                            if (messages.isEmpty) {
-                              return const Padding(
-                                padding: EdgeInsets.all(12),
-                                child: Text('No replies yet.'),
-                              );
-                            }
-
-                            return Column(
-                              children: messages
-                                  .map((doc) => _messageBubble(doc.data()))
-                                  .toList(),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (status != 'Resolved' || isAdmin)
-                    SafeArea(
+          return Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: TextField(
-                                controller: replyController,
-                                enabled: !sending,
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  hintText: isAdmin
-                                      ? 'Write a support reply...'
-                                      : 'Write a reply...',
-                                ),
+                            Text(
+                              subject,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              onPressed: sending
-                                  ? null
-                                  : () => _sendReply(senderType),
-                              icon: sending
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    )
-                                  : const Icon(
-                                      Icons.send,
-                                      color: PartyColors.gold,
-                                    ),
+                            const SizedBox(height: 10),
+                            Text(message),
+                            const SizedBox(height: 14),
+                            Text(
+                              'Status: $status',
+                              style: const TextStyle(
+                                color: PartyColors.gold,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                ],
-              );
-            },
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Conversation',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('supportTickets')
+                          .doc(widget.ticketId)
+                          .collection('messages')
+                          .orderBy('createdAt')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const SizedBox();
+                        }
+
+                        final messages = snapshot.data!.docs;
+
+                        if (messages.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Text(
+                              'No replies yet.',
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: messages.map((doc) {
+                            final data = doc.data()
+                                as Map<String, dynamic>;
+
+                            final isUser =
+                                data['senderType'] == 'user';
+
+                            return Align(
+                              alignment: isUser
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.only(
+                                  bottom: 8,
+                                ),
+                                padding:
+                                    const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isUser
+                                      ? PartyColors.purpleDark
+                                      : PartyColors.panel,
+                                  borderRadius:
+                                      BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isUser
+                                        ? PartyColors.purpleBright
+                                        : PartyColors.goldDark,
+                                  ),
+                                ),
+                                child: Text(
+                                  data['message']
+                                          ?.toString() ??
+                                      '',
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: replyController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            hintText: 'Write a reply...',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed:
+                            sending ? null : _sendReply,
+                        icon: sending
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child:
+                                    CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.send,
+                                color: PartyColors.gold,
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -7283,9 +7200,12 @@ class _SupportTicketPageState extends State<SupportTicketPage> {
   }
 }
 
+
+
 /* ============================================================
-   ADMIN SUPPORT PANEL
-   ============================================================ */
+       ADMIN SUPPORT PANEL
+       ============================================================ */
+
 
 class AdminSupportPanelPage extends StatelessWidget {
   const AdminSupportPanelPage({super.key});
@@ -7305,178 +7225,186 @@ class AdminSupportPanelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: PartyChatRoleService.getCurrentRole(),
-      builder: (context, roleSnapshot) {
-        if (roleSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: PartyLoading());
-        }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Support Requests'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('supportTickets')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-        final role = roleSnapshot.data ?? 'user';
-        if (!PartyChatRoleService.canManageSupport(role)) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Support Requests')),
-            body: const Center(
-              child: Text('You do not have permission to access this page.'),
-            ),
-          );
-        }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Failed to load requests.\n${snapshot.error}',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
 
-        return Scaffold(
-          appBar: AppBar(title: const Text('Support Requests')),
-          body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: FirebaseFirestore.instance
-                .collection('supportTickets')
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const PartyLoading();
-              }
+          final tickets = snapshot.data?.docs ?? [];
 
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Failed to load requests.\n${snapshot.error}',
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }
+          if (tickets.isEmpty) {
+            return const Center(
+              child: Text('No support requests.'),
+            );
+          }
 
-              final tickets = snapshot.data?.docs ?? [];
-              if (tickets.isEmpty) {
-                return const Center(child: Text('No support requests.'));
-              }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: tickets.length,
+            itemBuilder: (context, index) {
+              final doc = tickets[index];
+              final data =
+                  doc.data() as Map<String, dynamic>;
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: tickets.length,
-                itemBuilder: (context, index) {
-                  final doc = tickets[index];
-                  final data = doc.data();
-                  final subject = data['subject']?.toString() ?? 'Support Request';
-                  final message = data['message']?.toString() ?? '';
-                  final email = data['userEmail']?.toString() ?? '';
-                  final status = data['status']?.toString() ?? 'Open';
-                  final screenshotUrl = data['screenshotUrl']?.toString() ?? '';
+              final subject =
+                  data['subject']?.toString() ??
+                      'Support Request';
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              final message =
+                  data['message']?.toString() ?? '';
+
+              final email =
+                  data['userEmail']?.toString() ?? '';
+
+              final status =
+                  data['status']?.toString() ?? 'Open';
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        subject,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        email,
+                        style: const TextStyle(
+                          color: PartyColors.muted,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        message,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
                         children: [
+                          const Text('Status: '),
                           Text(
-                            subject,
+                            status,
                             style: const TextStyle(
-                              fontSize: 17,
+                              color: PartyColors.gold,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            email,
-                            style: const TextStyle(
-                              color: PartyColors.muted,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            message,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (screenshotUrl.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Screenshot attached',
-                              style: TextStyle(
-                                color: PartyColors.gold,
-                                fontSize: 12,
+                          const Spacer(),
+                          PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              try {
+                                await _updateStatus(
+                                  doc.id,
+                                  value,
+                                );
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Status changed to $value',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Status update failed: $e',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            itemBuilder: (context) => const [
+                              PopupMenuItem(
+                                value: 'Open',
+                                child: Text('Open'),
                               ),
-                            ),
-                          ],
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              const Text('Status: '),
-                              Text(
-                                status,
-                                style: const TextStyle(
-                                  color: PartyColors.gold,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              PopupMenuItem(
+                                value: 'In Progress',
+                                child: Text('In Progress'),
                               ),
-                              const Spacer(),
-                              PopupMenuButton<String>(
-                                onSelected: (value) async {
-                                  try {
-                                    await _updateStatus(doc.id, value);
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Status changed to $value'),
-                                        ),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Status update failed: $e'),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                },
-                                itemBuilder: (context) => const [
-                                  PopupMenuItem(
-                                    value: 'Open',
-                                    child: Text('Open'),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'In Progress',
-                                    child: Text('In Progress'),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'Resolved',
-                                    child: Text('Resolved'),
-                                  ),
-                                ],
-                                child: const Icon(Icons.more_vert),
+                              PopupMenuItem(
+                                value: 'Resolved',
+                                child: Text('Resolved'),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => SupportTicketPage(
-                                      ticketId: doc.id,
-                                    ),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.chat_outlined),
-                              label: const Text('Open Request'),
+                            child: const Icon(
+                              Icons.more_vert,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  );
-                },
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    SupportTicketPage(
+                                  ticketId: doc.id,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.chat_outlined,
+                          ),
+                          label: const Text(
+                            'Open Request',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
