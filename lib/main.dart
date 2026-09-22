@@ -6075,98 +6075,237 @@ class _PartyLoadingState extends State<PartyLoading>
        ============================================================ */
 
     class NotificationsPage extends StatefulWidget {
-      const NotificationsPage({super.key});
+  const NotificationsPage({super.key});
 
-      @override
-      State<NotificationsPage> createState() => _NotificationsPageState();
+  @override
+  State<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  bool messages = true;
+  bool announcements = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationSettings();
+  }
+
+  Future<void> _loadNotificationSettings() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final data = doc.data();
+
+      if (!mounted) return;
+
+      setState(() {
+        messages = data?['messageNotifications'] ?? true;
+        announcements = data?['announcementNotifications'] ?? true;
+      });
+    } catch (e) {
+      debugPrint('Notification settings load failed: $e');
+    }
+  }
+
+  Future<void> _saveNotificationSetting(
+    String field,
+    bool value,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set(
+        {
+          field: value,
+        },
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      debugPrint('Notification setting save failed: $e');
+    }
+  }
+
+  Future<void> _markAllRead() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    await ProfileUnreadService.markRead(
+      user.uid,
+      'notifications',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Please login first.'),
+        ),
+      );
     }
 
-    class _NotificationsPageState extends State<NotificationsPage> {
-      bool messages = true;
-      bool announcements = true;
+    final ref = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('notifications');
 
-      Future<void> _markAllRead() async {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user == null) return;
-        await ProfileUnreadService.markRead(user.uid, 'notifications');
-      }
-
-      @override
-      Widget build(BuildContext context) {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user == null) return const Scaffold(body: Center(child: Text('Please login first.')));
-        final ref = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('notifications');
-
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(AppLanguage.text('notifications')),
-            actions: [
-              TextButton(onPressed: _markAllRead, child: const Text('Read all')),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('notifications'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: _markAllRead,
+            child: const Text('Read all'),
           ),
-          body: ListView(
-            children: [
-              SwitchListTile(
-                title: Text(AppLanguage.text('messages')),
-                subtitle: const Text('Message notifications on/off'),
-                value: messages,
-                onChanged: (v) => setState(() => messages = v),
-              ),
-              SwitchListTile(
-                title: Text(AppLanguage.text('announcements')),
-                subtitle: const Text('PartyChat announcements on/off'),
-                value: announcements,
-                onChanged: (v) => setState(() => announcements = v),
-              ),
-              const Divider(),
-              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: ref.orderBy('createdAt', descending: true).snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) return const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Text('Could not load notifications.'),
-                  );
-                  if (!snapshot.hasData) return const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Center(child: LinearProgressIndicator(minHeight: 3)),
-                  );
-                  final docs = snapshot.data!.docs;
-                  if (docs.isEmpty) return const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Center(child: Text('No notifications yet.')),
-                  );
-                  return Column(
-                    children: docs.map((doc) {
-                      final d = doc.data();
-                      final read = d['isRead'] == true;
-                      return ListTile(
-                        tileColor: read ? null : const Color(0xFF15111F),
-                        leading: Icon(
-                          read ? Icons.notifications_none : Icons.notifications_active,
-                        ),
-                        title: Text(d['title'] ?? 'Notification'),
-                        subtitle: Text(d['message'] ?? ''),
-                        trailing: read ? null : const CircleAvatar(
-                          radius: 5,
-                          backgroundColor: Colors.red,
-                        ),
-                        onTap: () async {
-                          await doc.reference.update({
-                            'isRead': true,
-                            'readAt': FieldValue.serverTimestamp(),
-                          });
-                          await ProfileUnreadService.markRead(user.uid, d['badgeKey'] ?? 'notifications');
-                        },
+        ],
+      ),
+      body: ListView(
+        children: [
+          SwitchListTile(
+            title: Text(
+              AppLanguage.text('messages'),
+            ),
+            subtitle: const Text(
+              'Message notifications on/off',
+            ),
+            value: messages,
+            onChanged: (value) {
+              setState(() {
+                messages = value;
+              });
+
+              _saveNotificationSetting(
+                'messageNotifications',
+                value,
+              );
+            },
+          ),
+          SwitchListTile(
+            title: Text(
+              AppLanguage.text('announcements'),
+            ),
+            subtitle: const Text(
+              'PartyChat announcements on/off',
+            ),
+            value: announcements,
+            onChanged: (value) {
+              setState(() {
+                announcements = value;
+              });
+
+              _saveNotificationSetting(
+                'announcementNotifications',
+                value,
+              );
+            },
+          ),
+          const Divider(),
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: ref
+                .orderBy(
+                  'createdAt',
+                  descending: true,
+                )
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                    'Could not load notifications.',
+                  ),
+                );
+              }
+
+              if (!snapshot.hasData) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: LinearProgressIndicator(
+                      minHeight: 3,
+                    ),
+                  ),
+                );
+              }
+
+              final docs = snapshot.data!.docs;
+
+              if (docs.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'No notifications yet.',
+                    ),
+                  ),
+                );
+              }
+
+              return Column(
+                children: docs.map((doc) {
+                  final data = doc.data();
+                  final read = data['isRead'] == true;
+
+                  return ListTile(
+                    tileColor: read
+                        ? null
+                        : const Color(0xFF15111F),
+                    leading: Icon(
+                      read
+                          ? Icons.notifications_none
+                          : Icons.notifications_active,
+                    ),
+                    title: Text(
+                      data['title'] ?? 'Notification',
+                    ),
+                    subtitle: Text(
+                      data['message'] ?? '',
+                    ),
+                    trailing: read
+                        ? null
+                        : const CircleAvatar(
+                            radius: 5,
+                            backgroundColor: Colors.red,
+                          ),
+                    onTap: () async {
+                      await doc.reference.update({
+                        'isRead': true,
+                        'readAt':
+                            FieldValue.serverTimestamp(),
+                      });
+
+                      await ProfileUnreadService.markRead(
+                        user.uid,
+                        data['badgeKey'] ?? 'notifications',
                       );
-                    }).toList(),
+                    },
                   );
-                },
-              ),
-            ],
+                }).toList(),
+              );
+            },
           ),
-        );
-      }
-    }
+        ],
+      ),
+    );
+  }
+}
+                  
 
     /* ============================================================
        BLOCKED USERS
