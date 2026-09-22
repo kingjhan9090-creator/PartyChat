@@ -2954,39 +2954,48 @@
                     trailing: myUid == null ? null : FutureBuilder<bool>(
                       future: _requestPending(myUid, otherUid),
                       builder: (context, snapshot) {
-                        final pending = snapshot.data ?? false;
-                        return IconButton(
-  icon: Icon(
-    pending
-        ? Icons.check_circle_rounded
-        : Icons.person_add_alt_1_rounded,
-    color: pending
-        ? const Color(0xFFFFC83D)
-        : PartyColors.purpleBright,
-  ),
-  onPressed: pending
-      ? null
-      : () async {
-          try {
-            await PartyChatData.sendFriendRequest(
-              fromUid: myUid,
-              toUid: otherUid,
-            );
+  final pending = snapshot.data ?? false;
 
-            if (context.mounted) {
-              setState(() {});
-            }
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(e.toString()),
-                ),
+  return IconButton(
+    icon: Icon(
+      pending
+          ? Icons.check_circle_rounded
+          : Icons.person_add_alt_1_rounded,
+      color: pending
+          ? const Color(0xFFFFC83D)
+          : PartyColors.purpleBright,
+    ),
+    onPressed: pending
+        ? null
+        : () async {
+            try {
+              await PartyChatData.sendFriendRequest(
+                fromUid: myUid,
+                toUid: otherUid,
               );
+
+              if (context.mounted) {
+                setState(() {});
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString()),
+                  ),
+                );
+              }
             }
-          }
-        },
-);
+          },
+        );
+      },
+    ),
+    onTap: () => Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SimpleUserProfilePage(uid: otherUid),
+      ),
+    ),
                     onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: otherUid))),
                   ),
                 );
