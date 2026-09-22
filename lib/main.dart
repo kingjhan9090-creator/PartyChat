@@ -2820,7 +2820,7 @@
       @override
       Widget build(BuildContext context) {
         return Scaffold(
-          backgroundColor: const PartyColors.black,
+          backgroundColor: PartyColors.black,
           appBar: AppBar(),
           body: _NeonBackground(
             child: FutureBuilder<Map<String, dynamic>?>(
@@ -2915,8 +2915,7 @@
       @override
       Widget build(BuildContext context) {
         return Scaffold(
-          backgroundColor: const PartyColors.black,
-          appBar: AppBar(title: const Text('Search')),
+          backgroundColor: PartyColors.black,
           body: _NeonBackground(child: ListView(padding: const EdgeInsets.fromLTRB(18, 16, 18, 30), children: [
             TextField(
               controller: controller,
@@ -2957,14 +2956,37 @@
                       builder: (context, snapshot) {
                         final pending = snapshot.data ?? false;
                         return IconButton(
-                          icon: Icon(pending ? Icons.check_circle_rounded : Icons.person_add_alt_1_rounded, color: pending ? const Color(0xFFFFC83D) : const PartyColors.purpleBright),
-                          onPressed: pending ? null : () async {
-                            try { await PartyChatData.sendFriendRequest(fromUid: myUid, toUid: otherUid); if (context.mounted) setState(() {}); }
-                            catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
-                          },
-                        );
-                      },
-                    ),
+  icon: Icon(
+    pending
+        ? Icons.check_circle_rounded
+        : Icons.person_add_alt_1_rounded,
+    color: pending
+        ? const Color(0xFFFFC83D)
+        : PartyColors.purpleBright,
+  ),
+  onPressed: pending
+      ? null
+      : () async {
+          try {
+            await PartyChatData.sendFriendRequest(
+              fromUid: myUid,
+              toUid: otherUid,
+            );
+
+            if (context.mounted) {
+              setState(() {});
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(e.toString()),
+                ),
+              );
+            }
+          }
+        },
+);
                     onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: otherUid))),
                   ),
                 );
