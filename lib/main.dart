@@ -2957,17 +2957,33 @@ class _PartyChatSearchPageState extends State<PartyChatSearchPage> {
                   builder: (context, snapshot) {
                     final pending = snapshot.data ?? false;
                     return IconButton(
-                      icon: Icon(
-  pending
-      ? Icons.check_circle_rounded
-      : Icons.person_add_alt_1_rounded,
-  color: pending ? const Color(0xFFFFC83D) : PartyColors.purpleBright,
-)),
-                      onPressed: pending ? null : () async {
-                        try { await PartyChatData.sendFriendRequest(fromUid: myUid, toUid: otherUid); if (context.mounted) setState(() {}); }
-                        catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
-                      },
-                    );
+                      
+  icon: Icon(
+    pending
+        ? Icons.check_circle_rounded
+        : Icons.person_add_alt_1_rounded,
+    color: pending
+        ? const Color(0xFFFFC83D)
+        : PartyColors.purpleBright,
+  ),
+  onPressed: pending
+      ? null
+      : () async {
+          try {
+            await PartyChatData.sendFriendRequest(
+              fromUid: myUid,
+              toUid: otherUid,
+            );
+            if (context.mounted) setState(() {});
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(e.toString())),
+              );
+            }
+          }
+        },
+);
                   },
                 ),
                 onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: otherUid))),
