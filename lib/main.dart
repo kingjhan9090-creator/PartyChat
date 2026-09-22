@@ -2045,7 +2045,7 @@ class _LoginPageState extends State<LoginPage> {
   bool signup = false;
   bool loading = false;
   Future<String> generateUniqueUserId() async {
-  final random = Random();
+  final random = math.Random();
   final usersRef = FirebaseFirestore.instance.collection('users');
 
   while (true) {
@@ -4061,7 +4061,7 @@ Future<void> ensureUserId() async {
 
   if (data == null || data['userId'] != null) return;
 
-  final random = Random();
+  final random = math.Random();
   final newUserId =
       (100000 + random.nextInt(900000)).toString();
 
