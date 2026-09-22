@@ -2990,12 +2990,7 @@
         );
       },
     ),
-    onTap: () => Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SimpleUserProfilePage(uid: otherUid),
-      ),
-    ),
+    
                     onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: otherUid))),
                   ),
                 );
