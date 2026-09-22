@@ -6106,43 +6106,1204 @@
     }
 
     /* ============================================================
-       HELP CENTER
-       ============================================================ */
+   HELP CENTER
+   ============================================================ */
 
-    class HelpCenterPage extends StatelessWidget {
-      const HelpCenterPage({super.key});
+class HelpCenterPage extends StatefulWidget {
+  const HelpCenterPage({super.key});
 
-      @override
-      Widget build(BuildContext context) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              AppLanguage.text('help_center'),
-            ),
-          ),
-          body: ListView(
-            padding: const EdgeInsets.all(20),
-            children: const [
-              ListTile(
-                leading: Icon(Icons.help_outline),
-                title: Text('PartyChat Help Center'),
-                subtitle: Text(
-                  'Help and support features will be connected here.',
+  @override
+  State<HelpCenterPage> createState() => _HelpCenterPageState();
+}
+
+class _HelpCenterPageState extends State<HelpCenterPage> {
+  final searchController = TextEditingController();
+
+  final categories = const [
+    'Account & Login',
+    'Friends & Chat',
+    'Rooms',
+    'Gifts',
+    'Wallet & Payments',
+    'Privacy & Security',
+    'Report a Problem',
+  ];
+
+  final faqs = const [
+    {
+      'question': 'How do I change my profile name?',
+      'answer':
+          'Open Profile, tap your name and follow the name change option.',
+      'category': 'Account & Login',
+    },
+    {
+      'question': 'How do I send a friend request?',
+      'answer':
+          'Search for a user and tap the Add Friend button.',
+      'category': 'Friends & Chat',
+    },
+    {
+      'question': 'How do I join a room?',
+      'answer':
+          'Open Rooms and select the room you want to join.',
+      'category': 'Rooms',
+    },
+    {
+      'question': 'How do I send a gift?',
+      'answer':
+          'Open a room, select a user and choose a gift from the gift panel.',
+      'category': 'Gifts',
+    },
+    {
+      'question': 'How do I recharge my wallet?',
+      'answer':
+          'Open Wallet and choose the available recharge option.',
+      'category': 'Wallet & Payments',
+    },
+    {
+      'question': 'How do I protect my account?',
+      'answer':
+          'Use a strong password and review your privacy and security settings.',
+      'category': 'Privacy & Security',
+    },
+    {
+      'question': 'How do I report a problem?',
+      'answer':
+          'Open Contact Support and submit your problem to PartyChat Support.',
+      'category': 'Report a Problem',
+    },
+  ];
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createTicket() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login first.'),
+        ),
+      );
+      return;
+    }
+
+    final subjectController = TextEditingController();
+    final messageController = TextEditingController();
+
+    XFile? selectedImage;
+    bool uploading = false;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            Future<void> pickScreenshot() async {
+              final picker = ImagePicker();
+
+              final image = await picker.pickImage(
+                source: ImageSource.gallery,
+                imageQuality: 80,
+                maxWidth: 1600,
+              );
+
+              if (image != null) {
+                setDialogState(() {
+                  selectedImage = image;
+                });
+              }
+            }
+
+            Future<void> submitTicket() async {
+              final subject =
+                  subjectController.text.trim();
+
+              final message =
+                  messageController.text.trim();
+
+              if (subject.isEmpty || message.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Please enter a subject and describe your problem.',
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              setDialogState(() {
+                uploading = true;
+              });
+
+              try {
+                final ticketRef = FirebaseFirestore.instance
+                    .collection('supportTickets')
+                    .doc();
+
+                String screenshotUrl = '';
+
+                if (selectedImage != null) {
+                  final fileName =
+                      '${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+                  final storageRef =
+                      FirebaseStorage.instance
+                          .ref()
+                          .child('supportScreenshots')
+                          .child(user.uid)
+                          .child(ticketRef.id)
+                          .child(fileName);
+
+                  await storageRef.putData(
+                    await selectedImage!.readAsBytes(),
+                    SettableMetadata(
+                      contentType: 'image/jpeg',
+                    ),
+                  );
+
+                  screenshotUrl =
+                      await storageRef.getDownloadURL();
+                }
+
+                await ticketRef.set({
+                  'userId': user.uid,
+                  'userEmail': user.email ?? '',
+                  'subject': subject,
+                  'message': message,
+                  'screenshotUrl': screenshotUrl,
+                  'status': 'Open',
+                  'createdAt':
+                      FieldValue.serverTimestamp(),
+                  'updatedAt':
+                      FieldValue.serverTimestamp(),
+                });
+
+                if (dialogContext.mounted) {
+                  Navigator.pop(
+                    dialogContext,
+                    true,
+                  );
+                }
+              } catch (e) {
+                setDialogState(() {
+                  uploading = false;
+                });
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Ticket upload failed: $e',
+                      ),
+                    ),
+                  );
+                }
+              }
+            }
+
+            return AlertDialog(
+              title: const Text(
+                'Contact Support',
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: subjectController,
+                      enabled: !uploading,
+                      decoration: const InputDecoration(
+                        labelText: 'Subject',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: messageController,
+                      enabled: !uploading,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        labelText: 'Describe your problem',
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    OutlinedButton.icon(
+                      onPressed:
+                          uploading ? null : pickScreenshot,
+                      icon: const Icon(
+                        Icons.image_outlined,
+                      ),
+                      label: Text(
+                        selectedImage == null
+                            ? 'Attach Screenshot'
+                            : 'Screenshot Selected',
+                      ),
+                    ),
+                    if (selectedImage != null)
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(top: 8),
+                        child: Text(
+                          selectedImage!.name,
+                          maxLines: 1,
+                          overflow:
+                              TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: PartyColors.gold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              SizedBox(height: 10),
-              ListTile(
-                leading: Icon(Icons.support_agent),
-                title: Text('Contact Support'),
-                subtitle: Text(
-                  'Support contact system will be added later.',
+              actions: [
+                TextButton(
+                  onPressed: uploading
+                      ? null
+                      : () => Navigator.pop(
+                            dialogContext,
+                            false,
+                          ),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed:
+                      uploading ? null : submitTicket,
+                  child: uploading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child:
+                              CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    subjectController.dispose();
+    messageController.dispose();
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Support request submitted successfully.',
+          ),
+        ),
+      );
+    }
+  }
+
+  void _showFaq(
+    BuildContext context,
+    String question,
+    String answer,
+  ) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text(question),
+          content: Text(answer),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showCategory(String category) {
+    final categoryFaqs = faqs.where(
+      (faq) => faq['category'] == category,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            shrinkWrap: true,
+            children: [
+              Text(
+                category,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...categoryFaqs.map(
+                (faq) => Card(
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.question_answer_outlined,
+                    ),
+                    title: Text(faq['question']!),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+
+                      _showFaq(
+                        this.context,
+                        faq['question']!,
+                        faq['answer']!,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
           ),
         );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final query =
+        searchController.text.trim().toLowerCase();
+
+    final filteredFaqs = faqs.where((faq) {
+      if (query.isEmpty) {
+        return true;
+      }
+
+      return faq['question']!
+              .toLowerCase()
+              .contains(query) ||
+          faq['answer']!
+              .toLowerCase()
+              .contains(query) ||
+          faq['category']!
+              .toLowerCase()
+              .contains(query);
+    }).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLanguage.text('help_center'),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          TextField(
+            controller: searchController,
+            decoration: InputDecoration(
+              hintText: 'Search help',
+              prefixIcon: const Icon(
+                Icons.search,
+              ),
+              suffixIcon: searchController.text.isEmpty
+                  ? null
+                  : IconButton(
+                      onPressed: () {
+                        searchController.clear();
+                        setState(() {});
+                      },
+                      icon: const Icon(
+                        Icons.clear,
+                      ),
+                    ),
+            ),
+            onChanged: (_) {
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Help Categories',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...categories.map(
+            (category) => Card(
+              child: ListTile(
+                leading: const Icon(
+                  Icons.help_outline,
+                ),
+                title: Text(category),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                ),
+                onTap: () {
+                  _showCategory(category);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Frequently Asked Questions',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (filteredFaqs.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  'No help articles found.',
+                ),
+              ),
+            ),
+          ...filteredFaqs.map(
+            (faq) => Card(
+              child: ListTile(
+                leading: const Icon(
+                  Icons.question_answer_outlined,
+                ),
+                title: Text(faq['question']!),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                ),
+                onTap: () {
+                  _showFaq(
+                    context,
+                    faq['question']!,
+                    faq['answer']!,
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Card(
+            child: ListTile(
+              leading: const Icon(
+                Icons.support_agent,
+              ),
+              title: const Text(
+                'Contact Support',
+              ),
+              subtitle: const Text(
+                'Create a support request',
+              ),
+              trailing: const Icon(
+                Icons.chevron_right,
+              ),
+              onTap: _createTicket,
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(
+                Icons.receipt_long,
+              ),
+              title: const Text(
+                'My Requests',
+              ),
+              subtitle: const Text(
+                'View your support requests',
+              ),
+              trailing: const Icon(
+                Icons.chevron_right,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const MySupportRequestsPage(),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/* ============================================================
+       MY SUPPORT REQUESTS
+       ============================================================ */
+
+
+
+
+
+class MySupportRequestsPage extends StatelessWidget {
+  const MySupportRequestsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('My Requests'),
+        ),
+        body: const Center(
+          child: Text('Please login first.'),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Requests'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('supportTickets')
+            .where('userId', isEqualTo: user.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Failed to load requests.\n${snapshot.error}',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No support requests yet.',
+              ),
+            );
+          }
+
+          docs.sort((a, b) {
+            final aData = a.data() as Map<String, dynamic>;
+            final bData = b.data() as Map<String, dynamic>;
+
+            final aTime = aData['createdAt'];
+            final bTime = bData['createdAt'];
+
+            if (aTime is Timestamp && bTime is Timestamp) {
+              return bTime.compareTo(aTime);
+            }
+
+            return 0;
+          });
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+
+              final subject =
+                  data['subject']?.toString() ?? 'Support Request';
+
+              final message =
+                  data['message']?.toString() ?? '';
+
+              final status =
+                  data['status']?.toString() ?? 'Open';
+
+              final createdAt = data['createdAt'];
+
+              String dateText = '';
+
+              if (createdAt is Timestamp) {
+                final date = createdAt.toDate().toLocal();
+
+                dateText =
+                    '${date.day}/${date.month}/${date.year} '
+                    '${date.hour.toString().padLeft(2, '0')}:'
+                    '${date.minute.toString().padLeft(2, '0')}';
+              }
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  leading: CircleAvatar(
+                    backgroundColor: PartyColors.purpleDark,
+                    child: const Icon(
+                      Icons.support_agent,
+                      color: PartyColors.gold,
+                    ),
+                  ),
+                  title: Text(
+                    subject,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          status,
+                          style: TextStyle(
+                            color: status == 'Resolved'
+                                ? PartyColors.gold
+                                : PartyColors.purpleBright,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (dateText.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            dateText,
+                            style: const TextStyle(
+                              color: PartyColors.muted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SupportTicketPage(
+                          ticketId: doc.id,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+
+
+/* ============================================================
+       SUPPORT TICKET
+       ============================================================ */
+
+class SupportTicketPage extends StatefulWidget {
+  final String ticketId;
+
+  const SupportTicketPage({
+    super.key,
+    required this.ticketId,
+  });
+
+  @override
+  State<SupportTicketPage> createState() =>
+      _SupportTicketPageState();
+}
+
+class _SupportTicketPageState extends State<SupportTicketPage> {
+  final replyController = TextEditingController();
+  bool sending = false;
+
+  @override
+  void dispose() {
+    replyController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendReply() async {
+    final message = replyController.text.trim();
+
+    if (message.isEmpty || sending) return;
+
+    setState(() {
+      sending = true;
+    });
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('supportTickets')
+          .doc(widget.ticketId)
+          .collection('messages')
+          .add({
+        'senderId': FirebaseAuth.instance.currentUser?.uid ?? '',
+        'senderType': 'user',
+        'message': message,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      await FirebaseFirestore.instance
+          .collection('supportTickets')
+          .doc(widget.ticketId)
+          .update({
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      replyController.clear();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Reply send nahi ho saki: $e'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          sending = false;
+        });
       }
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Support Request'),
+      ),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('supportTickets')
+            .doc(widget.ticketId)
+            .snapshots(),
+        builder: (context, ticketSnapshot) {
+          if (ticketSnapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (!ticketSnapshot.hasData ||
+              !ticketSnapshot.data!.exists) {
+            return const Center(
+              child: Text('Support request not found.'),
+            );
+          }
+
+          final ticket =
+              ticketSnapshot.data!.data()
+                  as Map<String, dynamic>;
+
+          final subject =
+              ticket['subject']?.toString() ?? 'Support Request';
+
+          final message =
+              ticket['message']?.toString() ?? '';
+
+          final status =
+              ticket['status']?.toString() ?? 'Open';
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              subject,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(message),
+                            const SizedBox(height: 14),
+                            Text(
+                              'Status: $status',
+                              style: const TextStyle(
+                                color: PartyColors.gold,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Conversation',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('supportTickets')
+                          .doc(widget.ticketId)
+                          .collection('messages')
+                          .orderBy('createdAt')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const SizedBox();
+                        }
+
+                        final messages = snapshot.data!.docs;
+
+                        if (messages.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Text(
+                              'No replies yet.',
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: messages.map((doc) {
+                            final data = doc.data()
+                                as Map<String, dynamic>;
+
+                            final isUser =
+                                data['senderType'] == 'user';
+
+                            return Align(
+                              alignment: isUser
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.only(
+                                  bottom: 8,
+                                ),
+                                padding:
+                                    const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isUser
+                                      ? PartyColors.purpleDark
+                                      : PartyColors.panel,
+                                  borderRadius:
+                                      BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isUser
+                                        ? PartyColors.purpleBright
+                                        : PartyColors.goldDark,
+                                  ),
+                                ),
+                                child: Text(
+                                  data['message']
+                                          ?.toString() ??
+                                      '',
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: replyController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            hintText: 'Write a reply...',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed:
+                            sending ? null : _sendReply,
+                        icon: sending
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child:
+                                    CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.send,
+                                color: PartyColors.gold,
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+
+/* ============================================================
+       ADMIN SUPPORT PANEL
+       ============================================================ */
+
+
+class AdminSupportPanelPage extends StatelessWidget {
+  const AdminSupportPanelPage({super.key});
+
+  Future<void> _updateStatus(
+    String ticketId,
+    String status,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('supportTickets')
+        .doc(ticketId)
+        .update({
+      'status': status,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Support Requests'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('supportTickets')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Failed to load requests.\n${snapshot.error}',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          final tickets = snapshot.data?.docs ?? [];
+
+          if (tickets.isEmpty) {
+            return const Center(
+              child: Text('No support requests.'),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: tickets.length,
+            itemBuilder: (context, index) {
+              final doc = tickets[index];
+              final data =
+                  doc.data() as Map<String, dynamic>;
+
+              final subject =
+                  data['subject']?.toString() ??
+                      'Support Request';
+
+              final message =
+                  data['message']?.toString() ?? '';
+
+              final email =
+                  data['userEmail']?.toString() ?? '';
+
+              final status =
+                  data['status']?.toString() ?? 'Open';
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        subject,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        email,
+                        style: const TextStyle(
+                          color: PartyColors.muted,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        message,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Text('Status: '),
+                          Text(
+                            status,
+                            style: const TextStyle(
+                              color: PartyColors.gold,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              try {
+                                await _updateStatus(
+                                  doc.id,
+                                  value,
+                                );
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Status changed to $value',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Status update failed: $e',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            itemBuilder: (context) => const [
+                              PopupMenuItem(
+                                value: 'Open',
+                                child: Text('Open'),
+                              ),
+                              PopupMenuItem(
+                                value: 'In Progress',
+                                child: Text('In Progress'),
+                              ),
+                              PopupMenuItem(
+                                value: 'Resolved',
+                                child: Text('Resolved'),
+                              ),
+                            ],
+                            child: const Icon(
+                              Icons.more_vert,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    SupportTicketPage(
+                                  ticketId: doc.id,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.chat_outlined,
+                          ),
+                          label: const Text(
+                            'Open Request',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+
 
     /* ============================================================
        TRANSACTION HISTORY
