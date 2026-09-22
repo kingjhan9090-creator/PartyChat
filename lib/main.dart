@@ -832,6 +832,10 @@ class _PartyLoadingState extends State<PartyLoading>
         String? chatId,
       }) async {
         if (!keys.contains(type)) return;
+        if (type == 'friendMessages') {
+          final settings = await userDoc(uid).get();
+          if (settings.data()?['messageNotifications'] == false) return;
+        }
         final userNotifications = FirebaseFirestore.instance
             .collection('users')
             .doc(uid)
@@ -1033,7 +1037,8 @@ class _PartyLoadingState extends State<PartyLoading>
         required String otherUid,
         required Map<String, dynamic> otherData,
       }) async {
-        await blocked(uid).doc(otherUid).set({
+        final batch = db.batch();
+        batch.set(blocked(uid).doc(otherUid), {
           'name': otherData['name'] ?? 'Party User',
           'email': otherData['email'] ?? '',
           'photoURL': otherData['photoURL'] ?? '',
@@ -1041,22 +1046,11 @@ class _PartyLoadingState extends State<PartyLoading>
           'avatar': otherData['avatar'] ?? '',
           'createdAt': FieldValue.serverTimestamp(),
         });
-
-        await friends(uid)
-            .doc(otherUid)
-            .delete();
-
-        await friends(otherUid)
-            .doc(uid)
-            .delete();
-
-        await friendRequests(otherUid)
-            .doc(uid)
-            .delete();
-
-        await friendRequests(uid)
-            .doc(otherUid)
-            .delete();
+        batch.delete(friends(uid).doc(otherUid));
+        batch.delete(friends(otherUid).doc(uid));
+        batch.delete(friendRequests(otherUid).doc(uid));
+        batch.delete(friendRequests(uid).doc(otherUid));
+        await batch.commit();
       }
 
       static Future<void> unblockUser(
@@ -1092,56 +1086,20 @@ class _PartyLoadingState extends State<PartyLoading>
           );
         }
 
-        final receiver =
-            await userDoc(receiverUid).get();
+        final checks = await Future.wait([
+          userDoc(receiverUid).get(),
+          isBlockedEither(senderUid, receiverUid),
+          friends(senderUid).doc(receiverUid).get(),
+          friendRequests(receiverUid).doc(senderUid).get(),
+          friendRequests(senderUid).doc(receiverUid).get(),
+        ]);
 
-        if (!receiver.exists) {
-          throw Exception(
-            'User not found.',
-          );
-        }
-
-        if (await isBlockedEither(
-          senderUid,
-          receiverUid,
-        )) {
-          throw Exception(
-            'This user is blocked.',
-          );
-        }
-
-        final existingFriend =
-            await friends(senderUid)
-                .doc(receiverUid)
-                .get();
-
-        if (existingFriend.exists) {
-          throw Exception(
-            'This user is already your friend.',
-          );
-        }
-
-        final existingRequest =
-            await friendRequests(receiverUid)
-                .doc(senderUid)
-                .get();
-
-        if (existingRequest.exists) {
-          throw Exception(
-            'Friend request has already been sent.',
-          );
-        }
-
-        final reverseRequest =
-            await friendRequests(senderUid)
-                .doc(receiverUid)
-                .get();
-
-        if (reverseRequest.exists) {
-          throw Exception(
-            'This user has already sent you a friend request.',
-          );
-        }
+        final receiver = checks[0] as DocumentSnapshot<Map<String, dynamic>>;
+        if (!receiver.exists) throw Exception('User not found.');
+        if (checks[1] == true) throw Exception('This user is blocked.');
+        if ((checks[2] as DocumentSnapshot).exists) throw Exception('This user is already your friend.');
+        if ((checks[3] as DocumentSnapshot).exists) throw Exception('Friend request has already been sent.');
+        if ((checks[4] as DocumentSnapshot).exists) throw Exception('This user has already sent you a friend request.');
 
         final fromData =
             await userData(senderUid) ?? {};
@@ -1166,7 +1124,7 @@ class _PartyLoadingState extends State<PartyLoading>
               FieldValue.serverTimestamp(),
         });
 
-        await ProfileUnreadService.createNotification(
+        ProfileUnreadService.createNotification(
           uid: receiverUid,
           type: 'friendRequests',
           title: 'New Friend Request',
@@ -1177,7 +1135,7 @@ class _PartyLoadingState extends State<PartyLoading>
               fromData['name'] ?? 'Party User',
           actorPhoto:
               fromData['photoURL'] ?? '',
-        );
+        ).catchError((_) {});
       }
 
       /* ============================================================
@@ -1256,7 +1214,7 @@ class _PartyLoadingState extends State<PartyLoading>
 
         await batch.commit();
 
-        await ProfileUnreadService.createNotification(
+        ProfileUnreadService.createNotification(
           uid: requesterUid,
           type: 'friends',
           title: 'Friend Request Accepted',
@@ -1267,7 +1225,7 @@ class _PartyLoadingState extends State<PartyLoading>
               me['name'] ?? 'Party User',
           actorPhoto:
               me['photoURL'] ?? '',
-        );
+        ).catchError((_) {});
       }
 
       /* ============================================================
@@ -1344,85 +1302,91 @@ class _PartyLoadingState extends State<PartyLoading>
         return '${ids[0]}_${ids[1]}';
       }
 
+      static Future<void> deleteChatForUser({
+        required String uid,
+        required String chatId,
+      }) async {
+        final chatRef = db.collection('chats').doc(chatId);
+        final userChatRef = userDoc(uid).collection('chats').doc(chatId);
+        final userChatSnap = await userChatRef.get();
+        final otherUid = userChatSnap.data()?['otherUid']?.toString();
+
+        final messagesSnap = await chatRef.collection('messages').get();
+        const chunkSize = 450;
+
+        for (var start = 0; start < messagesSnap.docs.length; start += chunkSize) {
+          final end = (start + chunkSize < messagesSnap.docs.length)
+              ? start + chunkSize
+              : messagesSnap.docs.length;
+          final batch = db.batch();
+          for (final message in messagesSnap.docs.sublist(start, end)) {
+            batch.delete(message.reference);
+          }
+          await batch.commit();
+        }
+
+        final finalBatch = db.batch();
+        finalBatch.delete(userChatRef);
+        if (otherUid != null && otherUid.isNotEmpty && otherUid != uid) {
+          finalBatch.delete(userDoc(otherUid).collection('chats').doc(chatId));
+        }
+        await finalBatch.commit();
+
+        await chatRef.delete();
+      }
+
       static Future<void> sendMessage({
         required String fromUid,
         required String toUid,
         required String text,
       }) async {
         final clean = text.trim();
-
         if (clean.isEmpty) return;
 
-        if (await isBlockedEither(
-          fromUid,
-          toUid,
-        )) {
-          throw Exception(
-            'Messaging is blocked.',
-          );
-        }
+        final results = await Future.wait([
+          isBlockedEither(fromUid, toUid),
+          userData(fromUid),
+        ]);
+        if (results[0] == true) throw Exception('Messaging is blocked.');
 
-        final id =
-            chatId(fromUid, toUid);
+        final fromData = (results[1] as Map<String, dynamic>?) ?? {};
+        final id = chatId(fromUid, toUid);
+        final chat = db.collection('chats').doc(id);
+        final messageRef = chat.collection('messages').doc();
+        final now = FieldValue.serverTimestamp();
+        final batch = db.batch();
 
-        final fromData =
-            await userData(fromUid) ?? {};
-
-        final chat =
-            db.collection('chats').doc(id);
-
-        await chat
-            .collection('messages')
-            .add({
+        batch.set(messageRef, {
           'senderUid': fromUid,
           'receiverUid': toUid,
           'text': clean,
-          'createdAt':
-              FieldValue.serverTimestamp(),
+          'createdAt': now,
           'isRead': false,
         });
+        batch.set(userDoc(toUid).collection('chats').doc(id), {
+          'chatId': id,
+          'otherUid': fromUid,
+          'lastMessage': clean,
+          'lastMessageAt': now,
+        }, SetOptions(merge: true));
+        batch.set(userDoc(fromUid).collection('chats').doc(id), {
+          'chatId': id,
+          'otherUid': toUid,
+          'lastMessage': clean,
+          'lastMessageAt': now,
+        }, SetOptions(merge: true));
+        await batch.commit();
 
-        await userDoc(toUid)
-            .collection('chats')
-            .doc(id)
-            .set(
-          {
-            'chatId': id,
-            'otherUid': fromUid,
-            'lastMessage': clean,
-            'lastMessageAt':
-                FieldValue.serverTimestamp(),
-          },
-          SetOptions(merge: true),
-        );
-
-        await userDoc(fromUid)
-            .collection('chats')
-            .doc(id)
-            .set(
-          {
-            'chatId': id,
-            'otherUid': toUid,
-            'lastMessage': clean,
-            'lastMessageAt':
-                FieldValue.serverTimestamp(),
-          },
-          SetOptions(merge: true),
-        );
-
-        await ProfileUnreadService.createNotification(
+        ProfileUnreadService.createNotification(
           uid: toUid,
           type: 'friendMessages',
           title: 'New Message',
-          message:
-              '${fromData['name'] ?? 'Friend'}: $clean',
+          message: '${fromData['name'] ?? 'Friend'}: $clean',
           actorUid: fromUid,
-          actorName:
-              fromData['name'] ?? 'Party User',
-          actorPhoto:
-              fromData['photoURL'] ?? '',
+          actorName: fromData['name'] ?? 'Party User',
+          actorPhoto: fromData['photoURL'] ?? '',
           chatId: id,
-        );
+        ).catchError((_) {});
       }
 
       /* ============================================================
@@ -2035,21 +1999,10 @@ class _PartyLoadingState extends State<PartyLoading>
                         ),
                       ),
                       const SizedBox(height: 28),
-                      SizedBox(
-                        width: 140,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: const LinearProgressIndicator(
-                            minHeight: 5,
-                            backgroundColor: PartyColors.purpleDark,
-                            valueColor: AlwaysStoppedAnimation<Color>(PartyColors.gold),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'LOADING...',
-                        style: TextStyle(letterSpacing: 3.2, color: PartyColors.goldBright, fontWeight: FontWeight.w800, fontSize: 11),
+                      const SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: PartyLoading(),
                       ),
                     ],
                   ),
@@ -2131,6 +2084,7 @@ class _PartyLoadingState extends State<PartyLoading>
 
     class _LoginPageState extends State<LoginPage> {
       bool signup = false;
+      bool authBusy = false;
       Future<String> generateUniqueUserId() async {
       final random = math.Random();
       final usersRef = FirebaseFirestore.instance.collection('users');
@@ -2190,6 +2144,9 @@ class _PartyLoadingState extends State<PartyLoading>
           return;
         }
 
+        if (authBusy) return;
+        setState(() => authBusy = true);
+
         try {
           UserCredential credential;
 
@@ -2223,7 +2180,7 @@ class _PartyLoadingState extends State<PartyLoading>
                 SetOptions(merge: true),
               );
 
-              await ProfileUnreadService.ensure(user.uid);
+              ProfileUnreadService.ensure(user.uid);
             }
           } else {
             credential = await FirebaseAuth.instance
@@ -2232,11 +2189,10 @@ class _PartyLoadingState extends State<PartyLoading>
               password: password,
             );
 
-            await AppLanguage.load();
-
             final user = credential.user;
             if (user != null) {
-              await ProfileUnreadService.ensure(user.uid);
+              AppLanguage.load();
+              ProfileUnreadService.ensure(user.uid);
             }
           }
 
@@ -2249,6 +2205,7 @@ class _PartyLoadingState extends State<PartyLoading>
             ),
           );
         } catch (e) {
+          if (mounted) setState(() => authBusy = false);
           if (!mounted) return;
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -2260,6 +2217,8 @@ class _PartyLoadingState extends State<PartyLoading>
       }
 
       Future<void> continueWithGoogle() async {
+        if (authBusy) return;
+        setState(() => authBusy = true);
         try {
           final GoogleSignInAccount? googleUser =
               await GoogleSignIn(
@@ -2311,6 +2270,7 @@ class _PartyLoadingState extends State<PartyLoading>
             ),
           );
         } catch (e) {
+          if (mounted) setState(() => authBusy = false);
           if (!mounted) return;
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -2324,9 +2284,11 @@ class _PartyLoadingState extends State<PartyLoading>
       @override
       Widget build(BuildContext context) {
         return Scaffold(
-          body: _NeonBackground(
-            child: SafeArea(
-              child: SingleChildScrollView(
+          body: Stack(
+            children: [
+              _NeonBackground(
+                child: SafeArea(
+                  child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2371,7 +2333,7 @@ class _PartyLoadingState extends State<PartyLoading>
                           foregroundColor: PartyColors.text,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                         ),
-                        onPressed: continueWithGoogle,
+                        onPressed: authBusy ? null : continueWithGoogle,
                         icon: const Icon(Icons.g_mobiledata, size: 30, color: PartyColors.gold),
                         label: const Text('Continue with Google'),
                       ),
@@ -2455,7 +2417,7 @@ class _PartyLoadingState extends State<PartyLoading>
                       height: 52,
                       child: _NeonAction(
                         label: signup ? AppLanguage.text('create_account') : AppLanguage.text('login'),
-                        onPressed: continueToApp,
+                        onPressed: authBusy ? null : continueToApp,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -2465,8 +2427,19 @@ class _PartyLoadingState extends State<PartyLoading>
                     ),
                   ],
                 ),
+                  ),
+                ),
               ),
-            ),
+              if (authBusy)
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Color(0xCC050307),
+                    child: Center(
+                      child: SizedBox(width: 150, height: 150, child: PartyLoading()),
+                    ),
+                  ),
+                ),
+            ],
           ),
         );
       }
@@ -2484,46 +2457,18 @@ class _PartyLoadingState extends State<PartyLoading>
 
     class _MainPageState extends State<MainPage> {
       int selected = 0;
-      bool switchingTab = false;
-      Timer? _tabTimer;
       final pages = const [HomeTab(), RoomsTab(), GamesTab(), WalletTab(), ProfileTab()];
 
-      @override
-      void dispose() {
-        _tabTimer?.cancel();
-        super.dispose();
-      }
-
       void _selectTab(int value) {
-        if (value == selected || switchingTab) return;
-        setState(() => switchingTab = true);
-        _tabTimer?.cancel();
-        _tabTimer = Timer(const Duration(seconds: 1), () {
-          if (!mounted) return;
-          setState(() {
-            selected = value;
-            switchingTab = false;
-          });
-        });
+        if (value == selected || !mounted) return;
+        setState(() => selected = value);
       }
 
       @override
       Widget build(BuildContext context) {
         return Scaffold(
           extendBody: true,
-          body: Stack(
-            children: [
-              SafeArea(bottom: false, child: pages[selected]),
-              IgnorePointer(
-                ignoring: !switchingTab,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 160),
-                  opacity: switchingTab ? 1 : 0,
-                  child: const Align(alignment: Alignment.topCenter, child: _PartyTabLoadingBar()),
-                ),
-              ),
-            ],
-          ),
+          body: SafeArea(bottom: false, child: pages[selected]),
           bottomNavigationBar: NavigationBar(
             selectedIndex: selected,
             onDestinationSelected: _selectTab,
@@ -2537,38 +2482,9 @@ class _PartyLoadingState extends State<PartyLoading>
           ),
         );
       }
-    }
 
-    class _PartyTabLoadingBar extends StatefulWidget {
-      const _PartyTabLoadingBar();
-      @override
-      State<_PartyTabLoadingBar> createState() => _PartyTabLoadingBarState();
-    }
 
-    class _PartyTabLoadingBarState extends State<_PartyTabLoadingBar> with SingleTickerProviderStateMixin {
-      late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 850))..repeat(reverse: true);
-      @override
-      void dispose() { _controller.dispose(); super.dispose(); }
-      @override
-      Widget build(BuildContext context) {
-        return SizedBox(
-          height: 4,
-          width: double.infinity,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) => FractionallySizedBox(
-              alignment: Alignment(-1 + (_controller.value * 2), 0),
-              widthFactor: .42,
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [PartyColors.purpleBright, Color(0xFFFFC83D), PartyColors.purpleBright]),
-                  boxShadow: [BoxShadow(color: Color(0x99FFC83D), blurRadius: 12, spreadRadius: 1)],
-                ),
-              ),
-            ),
-          ),
-        );
-      }
+
     }
 
     /* ============================================================
@@ -2932,7 +2848,7 @@ class _PartyLoadingState extends State<PartyLoading>
             child: FutureBuilder<Map<String, dynamic>?>(
               future: PartyChatData.userData(uid),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
+                if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
                 final data = snapshot.data ?? <String, dynamic>{};
                 final name = data['name']?.toString() ?? 'Party User';
                 final publicId = data['userId']?.toString() ?? uid;
@@ -3036,7 +2952,7 @@ class _PartyLoadingState extends State<PartyLoading>
               ),
             ),
             const SizedBox(height: 18),
-            if (searching) const SizedBox(width: double.infinity, child: LinearProgressIndicator(minHeight: 3)),
+            if (searching) const SizedBox(height: 180, child: PartyLoading()),
             if (!searching && lastQuery.isNotEmpty && userResults.isEmpty && roomResults.isEmpty)
               const Padding(padding: EdgeInsets.only(top: 80), child: Center(child: Text('No matching result.', style: TextStyle(color: Colors.white54)))),
             if (userResults.isNotEmpty) ...[
@@ -3720,6 +3636,7 @@ class _PartyLoadingState extends State<PartyLoading>
           messageController.clear();
         });
       }
+
       @override
       void dispose() {
         soundLevelSubscription?.cancel();
@@ -3809,6 +3726,7 @@ class _PartyLoadingState extends State<PartyLoading>
           );
         }
         return FutureBuilder<Map<String, dynamic>?>(
+            
           future: PartyChatData.userData(userId),
           builder: (context, snapshot) {
             final data = snapshot.data ?? <String, dynamic>{};
@@ -3858,7 +3776,7 @@ class _PartyLoadingState extends State<PartyLoading>
           body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: ref.snapshots(),
             builder: (context, snapshot) {
-              if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('Add friends first.'));
               return ListView.builder(
@@ -4018,7 +3936,7 @@ class _PartyLoadingState extends State<PartyLoading>
                               ),
                             ),
                             child: const Center(
-                              child: LinearProgressIndicator(minHeight: 3),
+                              child: PartyLoading(),
                             ),
                           );
                         },
@@ -4732,7 +4650,7 @@ class _PartyLoadingState extends State<PartyLoading>
             stream: PartyChatData.friendRequestsStream(user.uid),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Center(child: Text('Could not load friend requests.'));
-              if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('No friend requests yet.'));
               return ListView.separated(
@@ -4791,7 +4709,7 @@ class _PartyLoadingState extends State<PartyLoading>
             stream: ref.orderBy('createdAt', descending: true).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Center(child: Text('Could not load room invites.'));
-              if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('No room invites yet.'));
               return ListView.builder(
@@ -4839,6 +4757,21 @@ class _PartyLoadingState extends State<PartyLoading>
     class FriendMessagesPage extends StatelessWidget {
       const FriendMessagesPage({super.key});
 
+      Future<void> _deleteChat(BuildContext context, String chatId) async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) return;
+        try {
+          await PartyChatData.deleteChatForUser(uid: user.uid, chatId: chatId);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Chat deleted.')));
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+          }
+        }
+      }
+
       @override
       Widget build(BuildContext context) {
         final user = FirebaseAuth.instance.currentUser;
@@ -4851,7 +4784,7 @@ class _PartyLoadingState extends State<PartyLoading>
             stream: ref.orderBy('lastMessageAt', descending: true).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Center(child: Text('Could not load chats.'));
-              if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('No messages yet.'));
               return ListView.builder(
@@ -4859,23 +4792,33 @@ class _PartyLoadingState extends State<PartyLoading>
                 itemBuilder: (context, index) {
                   final d = docs[index].data();
                   final otherUid = d['otherUid'] as String? ?? '';
+                  final chatId = d['chatId'] as String? ?? docs[index].id;
                   return FutureBuilder<Map<String, dynamic>?>(
                     future: PartyChatData.userData(otherUid),
                     builder: (context, userSnap) {
                       final other = userSnap.data ?? {};
+                      final name = other['name'] ?? 'Friend';
                       return ListTile(
-                        leading: _NetworkOrAvatar(
-                          photoUrl: other['photoURL'] as String?,
-                          avatar: other['avatar'] as String?,
-                        ),
-                        title: Text(other['name'] ?? 'Friend'),
+                        leading: _NetworkOrAvatar(photoUrl: other['photoURL'] as String?, avatar: other['avatar'] as String?),
+                        title: Text(name),
                         subtitle: Text(d['lastMessage'] ?? ''),
-                        onTap: () => Navigator.push(context, MaterialPageRoute(
-                          builder: (_) => ChatPage(
-                            otherUid: otherUid,
-                            otherName: other['name'] ?? 'Friend',
-                          ),
-                        )),
+                        onTap: () async {
+                          final action = await showModalBottomSheet<String>(
+                            context: context,
+                            backgroundColor: PartyColors.panel,
+                            builder: (_) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                              ListTile(leading: const Icon(Icons.message_rounded, color: PartyColors.gold), title: const Text('Open Chat'), onTap: () => Navigator.pop(context, 'open')),
+                              ListTile(leading: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent), title: const Text('Delete'), onTap: () => Navigator.pop(context, 'delete')),
+                              ListTile(leading: const Icon(Icons.close_rounded), title: const Text('Cancel'), onTap: () => Navigator.pop(context, 'cancel')),
+                            ])),
+                          );
+                          if (!context.mounted) return;
+                          if (action == 'open') {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => ChatPage(otherUid: otherUid, otherName: name)));
+                          } else if (action == 'delete') {
+                            await _deleteChat(context, chatId);
+                          }
+                        },
                       );
                     },
                   );
@@ -4906,7 +4849,7 @@ class _PartyLoadingState extends State<PartyLoading>
             stream: ref.orderBy('createdAt', descending: true).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-              if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('No gifts yet.'));
               return ListView.builder(
@@ -4945,7 +4888,7 @@ class _PartyLoadingState extends State<PartyLoading>
             stream: ref.orderBy('createdAt', descending: true).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Center(child: Text('Could not load gifts.'));
-              if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('Your sent gifts will appear here.'));
               return ListView.builder(
@@ -4961,7 +4904,6 @@ class _PartyLoadingState extends State<PartyLoading>
               );
             },
           ),
-
         );
       }
     }
@@ -4990,7 +4932,7 @@ class _PartyLoadingState extends State<PartyLoading>
             stream: PartyChatData.friendsStream(user.uid),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Center(child: Text('Could not load friends.'));
-              if (!snapshot.hasData) return const Center(child: SizedBox(width: 110, child: LinearProgressIndicator(minHeight: 3)));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('No friends yet.'));
               return ListView.separated(
@@ -5012,33 +4954,34 @@ class _PartyLoadingState extends State<PartyLoading>
                       title: Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
                       trailing: Wrap(children: [
                         IconButton(icon: const Icon(Icons.message_rounded, color: Color(0xFFFFC83D)), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChatPage(otherUid: uid, otherName: name)))),
-                        IconButton(icon: const Icon(Icons.card_giftcard_rounded, color: PartyColors.purpleBright), onPressed: () => _giftDialog(context, user.uid, uid, name)),
                         IconButton(icon: const Icon(Icons.block_rounded, color: Colors.white60), onPressed: () => _block(context, user.uid, uid, data)),
                       ]),
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: uid))),
+                      onTap: () async {
+                        final action = await showModalBottomSheet<String>(
+                          context: context,
+                          backgroundColor: PartyColors.panel,
+                          builder: (_) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                            ListTile(leading: const Icon(Icons.message_rounded, color: PartyColors.gold), title: const Text('Open Chat'), onTap: () => Navigator.pop(context, 'open')),
+                            ListTile(leading: const Icon(Icons.person_remove_rounded, color: Colors.redAccent), title: const Text('Delete Friend'), onTap: () => Navigator.pop(context, 'delete')),
+                            ListTile(leading: const Icon(Icons.close_rounded), title: const Text('Cancel'), onTap: () => Navigator.pop(context, 'cancel')),
+                          ])),
+                        );
+                        if (!context.mounted) return;
+                        if (action == 'open') {
+
+
+
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => ChatPage(otherUid: uid, otherName: name)));
+                        } else if (action == 'delete') {
+                          await PartyChatData.removeFriend(uid: user.uid, otherUid: uid);
+                        }
+                      },
                     ),
                   );
                 },
               );
             },
           ),
-        );
-      }
-
-      Future<void> _giftDialog(BuildContext context, String fromUid, String toUid, String name) async {
-        final gifts = [{'name':'Rose 🌹','cost':10},{'name':'Heart ❤️','cost':50},{'name':'Crown 👑','cost':100},{'name':'Diamond 💎','cost':500}];
-        await showModalBottomSheet(
-          context: context,
-          backgroundColor: const Color(0xFF0D0A12),
-          builder: (_) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Padding(padding: const EdgeInsets.all(16), child: Text('Gift for $name', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-            ...gifts.map((gift) => ListTile(title: Text(gift['name'] as String), trailing: Text('${gift['cost']} coins'), onTap: () async {
-              try {
-                await PartyChatData.sendGift(fromUid: fromUid, toUid: toUid, giftName: gift['name'] as String, cost: gift['cost'] as int);
-                if (context.mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gift sent successfully.'))); }
-              } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
-            })),
-          ])),
         );
       }
 
@@ -5091,7 +5034,7 @@ class _PartyLoadingState extends State<PartyLoading>
                   stream: ref.orderBy('createdAt', descending: false).snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) return const Center(child: Text('Could not load messages.'));
-                    if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+                    if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
                     final docs = snapshot.data!.docs;
                     if (docs.isEmpty) return const Center(child: Text('Say hello 👋'));
                     return ListView.builder(
@@ -6047,10 +5990,8 @@ class _PartyLoadingState extends State<PartyLoading>
                         language == selectedLanguage
                             ? const Icon(Icons.check)
                             : null,
-                    onTap: () async {
-                      await AppLanguage.change(
-                        language,
-                      );
+                    onTap: () {
+                      AppLanguage.change(language);
                     },
                   );
                 },
@@ -6075,6 +6016,85 @@ class _PartyLoadingState extends State<PartyLoading>
     class _NotificationsPageState extends State<NotificationsPage> {
       bool messages = true;
       bool announcements = true;
+
+      @override
+      void initState() {
+        super.initState();
+        _loadNotificationSettings();
+      }
+
+      Future<void> _loadNotificationSettings() async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) return;
+        try {
+          final data = (await FirebaseFirestore.instance.collection('users').doc(user.uid).get()).data() ?? {};
+          if (!mounted) return;
+          setState(() {
+            messages = data['messageNotifications'] != false;
+            announcements = data['announcementNotifications'] != false;
+          });
+        } catch (e) {
+          debugPrint('Notification settings load failed: $e');
+        }
+      }
+
+      Future<void> _saveNotificationSetting(String field, bool value) async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) return;
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+          {field: value},
+          SetOptions(merge: true),
+        );
+      }
+
+      Future<void> _deleteNotification(DocumentSnapshot<Map<String, dynamic>> doc) async {
+        await doc.reference.delete();
+      }
+
+      Future<void> _handleNotificationTap(DocumentSnapshot<Map<String, dynamic>> doc, Map<String, dynamic> d) async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) return;
+        await doc.reference.update({'isRead': true, 'readAt': FieldValue.serverTimestamp()});
+        await ProfileUnreadService.markRead(user.uid, d['badgeKey'] ?? 'notifications');
+
+        final type = d['type']?.toString() ?? '';
+        final actorUid = d['actorUid']?.toString();
+        final actorName = d['actorName']?.toString() ?? 'Friend';
+        if (!mounted) return;
+
+        if (type == 'friendMessages' && actorUid != null && actorUid.isNotEmpty) {
+          final action = await showModalBottomSheet<String>(
+            context: context,
+            backgroundColor: PartyColors.panel,
+            builder: (_) => SafeArea(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                ListTile(leading: const Icon(Icons.message_rounded, color: PartyColors.gold), title: const Text('Open Chat'), onTap: () => Navigator.pop(context, 'open')),
+                ListTile(leading: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent), title: const Text('Delete'), onTap: () => Navigator.pop(context, 'delete')),
+                ListTile(leading: const Icon(Icons.close_rounded), title: const Text('Cancel'), onTap: () => Navigator.pop(context, 'cancel')),
+              ]),
+            ),
+          );
+          if (!mounted) return;
+          if (action == 'open') {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => ChatPage(otherUid: actorUid, otherName: actorName)));
+          } else if (action == 'delete') {
+            await _deleteNotification(doc);
+          }
+          return;
+        }
+
+        final action = await showModalBottomSheet<String>(
+          context: context,
+          backgroundColor: PartyColors.panel,
+          builder: (_) => SafeArea(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              ListTile(leading: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent), title: const Text('Delete'), onTap: () => Navigator.pop(context, 'delete')),
+              ListTile(leading: const Icon(Icons.close_rounded), title: const Text('Cancel'), onTap: () => Navigator.pop(context, 'cancel')),
+            ]),
+          ),
+        );
+        if (action == 'delete') await _deleteNotification(doc);
+      }
 
       Future<void> _markAllRead() async {
         final user = FirebaseAuth.instance.currentUser;
@@ -6101,13 +6121,13 @@ class _PartyLoadingState extends State<PartyLoading>
                 title: Text(AppLanguage.text('messages')),
                 subtitle: const Text('Message notifications on/off'),
                 value: messages,
-                onChanged: (v) => setState(() => messages = v),
+                onChanged: (v) { setState(() => messages = v); _saveNotificationSetting('messageNotifications', v); },
               ),
               SwitchListTile(
                 title: Text(AppLanguage.text('announcements')),
                 subtitle: const Text('PartyChat announcements on/off'),
                 value: announcements,
-                onChanged: (v) => setState(() => announcements = v),
+                onChanged: (v) { setState(() => announcements = v); _saveNotificationSetting('announcementNotifications', v); },
               ),
               const Divider(),
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -6119,7 +6139,7 @@ class _PartyLoadingState extends State<PartyLoading>
                   );
                   if (!snapshot.hasData) return const Padding(
                     padding: EdgeInsets.all(20),
-                    child: Center(child: LinearProgressIndicator(minHeight: 3)),
+                    child: Center(child: SizedBox(height: 180, child: PartyLoading())),
                   );
                   final docs = snapshot.data!.docs;
                   if (docs.isEmpty) return const Padding(
@@ -6141,13 +6161,7 @@ class _PartyLoadingState extends State<PartyLoading>
                           radius: 5,
                           backgroundColor: Colors.red,
                         ),
-                        onTap: () async {
-                          await doc.reference.update({
-                            'isRead': true,
-                            'readAt': FieldValue.serverTimestamp(),
-                          });
-                          await ProfileUnreadService.markRead(user.uid, d['badgeKey'] ?? 'notifications');
-                        },
+                        onTap: () => _handleNotificationTap(doc, d),
                       );
                     }).toList(),
                   );
@@ -6178,7 +6192,7 @@ class _PartyLoadingState extends State<PartyLoading>
             stream: ref.snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Center(child: Text('Could not load blocked users.'));
-              if (!snapshot.hasData) return const Center(child: LinearProgressIndicator(minHeight: 3));
+              if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
               final docs = snapshot.data!.docs;
               if (docs.isEmpty) return const Center(child: Text('No blocked users.'));
               return ListView.builder(
@@ -6198,7 +6212,9 @@ class _PartyLoadingState extends State<PartyLoading>
                         await PartyChatData.unblockUser(user.uid, doc.id);
                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('User unblock kar diya.')),
-                        );
+
+
+                           );
                       },
                       child: const Text('Unblock'),
                     ),
@@ -7439,3 +7455,4 @@ class AdminSupportPanelPage extends StatelessWidget {
         );
       }
     }
+     
