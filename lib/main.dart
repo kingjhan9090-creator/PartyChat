@@ -833,7 +833,7 @@ class _PartyLoadingState extends State<PartyLoading>
       }) async {
         if (!keys.contains(type)) return;
         if (type == 'friendMessages') {
-          final settings = await userDoc(uid).get();
+          final settings = await PartyChatData.userDoc(uid).get();
           if (settings.data()?['messageNotifications'] == false) return;
         }
         final userNotifications = FirebaseFirestore.instance
@@ -2417,7 +2417,11 @@ class _PartyLoadingState extends State<PartyLoading>
                       height: 52,
                       child: _NeonAction(
                         label: signup ? AppLanguage.text('create_account') : AppLanguage.text('login'),
-                        onPressed: authBusy ? null : continueToApp,
+                        onPressed: authBusy
+    ? null
+    : () {
+        continueToApp();
+      },
                       ),
                     ),
                     const SizedBox(height: 12),
