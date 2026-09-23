@@ -4188,7 +4188,7 @@ class _PartyLoadingState extends State<PartyLoading>
     }
 
     /* ============================================================
-       REAL ROOM + MIC SYSTEM
+       PREMIUM ROOM UI
        ============================================================ */
 
     class RoomPage extends StatefulWidget {
@@ -4212,10 +4212,9 @@ class _PartyLoadingState extends State<PartyLoading>
       String role = 'user';
       bool banned = false;
       bool muted = false;
-      String? selectedReceiverUid;
-      String? selectedReceiverName;
 
-      ZegoUIKitPrebuiltLiveAudioRoomController get zegoController => ZegoUIKitPrebuiltLiveAudioRoomController();
+      ZegoUIKitPrebuiltLiveAudioRoomController get zegoController =>
+          ZegoUIKitPrebuiltLiveAudioRoomController();
 
       @override
       void initState() {
@@ -4234,48 +4233,68 @@ class _PartyLoadingState extends State<PartyLoading>
         });
       }
 
-      bool get canManageUsers => role == 'leader' || role == 'deputy' || role == 'admin';
-      bool get canManageRoom => role == 'leader';
+      bool get canManageUsers =>
+          role == 'leader' || role == 'deputy' || role == 'admin';
 
-      Future<void> _syncMember() async {
-        final uid = FirebaseAuth.instance.currentUser?.uid;
-        if (uid == null) return;
-        final snap = await PartyChatData.roomMembers(widget.roomId).doc(uid).get();
-        if (!mounted || !snap.exists) return;
-        final data = snap.data() ?? {};
-        setState(() {
-          role = data['role']?.toString() ?? 'user';
-          banned = data['banned'] == true;
-          muted = data['muted'] == true;
-        });
-      }
+      bool get canManageRoom => role == 'leader';
 
       Future<void> _toggleMic() async {
         if (banned || muted || loadingAction) return;
         final uid = FirebaseAuth.instance.currentUser?.uid;
         if (uid == null) return;
+
         setState(() => loadingAction = true);
         try {
           if (!micOn) {
-            await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: true);
+            await PartyChatData.updateRoomMicState(
+              roomId: widget.roomId,
+              uid: uid,
+              onSeat: true,
+            );
             final empty = zegoController.seat.getEmptySeats();
-            if (empty.isEmpty) throw Exception('No empty mic seat is available.');
-            await zegoController.seat.audience.take(empty.first);
+            if (empty.isNotEmpty) {
+              try {
+                await zegoController.seat.audience.take(empty.first);
+              } catch (_) {}
+            }
             ZegoUIKit().turnMicrophoneOn(true, userID: uid);
             if (mounted) setState(() => micOn = true);
             _startMicGlow();
           } else {
-            try { await zegoController.seat.speaker.leave(showDialog: false); } catch (_) {}
+            try {
+              await zegoController.seat.speaker.leave(showDialog: false);
+            } catch (_) {}
             ZegoUIKit().turnMicrophoneOn(false, userID: uid);
-            await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: false);
-            if (mounted) setState(() { micOn = false; isSpeaking = false; });
+            await PartyChatData.updateRoomMicState(
+              roomId: widget.roomId,
+              uid: uid,
+              onSeat: false,
+            );
+            if (mounted) {
+              setState(() {
+                micOn = false;
+                isSpeaking = false;
+              });
+            }
             await soundLevelSubscription?.cancel();
             soundLevelSubscription = null;
           }
         } catch (e) {
-          try { ZegoUIKit().turnMicrophoneOn(false, userID: uid); } catch (_) {}
-          try { await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: false); } catch (_) {}
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+          try {
+            ZegoUIKit().turnMicrophoneOn(false, userID: uid);
+          } catch (_) {}
+          try {
+            await PartyChatData.updateRoomMicState(
+              roomId: widget.roomId,
+              uid: uid,
+              onSeat: false,
+            );
+          } catch (_) {}
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$e')),
+            );
+          }
         } finally {
           if (mounted) setState(() => loadingAction = false);
         }
@@ -4285,24 +4304,35 @@ class _PartyLoadingState extends State<PartyLoading>
         soundLevelSubscription?.cancel();
         final uid = FirebaseAuth.instance.currentUser?.uid;
         if (uid == null) return;
-        soundLevelSubscription = ZegoUIKit().getSoundLevelStream(uid).listen((level) {
+        soundLevelSubscription =
+            ZegoUIKit().getSoundLevelStream(uid).listen((level) {
           if (!micOn || !mounted) return;
           final speaking = level > 20;
-          if (speaking != isSpeaking) setState(() => isSpeaking = speaking);
+          if (speaking != isSpeaking) {
+            setState(() => isSpeaking = speaking);
+          }
         });
       }
 
       Future<void> _sendMessage() async {
-        if (banned) return;
+        if (banned || muted) return;
         final uid = FirebaseAuth.instance.currentUser?.uid;
         if (uid == null) return;
         final text = messageController.text.trim();
         if (text.isEmpty) return;
         messageController.clear();
         try {
-          await PartyChatData.sendRoomMessage(roomId: widget.roomId, uid: uid, text: text);
+          await PartyChatData.sendRoomMessage(
+            roomId: widget.roomId,
+            uid: uid,
+            text: text,
+          );
         } catch (e) {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$e')),
+            );
+          }
         }
       }
 
@@ -4311,88 +4341,241 @@ class _PartyLoadingState extends State<PartyLoading>
           context: context,
           backgroundColor: PartyColors.black2,
           isScrollControlled: true,
-          builder: (_) => RoomMembersSheet(roomId: widget.roomId, canManage: canManageUsers, actorUid: FirebaseAuth.instance.currentUser?.uid ?? ''),
+          builder: (_) => RoomMembersSheet(
+            roomId: widget.roomId,
+            canManage: canManageUsers,
+            actorUid: FirebaseAuth.instance.currentUser?.uid ?? '',
+          ),
         );
-        await _syncMember();
+      }
+
+      Future<void> _showEmojiSheet() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null || banned || muted) return;
+        const emojis = ['❤️', '😂', '🔥', '😍', '👏', '🎉', '💜', '👑'];
+        await showModalBottomSheet(
+          context: context,
+          backgroundColor: PartyColors.black2,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+          ),
+          builder: (_) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 14,
+                runSpacing: 8,
+                children: emojis
+                    .map(
+                      (emoji) => IconButton(
+                        iconSize: 34,
+                        onPressed: () async {
+                          await PartyChatData.sendRoomEmoji(
+                            roomId: widget.roomId,
+                            uid: uid,
+                            emoji: emoji,
+                          );
+                          if (mounted) Navigator.pop(context);
+                        },
+                        icon: Text(emoji),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+        );
       }
 
       Future<void> _showGiftSheet() async {
         final uid = FirebaseAuth.instance.currentUser?.uid;
         if (uid == null) return;
-
-        final members = await PartyChatData.roomMembers(widget.roomId).where('active', isEqualTo: true).get();
+        final members = await PartyChatData.roomMembers(widget.roomId)
+            .where('active', isEqualTo: true)
+            .get();
         final candidates = members.docs.where((d) => d.id != uid).toList();
         if (candidates.isEmpty) {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No other user is in the room yet.')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No other user is in the room yet.')),
+            );
+          }
           return;
         }
+
         String? receiver;
-        int cost = 100;
         String gift = 'Rose 🌹';
+        int cost = 100;
         await showModalBottomSheet(
           context: context,
           backgroundColor: PartyColors.black2,
-          builder: (sheetContext) => StatefulBuilder(builder: (context, setSheetState) {
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  const Text('Send Gift', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    value: receiver,
-                    dropdownColor: PartyColors.panel,
-                    decoration: const InputDecoration(labelText: 'Receiver'),
-                    items: candidates.map((d) => DropdownMenuItem(value: d.id, child: Text(d.data()['name']?.toString() ?? 'Party User'))).toList(),
-                    onChanged: (value) => setSheetState(() => receiver = value),
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+          ),
+          builder: (sheetContext) => StatefulBuilder(
+            builder: (context, setSheetState) {
+              return SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Send Gift',
+                        style: TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      DropdownButtonFormField<String>(
+                        value: receiver,
+                        dropdownColor: PartyColors.panel,
+                        decoration: const InputDecoration(labelText: 'Receiver'),
+                        items: candidates
+                            .map(
+                              (d) => DropdownMenuItem(
+                                value: d.id,
+                                child: Text(
+                                  d.data()['name']?.toString() ?? 'Party User',
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) =>
+                            setSheetState(() => receiver = value),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          ChoiceChip(
+                            label: const Text('Rose 🌹 • 100'),
+                            selected: gift == 'Rose 🌹',
+                            onSelected: (_) => setSheetState(() {
+                              gift = 'Rose 🌹';
+                              cost = 100;
+                            }),
+                          ),
+                          ChoiceChip(
+                            label: const Text('Heart 💜 • 500'),
+                            selected: gift == 'Heart 💜',
+                            onSelected: (_) => setSheetState(() {
+                              gift = 'Heart 💜';
+                              cost = 500;
+                            }),
+                          ),
+                          ChoiceChip(
+                            label: const Text('Crown 👑 • 1000'),
+                            selected: gift == 'Crown 👑',
+                            onSelected: (_) => setSheetState(() {
+                              gift = 'Crown 👑';
+                              cost = 1000;
+                            }),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
+                        child: _NeonAction(
+                          label: 'Send Gift',
+                          onPressed: receiver == null
+                              ? () {}
+                              : () async {
+                                  final name = candidates
+                                          .firstWhere((d) => d.id == receiver)
+                                          .data()['name']
+                                          ?.toString() ??
+                                      'Party User';
+                                  try {
+                                    await PartyChatData.sendRoomGift(
+                                      roomId: widget.roomId,
+                                      fromUid: uid,
+                                      toUid: receiver!,
+                                      giftName: gift,
+                                      cost: cost,
+                                    );
+                                    if (sheetContext.mounted) {
+                                      Navigator.pop(sheetContext);
+                                    }
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Gift sent to $name')),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('$e')),
+                                      );
+                                    }
+                                  }
+                                },
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  Wrap(spacing: 8, children: [
-                    ChoiceChip(label: const Text('Rose 🌹 • 100'), selected: gift == 'Rose 🌹', onSelected: (_) => setSheetState(() { gift = 'Rose 🌹'; cost = 100; })),
-                    ChoiceChip(label: const Text('Heart 💜 • 500'), selected: gift == 'Heart 💜', onSelected: (_) => setSheetState(() { gift = 'Heart 💜'; cost = 500; })),
-                    ChoiceChip(label: const Text('Crown 👑 • 1000'), selected: gift == 'Crown 👑', onSelected: (_) => setSheetState(() { gift = 'Crown 👑'; cost = 1000; })),
-                  ]),
-                  const SizedBox(height: 14),
-                  SizedBox(width: double.infinity, child: _NeonAction(label: 'Send Gift', onPressed: receiver == null ? () {} : () async {
-                    final name = candidates.firstWhere((d) => d.id == receiver).data()['name']?.toString() ?? 'Party User';
-                    try {
-                      await PartyChatData.sendRoomGift(roomId: widget.roomId, fromUid: uid, toUid: receiver!, giftName: gift, cost: cost);
-                      if (sheetContext.mounted) Navigator.pop(sheetContext);
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gift sent to $name')));
-                    } catch (e) {
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-                    }
-                  })),
-                ]),
-              ),
-            );
-          }),
+                ),
+              );
+            },
+          ),
         );
       }
 
       Future<void> _showGameSheet() async {
         final uid = FirebaseAuth.instance.currentUser?.uid;
         if (uid == null) return;
-        final members = await PartyChatData.roomMembers(widget.roomId).where('active', isEqualTo: true).where('onSeat', isEqualTo: true).get();
+        final members = await PartyChatData.roomMembers(widget.roomId)
+            .where('active', isEqualTo: true)
+            .where('onSeat', isEqualTo: true)
+            .get();
         if (members.docs.isEmpty) {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('At least one mic user is needed.')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('At least one mic user is needed.')),
+            );
+          }
           return;
         }
         await showModalBottomSheet(
           context: context,
           backgroundColor: PartyColors.black2,
-          builder: (_) => SafeArea(child: Padding(padding: const EdgeInsets.all(18), child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('Room Games', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 12),
-            _NeonAction(label: 'Bomb 💣', onPressed: () async {
-              final random = math.Random();
-              final target = members.docs[random.nextInt(members.docs.length)].id;
-              await PartyChatData.sendRoomGame(roomId: widget.roomId, uid: uid, game: 'bomb', targetUid: target);
-              if (mounted) Navigator.pop(context);
-            }),
-            const SizedBox(height: 8),
-            const Text('The bomb spins over the mic seats and lands on one user.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54)),
-          ]))),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+          ),
+          builder: (_) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Room Games',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 12),
+                  _NeonAction(
+                    label: 'Bomb 💣',
+                    onPressed: () async {
+                      final random = math.Random();
+                      final target =
+                          members.docs[random.nextInt(members.docs.length)].id;
+                      await PartyChatData.sendRoomGame(
+                        roomId: widget.roomId,
+                        uid: uid,
+                        game: 'bomb',
+                        targetUid: target,
+                      );
+                      if (mounted) Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       }
 
@@ -4401,21 +4584,13 @@ class _PartyLoadingState extends State<PartyLoading>
         if (uid == null) return;
         try {
           await PartyChatData.setRoomMusic(roomId: widget.roomId, uid: uid);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Music added to the room.')));
         } catch (e) {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$e')),
+            );
+          }
         }
-      }
-
-      Future<void> _showEmojiSheet() async {
-        final uid = FirebaseAuth.instance.currentUser?.uid;
-        if (uid == null || banned) return;
-        const emojis = ['❤️', '😂', '🔥', '😍', '👏', '🎉', '💜', '👑'];
-        await showModalBottomSheet(
-          context: context,
-          backgroundColor: PartyColors.black2,
-          builder: (_) => SafeArea(child: Wrap(alignment: WrapAlignment.center, children: emojis.map((emoji) => IconButton(iconSize: 34, onPressed: () async { await PartyChatData.sendRoomEmoji(roomId: widget.roomId, uid: uid, emoji: emoji); if (mounted) Navigator.pop(context); }, icon: Text(emoji))).toList())),
-        );
       }
 
       Future<void> _leaveFlow() async {
@@ -4427,21 +4602,47 @@ class _PartyLoadingState extends State<PartyLoading>
             title: const Text('Leave Room'),
             content: const Text('Keep this room in your room history?'),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Leave')), 
-              FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Keep')),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Leave'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Keep'),
+              ),
             ],
           ),
         );
         if (keep == null) return;
-        try { if (micOn) await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: false); } catch (_) {}
-        try { ZegoUIKit().turnMicrophoneOn(false, userID: uid); } catch (_) {}
-        try { await PartyChatData.leaveRoom(roomId: widget.roomId, uid: uid, keep: keep); } catch (_) {}
+        try {
+          if (micOn) {
+            await PartyChatData.updateRoomMicState(
+              roomId: widget.roomId,
+              uid: uid,
+              onSeat: false,
+            );
+          }
+        } catch (_) {}
+        try {
+          ZegoUIKit().turnMicrophoneOn(false, userID: uid);
+        } catch (_) {}
+        try {
+          await PartyChatData.leaveRoom(
+            roomId: widget.roomId,
+            uid: uid,
+            keep: keep,
+          );
+        } catch (_) {}
         if (mounted) Navigator.pop(context);
       }
 
       Future<void> _manageRoom() async {
-        await Navigator.push(context, MaterialPageRoute(builder: (_) => RoomManagePage(roomId: widget.roomId)));
-        await _syncMember();
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RoomManagePage(roomId: widget.roomId),
+          ),
+        );
       }
 
       @override
@@ -4454,104 +4655,950 @@ class _PartyLoadingState extends State<PartyLoading>
       @override
       Widget build(BuildContext context) {
         final uid = FirebaseAuth.instance.currentUser?.uid;
-        if (uid == null) return const Scaffold(body: Center(child: Text('Please login first.')));
+        if (uid == null) {
+          return const Scaffold(
+            body: Center(child: Text('Please login first.')),
+          );
+        }
 
         return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: PartyChatData.roomStream(widget.roomId),
           builder: (context, roomSnapshot) {
-            if (!roomSnapshot.hasData) return const Scaffold(body: PartyLoading());
+            if (!roomSnapshot.hasData) {
+              return const Scaffold(body: PartyLoading());
+            }
             final room = roomSnapshot.data?.data();
-            if (room == null) return const Scaffold(body: Center(child: Text('Room no longer exists.')));
-            return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              stream: PartyChatData.roomMembers(widget.roomId).doc(uid).snapshots(),
-              builder: (context, memberSnapshot) {
-                final member = memberSnapshot.data?.data() ?? {};
-                role = member['role']?.toString() ?? role;
-                banned = member['banned'] == true;
-                muted = member['muted'] == true;
-                final zegoRole = role == 'leader' ? ZegoLiveAudioRoomRole.host : role == 'user' ? ZegoLiveAudioRoomRole.audience : ZegoLiveAudioRoomRole.speaker;
-                final config = (zegoRole == ZegoLiveAudioRoomRole.host ? ZegoUIKitPrebuiltLiveAudioRoomConfig.host() : ZegoUIKitPrebuiltLiveAudioRoomConfig.audience())
-                  ..role = zegoRole
-                  ..turnOnMicrophoneWhenJoining = false
-                  ..useSpeakerWhenJoining = true
-                  ..topMenuBar = ZegoLiveAudioRoomTopMenuBarConfig(buttons: const [])
-                  ..bottomMenuBar = ZegoLiveAudioRoomBottomMenuBarConfig(
-                    visible: false,
-                    showInRoomMessageButton: false,
-                    hostButtons: const [],
-                    speakerButtons: const [],
-                    audienceButtons: const [],
-                  )
-                  ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
-                    rowSpacing: 12,
-                    rowConfigs: [
-                      ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
-                      ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
-                      ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
-                      ZegoLiveAudioRoomLayoutRowConfig(count: 3, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
-                    ],
-                  )
-                  ..seat.hostIndexes = const [0]
-                  ..seat.closeWhenJoining = false
-                  ..seat.avatarBuilder = (context, size, user, extraInfo) => _ZegoFirebaseAvatar(userId: user?.id ?? '', size: size);
+            if (room == null) {
+              return const Scaffold(
+                body: Center(child: Text('Room no longer exists.')),
+              );
+            }
 
+            return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: PartyChatData.roomMembersStream(widget.roomId),
+              builder: (context, membersSnapshot) {
+                final docs = membersSnapshot.data?.docs ?? [];
+                final currentMember = docs.where((d) => d.id == uid).isNotEmpty
+                    ? docs.firstWhere((d) => d.id == uid).data()
+                    : <String, dynamic>{};
+
+                role = currentMember['role']?.toString() ?? role;
+                banned = currentMember['banned'] == true;
+                muted = currentMember['muted'] == true;
+
+                final ownerUid = room['ownerUid']?.toString() ?? '';
                 final ownerName = room['ownerName']?.toString() ?? 'Party User';
-                final memberCount = (room['memberCount'] as num?)?.toInt() ?? 0;
+                final memberCount = (room['memberCount'] as num?)?.toInt() ?? docs.length;
+                final capacity = (room['userCapacity'] as num?)?.toInt() ?? 100;
+
                 ImageProvider<Object>? roomImage;
                 final roomPhoto = room['photoBase64']?.toString() ?? '';
                 if (roomPhoto.isNotEmpty) {
-                  try { roomImage = MemoryImage(base64Decode(roomPhoto)); } catch (_) {}
+                  try {
+                    roomImage = MemoryImage(base64Decode(roomPhoto));
+                  } catch (_) {}
+                }
+                if (roomImage == null && roomPhotoUrl != null && roomPhotoUrl!.isNotEmpty) {
+                  roomImage = NetworkImage(roomPhotoUrl!);
                 }
 
+                                final seatMembers = <Map<String, dynamic>>[];
+                final leader = docs.where((d) => d.id == ownerUid).toList();
+                if (leader.isNotEmpty) {
+                  seatMembers.add({...leader.first.data(), '_uid': leader.first.id});
+                }
+                for (final d in docs) {
+                  if (d.id == ownerUid) continue;
+                  final data = d.data();
+                  if (data['onSeat'] == true) {
+                    seatMembers.add({...data, '_uid': d.id});
+                  }
+                }
+
+                final zegoRole = role == 'leader'
+                    ? ZegoLiveAudioRoomRole.host
+                    : role == 'user'
+                        ? ZegoLiveAudioRoomRole.audience
+                        : ZegoLiveAudioRoomRole.speaker;
+                final config = (zegoRole == ZegoLiveAudioRoomRole.host
+                        ? ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
+                        : ZegoUIKitPrebuiltLiveAudioRoomConfig.audience())
+                    ..role = zegoRole
+                    ..turnOnMicrophoneWhenJoining = false
+                    ..useSpeakerWhenJoining = true
+                    ..topMenuBar = ZegoLiveAudioRoomTopMenuBarConfig(buttons: const [])
+                    ..bottomMenuBar = ZegoLiveAudioRoomBottomMenuBarConfig(
+                      visible: false,
+                      showInRoomMessageButton: false,
+                      hostButtons: const [],
+                      speakerButtons: const [],
+                      audienceButtons: const [],
+                    )
+                    ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
+                      rowSpacing: 14,
+                      rowConfigs: const [
+                        ZegoLiveAudioRoomLayoutRowConfig(
+                          count: 5,
+                          alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround,
+                        ),
+                        ZegoLiveAudioRoomLayoutRowConfig(
+                          count: 5,
+                          alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround,
+                        ),
+                        ZegoLiveAudioRoomLayoutRowConfig(
+                          count: 5,
+                          alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround,
+                        ),
+                      ],
+                    )
+                    ..seat.hostIndexes = const [0]
+                    ..seat.closeWhenJoining = false;
+
                 return Scaffold(
-                  backgroundColor: PartyColors.black,
-                  body: Stack(children: [
-                    ZegoUIKitPrebuiltLiveAudioRoom(
-                      appID: zegoAppId,
-                      appSign: zegoAppSign,
-                      userID: uid,
-                      userName: roomUserName,
-                      roomID: widget.roomId,
-                      config: config,
-                    ),
-                    Positioned.fill(child: _RoomGiftOverlay(roomId: widget.roomId)),
-                    Positioned.fill(child: IgnorePointer(child: _RoomGameOverlay(roomId: widget.roomId))),
-                    Positioned(top: 34, left: 8, right: 8, child: SafeArea(child: Row(children: [
-                      IconButton.filled(onPressed: _showMembers, icon: const Icon(Icons.people_alt_rounded)),
-                      if (canManageRoom) IconButton.filled(onPressed: _manageRoom, icon: const Icon(Icons.admin_panel_settings_rounded)),
-                      const SizedBox(width: 8),
-                      Expanded(child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                        decoration: BoxDecoration(color: PartyColors.black2.withOpacity(.84), borderRadius: BorderRadius.circular(18), border: Border.all(color: PartyColors.goldDark)),
-                        child: Row(children: [
-                          CircleAvatar(radius: 18, backgroundColor: PartyColors.panel, backgroundImage: roomImage, child: roomImage == null ? const Icon(Icons.meeting_room, color: PartyColors.gold, size: 18) : null),
-                          const SizedBox(width: 8),
-                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
-                            Text('$memberCount/${room['userCapacity'] ?? 100} • Leader: $ownerName', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: PartyColors.muted, fontSize: 9)),
-                          ]),),
-                        ]),
-                      )),
-                      const SizedBox(width: 8),
-                      IconButton.filled(onPressed: _leaveFlow, icon: const Icon(Icons.close_rounded)),
-                    ]))),
-                    if (banned) Positioned(left: 14, right: 14, top: 112, child: SafeArea(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.red.withOpacity(.22), borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.red)), child: const Text('You are banned in this room. You can only send gifts.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))))),
-                    Positioned(left: 10, right: 10, bottom: 76, child: SafeArea(child: _RoomChatBar(roomId: widget.roomId, controller: messageController, banned: banned, onSend: _sendMessage))),
-                    Positioned(left: 10, right: 10, bottom: 8, child: SafeArea(child: Row(children: [
-                      Expanded(child: _RoomControl(icon: Icons.chat_bubble_outline, label: 'SMS', onTap: banned ? null : () { FocusScope.of(context).requestFocus(); })),
-                      Expanded(child: _RoomControl(icon: micOn ? Icons.mic : Icons.mic_off, label: 'Mic', onTap: banned || muted ? null : _toggleMic, active: micOn, glow: isSpeaking)),
-                      Expanded(child: _RoomControl(icon: Icons.emoji_emotions_outlined, label: 'Emoji', onTap: banned ? null : _showEmojiSheet)),
-                      Expanded(child: _RoomControl(icon: Icons.music_note_rounded, label: 'Music', onTap: _pickMusic)),
-                      Expanded(child: _RoomControl(icon: Icons.games_rounded, label: 'Game', onTap: _showGameSheet)),
-                      Expanded(child: _RoomControl(icon: Icons.card_giftcard_rounded, label: 'Gift', onTap: _showGiftSheet)),
-                    ]))),
-                    if (room['musicUrl']?.toString().isNotEmpty == true)
-                      Positioned(left: 18, right: 18, bottom: 154, child: SafeArea(child: _RoomMusicBar(room: room))),
-                  ]),
+                  backgroundColor: const Color(0xFF05020C),
+                  body: Stack(
+                    children: [
+                      const Positioned.fill(child: _PremiumRoomBackground()),
+
+                      IgnorePointer(
+                        child: Opacity(
+                          opacity: 0.015,
+                          child: ZegoUIKitPrebuiltLiveAudioRoom(
+                            appID: zegoAppId,
+                            appSign: zegoAppSign,
+                            userID: uid,
+                            userName: roomUserName,
+                            roomID: widget.roomId,
+                            config: config,
+                          ),
+                        ),
+                      ),
+
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                          child: _PremiumRoomHeader(
+                            roomTitle: widget.title,
+                            ownerName: ownerName,
+                            memberCount: memberCount,
+                            capacity: capacity,
+                            roomImage: roomImage,
+                            canManage: canManageRoom,
+                            onMembers: _showMembers,
+                            onManage: _manageRoom,
+                            onLeave: _leaveFlow,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        top: 158,
+                        left: 18,
+                        right: 18,
+                        bottom: 318,
+                        child: _PremiumSeatGrid(
+                          seats: seatMembers,
+                          currentUid: uid,
+                          micOn: micOn,
+                          isSpeaking: isSpeaking,
+                          onSeatTap: (seat) async {
+                            final targetUid = seat['_uid']?.toString() ?? '';
+                            if (targetUid == uid) {
+                              await _toggleMic();
+                            } else if (targetUid.isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SimpleUserProfilePage(uid: targetUid),
+                                ),
+                              );
+                            }
+                          },
+                          onEmptyTap: _toggleMic,
+                        ),
+                      ),
+
+                      Positioned(
+                        left: 24,
+                        right: 24,
+                        bottom: 236,
+                        child: SafeArea(
+                          child: _PremiumGiftTicker(roomId: widget.roomId),
+                        ),
+                      ),
+
+                      Positioned(
+                        left: 20,
+                        right: 20,
+                        bottom: 132,
+                        height: 92,
+                        child: _PremiumRoomChatPreview(roomId: widget.roomId),
+                      ),
+
+                      Positioned(
+                        right: 22,
+                        bottom: 226,
+                        child: _PremiumMusicCard(room: room),
+                      ),
+
+                      Positioned(
+                        left: 18,
+                        right: 18,
+                        bottom: 102,
+                        child: SafeArea(
+                          child: _PremiumRoomMessageBar(
+                            controller: messageController,
+                            enabled: !banned && !muted,
+                            onSend: _sendMessage,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        left: 20,
+                        right: 20,
+                        bottom: 8,
+                        child: SafeArea(
+                          child: _PremiumRoomControls(
+                            micOn: micOn,
+                            speaking: isSpeaking,
+                            disabled: banned || muted,
+                            onMic: _toggleMic,
+                            onEmoji: _showEmojiSheet,
+                            onMusic: _pickMusic,
+                            onGame: _showGameSheet,
+                            onGift: _showGiftSheet,
+                          ),
+                        ),
+                      ),
+
+                      if (banned)
+                        Positioned(
+                          left: 28,
+                          right: 28,
+                          top: 136,
+                          child: SafeArea(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(.16),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.redAccent.withOpacity(.6)),
+                              ),
+                              child: const Text(
+                                'You are banned. Gifts are still available.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 );
               },
             );
           },
+        );
+      }
+    }
+
+    class _PremiumRoomBackground extends StatelessWidget {
+      const _PremiumRoomBackground();
+
+      @override
+      Widget build(BuildContext context) {
+        return DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(-0.15, -0.75),
+              radius: 1.25,
+              colors: [
+                Color(0xFF2B0755),
+                Color(0xFF0A0315),
+                Color(0xFF030107),
+              ],
+              stops: [0.0, 0.48, 1.0],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 170,
+                left: -80,
+                child: Container(
+                  width: 240,
+                  height: 240,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF7A2CFF).withOpacity(.18),
+                        blurRadius: 90,
+                        spreadRadius: 25,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 70,
+                right: -90,
+                child: Container(
+                  width: 260,
+                  height: 260,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFFC928).withOpacity(.08),
+                        blurRadius: 100,
+                        spreadRadius: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    class _PremiumRoomHeader extends StatelessWidget {
+      final String roomTitle;
+      final String ownerName;
+      final int memberCount;
+      final int capacity;
+      final ImageProvider<Object>? roomImage;
+      final bool canManage;
+      final VoidCallback onMembers;
+      final VoidCallback onManage;
+      final VoidCallback onLeave;
+
+      const _PremiumRoomHeader({
+        required this.roomTitle,
+        required this.ownerName,
+        required this.memberCount,
+        required this.capacity,
+        required this.roomImage,
+        required this.canManage,
+        required this.onMembers,
+        required this.onManage,
+        required this.onLeave,
+      });
+
+      @override
+      Widget build(BuildContext context) {
+        return Container(
+          height: 142,
+          padding: const EdgeInsets.fromLTRB(10, 10, 8, 8),
+          decoration: BoxDecoration(
+            color: const Color(0xB8090610),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0x99FFC928), width: 1),
+            boxShadow: const [
+              BoxShadow(color: Color(0x557A2CFF), blurRadius: 28, spreadRadius: 2),
+            ],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: onLeave,
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 25),
+              ),
+              const SizedBox(width: 2),
+              Container(
+                width: 88,
+                height: 88,
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(colors: [Color(0xFFFFC928), Color(0xFF8B2CFF)]),
+                  boxShadow: const [BoxShadow(color: Color(0x887A2CFF), blurRadius: 20)],
+                ),
+                child: CircleAvatar(
+                  backgroundColor: const Color(0xFF180927),
+                  backgroundImage: roomImage,
+                  child: roomImage == null ? const Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFC928), size: 42) : null,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '$roomTitle 👑',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900, color: Color(0xFFE9D8FF)),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.people_alt_rounded, size: 19, color: Colors.white70),
+                        const SizedBox(width: 5),
+                        Text('$memberCount / $capacity', style: const TextStyle(fontWeight: FontWeight.w800)),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0x33FFC928),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: const Color(0xFFFFC928)),
+                          ),
+                          child: const Text('👑 Leader', style: TextStyle(color: Color(0xFFFFE47A), fontWeight: FontWeight.w900, fontSize: 11)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      'Good Vibes  •  Make Friends  •  Have Fun',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Color(0xFFB8AEC6), fontSize: 11),
+                    ),
+                    Text(
+                      'Leader: $ownerName',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Color(0xFF8F82A1), fontSize: 10),
+                    ),
+                  ],
+                ),
+              ),
+              _PremiumHeaderAction(icon: Icons.people_alt_rounded, label: 'Members', onTap: onMembers),
+              if (canManage)
+                _PremiumHeaderAction(icon: Icons.settings_rounded, label: 'Manage', onTap: onManage),
+              _PremiumHeaderAction(icon: Icons.close_rounded, label: 'Leave', onTap: onLeave),
+            ],
+          ),
+        );
+      }
+    }
+
+    class _PremiumHeaderAction extends StatelessWidget {
+      final IconData icon;
+      final String label;
+      final VoidCallback onTap;
+
+      const _PremiumHeaderAction({required this.icon, required this.label, required this.onTap});
+
+      @override
+      Widget build(BuildContext context) {
+        return SizedBox(
+          width: 60,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0x33140A24),
+                    border: Border.all(color: const Color(0xFF8D3DFF)),
+                    boxShadow: const [BoxShadow(color: Color(0x447A2CFF), blurRadius: 14)],
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 28),
+                ),
+                const SizedBox(height: 4),
+                Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white70)),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+
+    class _PremiumSeatGrid extends StatelessWidget {
+      final List<Map<String, dynamic>> seats;
+      final String currentUid;
+      final bool micOn;
+      final bool isSpeaking;
+      final Future<void> Function(Map<String, dynamic> seat) onSeatTap;
+      final Future<void> Function() onEmptyTap;
+
+      const _PremiumSeatGrid({
+        required this.seats,
+        required this.currentUid,
+        required this.micOn,
+        required this.isSpeaking,
+        required this.onSeatTap,
+        required this.onEmptyTap,
+      });
+
+      @override
+      Widget build(BuildContext context) {
+        return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 7,
+            childAspectRatio: .72,
+          ),
+          itemCount: 15,
+          itemBuilder: (context, index) {
+            final seat = index < seats.length ? seats[index] : null;
+            return _PremiumSeat(
+              number: index + 1,
+              seat: seat,
+              currentUid: currentUid,
+              micOn: micOn,
+              speaking: isSpeaking,
+              onTap: seat == null ? onEmptyTap : () => onSeatTap(seat),
+            );
+          },
+        );
+      }
+    }
+
+    class _PremiumSeat extends StatelessWidget {
+      final int number;
+      final Map<String, dynamic>? seat;
+      final String currentUid;
+      final bool micOn;
+      final bool speaking;
+      final VoidCallback onTap;
+
+      const _PremiumSeat({
+        required this.number,
+        required this.seat,
+        required this.currentUid,
+        required this.micOn,
+        required this.speaking,
+        required this.onTap,
+      });
+
+      @override
+      Widget build(BuildContext context) {
+        final uid = seat?['_uid']?.toString() ?? '';
+        final name = seat?['name']?.toString() ?? 'Join';
+        final memberRole = seat?['role']?.toString() ?? 'user';
+        final isCurrent = uid == currentUid;
+        final isActiveMic = seat?['onSeat'] == true && (!isCurrent || micOn);
+        final image = _seatImage(seat);
+
+        return GestureDetector(
+          onTap: onTap,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 92,
+                width: double.infinity,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        width: 82,
+                        height: 82,
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: seat == null
+                              ? const LinearGradient(colors: [Color(0xFF3B1D68), Color(0xFF7A2CFF)])
+                              : memberRole == 'leader'
+                                  ? const LinearGradient(colors: [Color(0xFFFFE47A), Color(0xFFFFA600), Color(0xFF7A2CFF)])
+                                  : const LinearGradient(colors: [Color(0xFFB65CFF), Color(0xFF7A2CFF)]),
+                          boxShadow: (isCurrent && speaking) || (isActiveMic && speaking)
+                              ? const [
+                                  BoxShadow(color: Color(0xDDFFFFFF), blurRadius: 22, spreadRadius: 5),
+                                  BoxShadow(color: Color(0xAA8D3DFF), blurRadius: 32, spreadRadius: 8),
+                                ]
+                              : const [BoxShadow(color: Color(0x667A2CFF), blurRadius: 13)],
+                        ),
+                        child: CircleAvatar(
+                          backgroundColor: const Color(0xFF171022),
+                          backgroundImage: image,
+                          child: seat == null
+                              ? const Icon(Icons.add_rounded, color: Color(0xFFB65CFF), size: 34)
+                              : image == null
+                                  ? const Icon(Icons.person_rounded, color: Color(0xFFFFC928), size: 31)
+                                  : null,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 1,
+                      top: 2,
+                      child: Container(
+                        width: 26,
+                        height: 26,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF0A0611),
+                          border: Border.all(color: const Color(0xFFB65CFF), width: 1.2),
+                        ),
+                        child: Text('$number', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+                      ),
+                    ),
+                    if (seat != null)
+                      Positioned(
+                        right: 1,
+                        bottom: 1,
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF721BFF),
+                            border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 1.2)),
+                          ),
+                          child: Icon(
+                            isActiveMic ? Icons.mic_rounded : Icons.mic_off_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+              ),
+              if (seat != null && memberRole != 'user') ...[
+                const SizedBox(height: 4),
+                _PremiumRolePill(role: memberRole),
+              ],
+            ],
+          ),
+        );
+      }
+
+      ImageProvider<Object>? _seatImage(Map<String, dynamic>? data) {
+        if (data == null) return null;
+        final b64 = data['photoBase64']?.toString() ?? '';
+        if (b64.isNotEmpty) {
+          try {
+            return MemoryImage(base64Decode(b64));
+          } catch (_) {}
+        }
+        final url = data['photoURL']?.toString() ?? '';
+        if (url.isNotEmpty) return NetworkImage(url);
+        return null;
+      }
+    }
+
+    class _PremiumRolePill extends StatelessWidget {
+      final String role;
+      const _PremiumRolePill({required this.role});
+
+      @override
+      Widget build(BuildContext context) {
+        final isLeader = role == 'leader';
+        final isDeputy = role == 'deputy';
+        final label = isLeader ? '👑 Leader' : isDeputy ? '🛡 Deputy' : '★ Admin';
+        final color = isLeader
+            ? const Color(0xFFFFC928)
+            : isDeputy
+                ? const Color(0xFFA238FF)
+                : const Color(0xFF168CFF);
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          decoration: BoxDecoration(
+            color: color.withOpacity(.18),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(.9)),
+          ),
+          child: Text(label, style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w900)),
+        );
+      }
+    }
+
+    class _PremiumRoomChatPreview extends StatelessWidget {
+      final String roomId;
+      const _PremiumRoomChatPreview({required this.roomId});
+
+      @override
+      Widget build(BuildContext context) {
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: PartyChatData.roomMessagesStream(roomId),
+          builder: (context, snapshot) {
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) return const SizedBox.shrink();
+            final visible = docs.reversed.take(4).toList();
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: visible.map((doc) {
+                final data = doc.data();
+                final name = data['name']?.toString() ?? 'Party User';
+                final text = data['text']?.toString() ?? '';
+                final memberRole = data['role']?.toString();
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xC50A0713),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0x332B164B)),
+                  ),
+                  child: RichText(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      style: const TextStyle(fontSize: 12, color: Colors.white),
+                      children: [
+                        TextSpan(text: name, style: const TextStyle(fontWeight: FontWeight.w900)),
+                        if (memberRole == 'admin') const TextSpan(text: '  ★ Admin', style: TextStyle(color: Color(0xFF2CA8FF), fontWeight: FontWeight.w900)),
+                        if (memberRole == 'deputy') const TextSpan(text: '  🛡 Deputy', style: TextStyle(color: Color(0xFFB65CFF), fontWeight: FontWeight.w900)),
+                        TextSpan(text: ': $text', style: const TextStyle(color: Color(0xFFE2D9EA))),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        );
+      }
+    }
+
+    class _PremiumRoomMessageBar extends StatelessWidget {
+      final TextEditingController controller;
+      final bool enabled;
+      final VoidCallback onSend;
+
+      const _PremiumRoomMessageBar({
+        required this.controller,
+        required this.enabled,
+        required this.onSend,
+      });
+
+      @override
+      Widget build(BuildContext context) {
+        return Container(
+          height: 54,
+          padding: const EdgeInsets.only(left: 12, right: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xD5090610),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: const Color(0xFF8D3DFF), width: 1.1),
+            boxShadow: const [BoxShadow(color: Color(0x337A2CFF), blurRadius: 18)],
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.chat_bubble_rounded, color: Color(0xFFB65CFF), size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  enabled: enabled,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => onSend(),
+                  style: const TextStyle(fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'Type a message...',
+                    hintStyle: TextStyle(color: Color(0xFF8C8196)),
+                    border: InputBorder.none,
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const Icon(Icons.emoji_emotions_outlined, color: Color(0xFFB8AEC6), size: 25),
+              const SizedBox(width: 5),
+              GestureDetector(
+                onTap: enabled ? onSend : null,
+                child: Container(
+                  width: 48,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: enabled
+                        ? const LinearGradient(colors: [Color(0xFFE04AFF), Color(0xFF7138FF)])
+                        : const LinearGradient(colors: [Color(0xFF3A3441), Color(0xFF25212B)]),
+                  ),
+                  child: const Icon(Icons.send_rounded, color: Colors.white, size: 23),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    class _PremiumRoomControls extends StatelessWidget {
+      final bool micOn;
+      final bool speaking;
+      final bool disabled;
+      final VoidCallback onMic;
+      final VoidCallback onEmoji;
+      final VoidCallback onMusic;
+      final VoidCallback onGame;
+      final VoidCallback onGift;
+
+      const _PremiumRoomControls({
+        required this.micOn,
+        required this.speaking,
+        required this.disabled,
+        required this.onMic,
+        required this.onEmoji,
+        required this.onMusic,
+        required this.onGame,
+        required this.onGift,
+      });
+
+      @override
+      Widget build(BuildContext context) {
+        final items = [
+          ('Mic', micOn ? Icons.mic_rounded : Icons.mic_off_rounded, onMic),
+          ('Emoji', Icons.emoji_emotions_rounded, onEmoji),
+          ('Music', Icons.music_note_rounded, onMusic),
+          ('Game', Icons.sports_esports_rounded, onGame),
+          ('Gift', Icons.card_giftcard_rounded, onGift),
+        ];
+        return Container(
+          height: 90,
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xD9090610),
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(color: const Color(0xB5FFC928)),
+          ),
+          child: Row(
+            children: items.map((item) {
+              final isMic = item.$1 == 'Mic';
+              return Expanded(
+                child: GestureDetector(
+                  onTap: disabled && isMic ? null : item.$3,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isMic && micOn ? const Color(0xFFFFC928) : const Color(0xFF160D23),
+                          border: Border.all(color: const Color(0xFFFFC928), width: 1),
+                          boxShadow: isMic && speaking
+                              ? const [
+                                  BoxShadow(color: Color(0xFFFFE47A), blurRadius: 20, spreadRadius: 5),
+                                  BoxShadow(color: Color(0xAA8D3DFF), blurRadius: 28, spreadRadius: 5),
+                                ]
+                              : const [BoxShadow(color: Color(0x447A2CFF), blurRadius: 12)],
+                        ),
+                        child: Icon(
+                          item.$2,
+                          color: isMic && micOn ? Colors.black : Colors.white,
+                          size: 27,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(item.$1, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white70)),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      }
+    }
+
+    class _PremiumGiftTicker extends StatelessWidget {
+      final String roomId;
+      const _PremiumGiftTicker({required this.roomId});
+
+      @override
+      Widget build(BuildContext context) {
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: PartyChatData.roomGiftsStream(roomId),
+          builder: (context, snapshot) {
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) return const SizedBox.shrink();
+            final data = docs.first.data();
+            final sender = data['senderName']?.toString() ?? 'User';
+            final receiver = data['receiverName']?.toString() ?? 'User';
+            final gift = data['giftName']?.toString() ?? 'Gift 🎁';
+            return Container(
+              height: 72,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF14081D), Color(0xFF30105C), Color(0xFF150A24)]),
+                borderRadius: BorderRadius.circular(38),
+                border: Border.all(color: const Color(0xFFFFC928)),
+                boxShadow: const [BoxShadow(color: Color(0x997A2CFF), blurRadius: 22)],
+              ),
+              child: Row(
+                children: [
+                  const CircleAvatar(radius: 22, backgroundColor: Color(0xFF26113B), child: Icon(Icons.person_rounded, color: Color(0xFFFFC928))),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('$sender  →  $receiver', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900)),
+                        const SizedBox(height: 2),
+                        Text('Sent $gift', style: const TextStyle(color: Color(0xFFB8AEC6), fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                  const Text('🎁', style: TextStyle(fontSize: 30)),
+                  const SizedBox(width: 5),
+                  const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+                ],
+              ),
+            );
+          },
+        );
+      }
+    }
+
+    class _PremiumMusicCard extends StatelessWidget {
+      final Map<String, dynamic> room;
+      const _PremiumMusicCard({required this.room});
+
+      @override
+      Widget build(BuildContext context) {
+        final url = room['musicUrl']?.toString() ?? '';
+        final name = room['musicName']?.toString() ?? '';
+        if (url.isEmpty) return const SizedBox.shrink();
+        return Container(
+          width: 142,
+          height: 118,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xE50A0614),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF7138FF)),
+            boxShadow: const [BoxShadow(color: Color(0x667A2CFF), blurRadius: 22)],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.music_note_rounded, color: Color(0xFFE65CFF), size: 40),
+              const Text('Music Playing', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12)),
+              const SizedBox(height: 2),
+              Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFFB8AEC6), fontSize: 9)),
+              const SizedBox(height: 5),
+              GestureDetector(
+                onTap: () async {
+                  await ZegoUIKitPrebuiltLiveAudioRoomController().media.play(filePathOrURL: url, enableRepeat: true);
+                },
+                child: const Icon(Icons.graphic_eq_rounded, color: Color(0xFF8D3DFF), size: 27),
+              ),
+            ],
+          ),
         );
       }
     }
@@ -5431,7 +6478,7 @@ class _PartyLoadingState extends State<PartyLoading>
                             fit: BoxFit.contain,
                           ),
                         ),
-                      );
+                                           );
                     },
                   ),
                   actions: [
@@ -7051,7 +8098,8 @@ class _PartyLoadingState extends State<PartyLoading>
                     giftPermission,
                     (value) async {
                       setState(() {
-                        giftPermission = value;
+ 
+                                        giftPermission = value;
                       });
 
                       await _saveField(
@@ -8671,3 +9719,4 @@ class AdminSupportPanelPage extends StatelessWidget {
       }
     }
      
+
