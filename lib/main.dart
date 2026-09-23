@@ -1947,7 +1947,7 @@ class _PartyLoadingState extends State<PartyLoading>
         });
         if (banned) {
           try {
-            ZegoUIKit().turnMicrophoneOn(false, userID: targetUid);
+            await ZegoUIKit().turnMicrophoneOn(false, userID: targetUid);
           } catch (_) {}
         }
       }
@@ -1973,7 +1973,7 @@ class _PartyLoadingState extends State<PartyLoading>
         if (!allowed) throw Exception('You do not have permission for this user.');
         await roomMembers(roomId).doc(targetUid).update({'muted': muted});
         try {
-          ZegoUIKit().turnMicrophoneOn(!muted, userID: targetUid);
+          await ZegoUIKit().turnMicrophoneOn(!muted, userID: targetUid);
         } catch (_) {}
       }
 
@@ -2183,7 +2183,6 @@ class _PartyLoadingState extends State<PartyLoading>
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
-    }
 
     /* ============================================================
        APP
@@ -3042,6 +3041,8 @@ class _PartyLoadingState extends State<PartyLoading>
       }
     }
 
+    }
+
     /* ============================================================
        MAIN PAGE
        ============================================================ */
@@ -3429,8 +3430,7 @@ class _PartyLoadingState extends State<PartyLoading>
     class LiveRoomTile extends StatelessWidget {
       final Map<String, dynamic> data;
       final String roomId;
-      final bool showOwnerRoomLabel;
-      const LiveRoomTile({super.key, required this.data, required this.roomId, this.showOwnerRoomLabel = false});
+      const LiveRoomTile({super.key, required this.data, required this.roomId});
 
       @override
       Widget build(BuildContext context) {
@@ -3449,7 +3449,7 @@ class _PartyLoadingState extends State<PartyLoading>
           decoration: BoxDecoration(
             gradient: const LinearGradient(colors: [Color(0xFF171126), Color(0xFF0D0917)]),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: showOwnerRoomLabel ? PartyColors.gold : PartyColors.purple),
+            border: Border.all(color: PartyColors.purple),
             boxShadow: const [BoxShadow(color: Color(0x331C00FF), blurRadius: 12)],
           ),
           child: Row(children: [
@@ -3462,10 +3462,7 @@ class _PartyLoadingState extends State<PartyLoading>
             ),
             const SizedBox(width: 12),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900))),
-                if (showOwnerRoomLabel) const Padding(padding: EdgeInsets.only(left: 6), child: Text('YOUR ROOM', style: TextStyle(color: PartyColors.gold, fontSize: 9, fontWeight: FontWeight.w900))),
-              ]),
+              Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900)),
               const SizedBox(height: 3),
               Text('$members users • $mic/$limit mics', style: const TextStyle(color: Color(0xFF43F5B0), fontSize: 12, fontWeight: FontWeight.w700)),
               Text(data['description']?.toString() ?? 'Chat • Friends • Fun', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white54, fontSize: 11)),
@@ -3473,18 +3470,6 @@ class _PartyLoadingState extends State<PartyLoading>
             _NeonAction(label: AppLanguage.text('join'), onPressed: () async {
               final uid = FirebaseAuth.instance.currentUser?.uid;
               if (uid == null) return;
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (dialogContext) => AlertDialog(
-                  title: Text('Join $title?'),
-                  content: Text('$members users are currently in this room.'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
-                    FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Join')),
-                  ],
-                ),
-              );
-              if (confirmed != true || !context.mounted) return;
               try {
                 await PartyChatData.joinRoom(roomId: roomId, uid: uid);
                 if (!context.mounted) return;
@@ -4013,47 +3998,43 @@ class _PartyLoadingState extends State<PartyLoading>
 
       @override
       Widget build(BuildContext context) {
-        final uid = FirebaseAuth.instance.currentUser?.uid;
-        if (uid == null) {
-          return const Scaffold(body: Center(child: Text('Please login first.')));
-        }
         return Scaffold(
-          appBar: AppBar(title: const Text('My Room')),
+          appBar: AppBar(
+            title: const Text('My Room'),
+          ),
           body: _NeonBackground(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(uid)
-                  .collection('createdRooms')
-                  .orderBy('createdAt', descending: true)
-                  .limit(1)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
-                final docs = snapshot.data!.docs;
-                if (docs.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: _NeonAction(
-                        label: 'Create Room',
-                        icon: Icons.add_home_work_rounded,
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateRoomPage())),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: _NeonPanel(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.meeting_room,
+                        size: 60,
+                        color: Color(0xFFFFC83D),
                       ),
-                    ),
-                  );
-                }
-                final room = docs.first.data();
-                final roomId = room['roomId']?.toString() ?? docs.first.id;
-                return ListView(
-                  padding: const EdgeInsets.all(18),
-                  children: [
-                    const Text('Your Room', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
-                    const SizedBox(height: 12),
-                    LiveRoomTile(data: room, roomId: roomId, showOwnerRoomLabel: true),
-                  ],
-                );
-              },
+                      const SizedBox(height: 15),
+                      const Text(
+                        'My Room',
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Your created room will appear here.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         );
@@ -4474,14 +4455,6 @@ class _PartyLoadingState extends State<PartyLoading>
                   ..role = zegoRole
                   ..turnOnMicrophoneWhenJoining = false
                   ..useSpeakerWhenJoining = true
-                  ..topMenuBar = ZegoLiveAudioRoomTopMenuBarConfig(buttons: const [])
-                  ..bottomMenuBar = ZegoLiveAudioRoomBottomMenuBarConfig(
-                    visible: false,
-                    showInRoomMessageButton: false,
-                    hostButtons: const [],
-                    speakerButtons: const [],
-                    audienceButtons: const [],
-                  )
                   ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
                     rowSpacing: 12,
                     rowConfigs: [
@@ -4495,14 +4468,6 @@ class _PartyLoadingState extends State<PartyLoading>
                   ..seat.closeWhenJoining = false
                   ..seat.avatarBuilder = (context, size, user, extraInfo) => _ZegoFirebaseAvatar(userId: user?.id ?? '', size: size);
 
-                final ownerName = room['ownerName']?.toString() ?? 'Party User';
-                final memberCount = (room['memberCount'] as num?)?.toInt() ?? 0;
-                ImageProvider<Object>? roomImage;
-                final roomPhoto = room['photoBase64']?.toString() ?? '';
-                if (roomPhoto.isNotEmpty) {
-                  try { roomImage = MemoryImage(base64Decode(roomPhoto)); } catch (_) {}
-                }
-
                 return Scaffold(
                   backgroundColor: PartyColors.black,
                   body: Stack(children: [
@@ -4515,35 +4480,23 @@ class _PartyLoadingState extends State<PartyLoading>
                       config: config,
                     ),
                     Positioned.fill(child: _RoomGiftOverlay(roomId: widget.roomId)),
-                    Positioned.fill(child: IgnorePointer(child: _RoomGameOverlay(roomId: widget.roomId))),
-                    Positioned(top: 34, left: 8, right: 8, child: SafeArea(child: Row(children: [
+                    Positioned.fill(child: _RoomGameOverlay(roomId: widget.roomId)),
+                    Positioned(top: 44, left: 10, child: SafeArea(child: Row(children: [
                       IconButton.filled(onPressed: _showMembers, icon: const Icon(Icons.people_alt_rounded)),
                       if (canManageRoom) IconButton.filled(onPressed: _manageRoom, icon: const Icon(Icons.admin_panel_settings_rounded)),
-                      const SizedBox(width: 8),
-                      Expanded(child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                        decoration: BoxDecoration(color: PartyColors.black2.withOpacity(.84), borderRadius: BorderRadius.circular(18), border: Border.all(color: PartyColors.goldDark)),
-                        child: Row(children: [
-                          CircleAvatar(radius: 18, backgroundColor: PartyColors.panel, backgroundImage: roomImage, child: roomImage == null ? const Icon(Icons.meeting_room, color: PartyColors.gold, size: 18) : null),
-                          const SizedBox(width: 8),
-                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
-                            Text('$memberCount/${room['userCapacity'] ?? 100} • Leader: $ownerName', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: PartyColors.muted, fontSize: 9)),
-                          ]),),
-                        ]),
-                      )),
-                      const SizedBox(width: 8),
+                    ]))),
+                    Positioned(top: 44, right: 10, child: SafeArea(child: Row(children: [
                       IconButton.filled(onPressed: _leaveFlow, icon: const Icon(Icons.close_rounded)),
                     ]))),
-                    if (banned) Positioned(left: 14, right: 14, top: 112, child: SafeArea(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.red.withOpacity(.22), borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.red)), child: const Text('You are banned in this room. You can only send gifts.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))))),
-                    Positioned(left: 10, right: 10, bottom: 76, child: SafeArea(child: _RoomChatBar(roomId: widget.roomId, controller: messageController, banned: banned, onSend: _sendMessage))),
-                    Positioned(left: 10, right: 10, bottom: 8, child: SafeArea(child: Row(children: [
-                      Expanded(child: _RoomControl(icon: Icons.chat_bubble_outline, label: 'SMS', onTap: banned ? null : () { FocusScope.of(context).requestFocus(); })),
-                      Expanded(child: _RoomControl(icon: micOn ? Icons.mic : Icons.mic_off, label: 'Mic', onTap: banned || muted ? null : _toggleMic, active: micOn, glow: isSpeaking)),
-                      Expanded(child: _RoomControl(icon: Icons.emoji_emotions_outlined, label: 'Emoji', onTap: banned ? null : _showEmojiSheet)),
-                      Expanded(child: _RoomControl(icon: Icons.music_note_rounded, label: 'Music', onTap: _pickMusic)),
-                      Expanded(child: _RoomControl(icon: Icons.games_rounded, label: 'Game', onTap: _showGameSheet)),
-                      Expanded(child: _RoomControl(icon: Icons.card_giftcard_rounded, label: 'Gift', onTap: _showGiftSheet)),
+                    if (banned) Positioned(left: 14, right: 14, top: 118, child: SafeArea(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.red.withOpacity(.22), borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.red)), child: const Text('You are banned in this room. You can only send gifts.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))))),
+                    Positioned(left: 12, right: 12, bottom: 88, child: _RoomChatBar(roomId: widget.roomId, controller: messageController, banned: banned, onSend: _sendMessage)),
+                    Positioned(left: 12, right: 12, bottom: 18, child: SafeArea(child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                      _RoomControl(icon: Icons.chat_bubble_outline, label: 'SMS', onTap: banned ? null : () => messageController.text.isEmpty ? null : _sendMessage()),
+                      _RoomControl(icon: micOn ? Icons.mic : Icons.mic_off, label: 'Mic', onTap: banned || muted ? null : _toggleMic, active: micOn, glow: isSpeaking),
+                      _RoomControl(icon: Icons.emoji_emotions_outlined, label: 'Emoji', onTap: banned ? null : _showEmojiSheet),
+                      _RoomControl(icon: Icons.music_note_rounded, label: 'Music', onTap: _pickMusic),
+                      _RoomControl(icon: Icons.games_rounded, label: 'Game', onTap: _showGameSheet),
+                      _RoomControl(icon: Icons.card_giftcard_rounded, label: 'Gift', onTap: _showGiftSheet),
                     ]))),
                     if (room['musicUrl']?.toString().isNotEmpty == true)
                       Positioned(left: 18, right: 18, bottom: 154, child: SafeArea(child: _RoomMusicBar(room: room))),
@@ -4588,7 +4541,7 @@ class _PartyLoadingState extends State<PartyLoading>
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(color: PartyColors.black.withOpacity(.86), borderRadius: BorderRadius.circular(20), border: Border.all(color: PartyColors.purpleDark)),
           child: Row(children: [
-            Expanded(child: TextField(controller: controller, enabled: !banned, textInputAction: TextInputAction.send, onSubmitted: (_) => onSend(), decoration: const InputDecoration(hintText: 'Write a room message...', prefixIcon: Icon(Icons.chat_bubble_outline, color: PartyColors.purpleBright), border: InputBorder.none, isDense: true))),
+            Expanded(child: TextField(controller: controller, enabled: !banned, decoration: const InputDecoration(hintText: 'Write a room message...', border: InputBorder.none, isDense: true))),
             IconButton(onPressed: banned ? null : onSend, icon: const Icon(Icons.send_rounded, color: PartyColors.gold)),
           ]),
         );
@@ -5774,48 +5727,26 @@ class _PartyLoadingState extends State<PartyLoading>
                 ]),
               ),
               const SizedBox(height: 18),
-              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(user.uid)
-                    .collection('createdRooms')
-                    .orderBy('createdAt', descending: true)
-                    .limit(1)
-                    .snapshots(),
-                builder: (context, roomSnapshot) {
-                  final docs = roomSnapshot.data?.docs ?? [];
-                  if (docs.isNotEmpty) {
-                    final room = docs.first.data();
-                    final roomId = room['roomId']?.toString() ?? docs.first.id;
-                    final title = room['title']?.toString() ?? 'My Room';
-                    return LiveRoomTile(
-                      data: room,
-                      roomId: roomId,
-                      showOwnerRoomLabel: true,
-                    );
-                  }
-                  return GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateRoomPage())),
-                    child: Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF20102F), Color(0xFF0B0711)]),
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(color: PartyColors.gold, width: 1.2),
-                        boxShadow: const [BoxShadow(color: Color(0x553F00FF), blurRadius: 18)],
-                      ),
-                      child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Icon(Icons.add_home_work_rounded, size: 42, color: PartyColors.gold),
-                        SizedBox(width: 14),
-                        Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text('Create New Room', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
-                          SizedBox(height: 5),
-                          Text('Create your own live room', style: TextStyle(color: PartyColors.muted, fontSize: 12)),
-                        ]),
-                      ]),
-                    ),
-                  );
-                },
+              GestureDetector(
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateRoomPage())),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFF20102F), Color(0xFF0B0711)]),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: PartyColors.gold, width: 1.2),
+                    boxShadow: const [BoxShadow(color: Color(0x553F00FF), blurRadius: 18)],
+                  ),
+                  child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.add_home_work_rounded, size: 42, color: PartyColors.gold),
+                    SizedBox(width: 14),
+                    Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Create New Room', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+                      SizedBox(height: 5),
+                      Text('Create your own live room', style: TextStyle(color: PartyColors.muted, fontSize: 12)),
+                    ]),
+                  ]),
+                ),
               ),
 
               const SizedBox(height: 18),
@@ -7237,6 +7168,9 @@ class _PartyLoadingState extends State<PartyLoading>
         super.initState();
         _loadNotificationSettings();
       }
+
+
+
 
       Future<void> _loadNotificationSettings() async {
         final user = FirebaseAuth.instance.currentUser;
