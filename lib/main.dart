@@ -1732,7 +1732,7 @@ class _PartyLoadingState extends State<PartyLoading>
           'name': owner['name'] ?? 'Party User',
           'photoURL': owner['photoURL'] ?? '',
           'photoBase64': owner['photoBase64'] ?? '',
-                     'avatar': owner['avatar'] ?? '',
+          'avatar': owner['avatar'] ?? '',
           'role': 'leader',
           'active': true,
           'onSeat': false,
@@ -2183,6 +2183,7 @@ class _PartyLoadingState extends State<PartyLoading>
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
+    }
 
     /* ============================================================
        APP
@@ -3467,7 +3468,6 @@ class _PartyLoadingState extends State<PartyLoading>
                 Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900))),
                 if (showOwnerRoomLabel) const Padding(padding: EdgeInsets.only(left: 6), child: Text('YOUR ROOM', style: TextStyle(color: PartyColors.gold, fontSize: 9, fontWeight: FontWeight.w900))),
               ]),
- 
               const SizedBox(height: 3),
               Text('$members users • $mic/$limit mics', style: const TextStyle(color: Color(0xFF43F5B0), fontSize: 12, fontWeight: FontWeight.w700)),
               Text(data['description']?.toString() ?? 'Chat • Friends • Fun', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white54, fontSize: 11)),
@@ -6938,7 +6938,6 @@ class _PartyLoadingState extends State<PartyLoading>
                 leading: const Icon(Icons.person),
                 title: const Text(
                   'Who can view my profile',
-                    
                 ),
                 subtitle: Text(profileVisibility),
                 trailing: const Icon(
