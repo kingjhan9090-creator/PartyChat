@@ -3121,10 +3121,9 @@ class _PartyLoadingState extends State<PartyLoading>
               const SizedBox(height: 14),
               _HomeBigBox(title: 'Free Reward', icon: Icons.card_giftcard_rounded, subtitle: 'Collect your free daily reward'),
               const SizedBox(height: 14),
-              _HomeBigBox(title: 'Daily Task', icon: Icons.task_alt_
+              _HomeBigBox(title: 'Daily Task', icon: Icons.task_alt_rounded, subtitle: 'Complete today\'s tasks'),
 
-             rounded, subtitle: 'Complete today\'s tasks'),
-            ],
+                       ],
           ),
         );
       }
@@ -4428,8 +4427,8 @@ class _PartyLoadingState extends State<PartyLoading>
         if (mounted) Navigator.pop(context);
       }
 
-      Future<void> _manageR
-          oom() async {
+      Future<void> _manageRoom() async {
+
         await Navigator.push(context, MaterialPageRoute(builder: (_) => RoomManagePage(roomId: widget.roomId)));
         await _syncMember();
       }
@@ -4466,7 +4465,7 @@ class _PartyLoadingState extends State<PartyLoading>
                   ..useSpeakerWhenJoining = true
                   ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
                     rowSpacing: 12,
-                    rowConfigs: [
+                    rowConfigs: const [
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
@@ -6944,7 +6943,8 @@ class _PartyLoadingState extends State<PartyLoading>
                 subtitle: Text(messagePermission),
                 trailing: const Icon(
                   Icons.chevron_right,
-                ),
+
+                                    ),
                 onTap: () {
                   _chooseOption(
                     context,
