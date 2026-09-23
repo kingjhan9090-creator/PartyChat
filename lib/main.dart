@@ -2762,7 +2762,7 @@ class _PartyLoadingState extends State<PartyLoading>
                 );
               }),
             ],
-,
+
           ])),
         );
       }
