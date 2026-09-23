@@ -4736,7 +4736,7 @@ class _PartyLoadingState extends State<PartyLoading>
                     )
                     ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
                       rowSpacing: 14,
-                      rowConfigs: const [
+                      rowConfigs: [
                         ZegoLiveAudioRoomLayoutRowConfig(
                           count: 5,
                           alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround,
@@ -6478,7 +6478,7 @@ class _PartyLoadingState extends State<PartyLoading>
                             fit: BoxFit.contain,
                           ),
                         ),
-                                           );
+                      );
                     },
                   ),
                   actions: [
@@ -8098,8 +8098,7 @@ class _PartyLoadingState extends State<PartyLoading>
                     giftPermission,
                     (value) async {
                       setState(() {
- 
-                                        giftPermission = value;
+                        giftPermission = value;
                       });
 
                       await _saveField(
@@ -9719,4 +9718,3 @@ class AdminSupportPanelPage extends StatelessWidget {
       }
     }
      
-
