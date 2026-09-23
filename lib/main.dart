@@ -1947,7 +1947,7 @@ class _PartyLoadingState extends State<PartyLoading>
         });
         if (banned) {
           try {
-            await ZegoUIKit().turnMicrophoneOn(false, userID: targetUid);
+            ZegoUIKit().turnMicrophoneOn(false, userID: targetUid);
           } catch (_) {}
         }
       }
@@ -1973,7 +1973,7 @@ class _PartyLoadingState extends State<PartyLoading>
         if (!allowed) throw Exception('You do not have permission for this user.');
         await roomMembers(roomId).doc(targetUid).update({'muted': muted});
         try {
-          await ZegoUIKit().turnMicrophoneOn(!muted, userID: targetUid);
+          ZegoUIKit().turnMicrophoneOn(!muted, userID: targetUid);
         } catch (_) {}
       }
 
@@ -3040,8 +3040,6 @@ class _PartyLoadingState extends State<PartyLoading>
           ),
         );
       }
-    }
-
     }
 
     /* ============================================================
