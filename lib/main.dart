@@ -1719,7 +1719,7 @@ class _PartyLoadingState extends State<PartyLoading>
           'userCapacity': userCapacity,
           'micCapacity': micCapacity,
           'memberCount': 1,
-          'activeMicCount': 0,
+                      'activeMicCount': 0,
           'deputyUids': <String>[],
           'adminUids': <String>[],
           'musicUrl': '',
@@ -2183,6 +2183,8 @@ class _PartyLoadingState extends State<PartyLoading>
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
+
+    }
 
     /* ============================================================
        APP
@@ -3438,7 +3440,7 @@ class _PartyLoadingState extends State<PartyLoading>
         final members = (data['memberCount'] as num?)?.toInt() ?? 0;
         final mic = (data['activeMicCount'] as num?)?.toInt() ?? 0;
         final limit = (data['micCapacity'] as num?)?.toInt() ?? 15;
-        final photo = data['photoBase64']?.toString();
+                final photo = data['photoBase64']?.toString();
         ImageProvider<Object>? image;
         if (photo != null && photo.isNotEmpty) {
           try { image = MemoryImage(base64Decode(photo)); } catch (_) {}
@@ -5160,6 +5162,7 @@ class _PartyLoadingState extends State<PartyLoading>
       }
     }
 
+
     class ProfileTab extends StatefulWidget {
       const ProfileTab({super.key});
 
@@ -6880,7 +6883,7 @@ class _PartyLoadingState extends State<PartyLoading>
                       'Everyone',
                       'Friends Only',
                       'Nobody',
-                    ],
+                                          ],
                     profileVisibility,
                     (value) async {
                       setState(() {
@@ -8602,3 +8605,5 @@ class AdminSupportPanelPage extends StatelessWidget {
       }
     }
      
+  
+
