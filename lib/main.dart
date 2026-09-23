@@ -3121,7 +3121,9 @@ class _PartyLoadingState extends State<PartyLoading>
               const SizedBox(height: 14),
               _HomeBigBox(title: 'Free Reward', icon: Icons.card_giftcard_rounded, subtitle: 'Collect your free daily reward'),
               const SizedBox(height: 14),
-              _HomeBigBox(title: 'Daily Task', icon: Icons.task_alt_rounded, subtitle: 'Complete today\'s tasks'),
+              _HomeBigBox(title: 'Daily Task', icon: Icons.task_alt_
+
+             rounded, subtitle: 'Complete today\'s tasks'),
             ],
           ),
         );
@@ -4426,7 +4428,8 @@ class _PartyLoadingState extends State<PartyLoading>
         if (mounted) Navigator.pop(context);
       }
 
-      Future<void> _manageRoom() async {
+      Future<void> _manageR
+          oom() async {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => RoomManagePage(roomId: widget.roomId)));
         await _syncMember();
       }
@@ -4463,7 +4466,7 @@ class _PartyLoadingState extends State<PartyLoading>
                   ..useSpeakerWhenJoining = true
                   ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
                     rowSpacing: 12,
-                    rowConfigs: const [
+                    rowConfigs: [
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
@@ -5738,9 +5741,7 @@ class _PartyLoadingState extends State<PartyLoading>
                 child: Container(
                   height: 120,
                   decoration: BoxDecoration(
-
-
-                                          gradient: const LinearGradient(colors: [Color(0xFF20102F), Color(0xFF0B0711)]),
+                    gradient: const LinearGradient(colors: [Color(0xFF20102F), Color(0xFF0B0711)]),
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(color: PartyColors.gold, width: 1.2),
                     boxShadow: const [BoxShadow(color: Color(0x553F00FF), blurRadius: 18)],
@@ -7175,7 +7176,6 @@ class _PartyLoadingState extends State<PartyLoading>
       void initState() {
         super.initState();
         _loadNotificationSettings();
-
       }
 
       Future<void> _loadNotificationSettings() async {
@@ -8611,5 +8611,3 @@ class AdminSupportPanelPage extends StatelessWidget {
       }
     }
      
-
-          
