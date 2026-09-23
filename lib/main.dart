@@ -1,5 +1,6 @@
     import 'dart:async';
     import 'dart:convert';
+import 'dart:io';
     import 'dart:math' as math;
 
     import 'package:flutter/material.dart';
@@ -1593,6 +1594,606 @@ class _PartyLoadingState extends State<PartyLoading>
 
         
           
+
+      /* ============================================================
+         REAL ROOM SYSTEM
+         ============================================================ */
+
+      static CollectionReference<Map<String, dynamic>> rooms() {
+        return db.collection('rooms');
+      }
+
+      static DocumentReference<Map<String, dynamic>> roomDoc(String roomId) {
+        return rooms().doc(roomId);
+      }
+
+      static CollectionReference<Map<String, dynamic>> roomMembers(
+        String roomId,
+      ) {
+        return roomDoc(roomId).collection('members');
+      }
+
+      static CollectionReference<Map<String, dynamic>> roomMessages(
+        String roomId,
+      ) {
+        return roomDoc(roomId).collection('messages');
+      }
+
+      static CollectionReference<Map<String, dynamic>> roomGifts(
+        String roomId,
+      ) {
+        return roomDoc(roomId).collection('gifts');
+      }
+
+      static CollectionReference<Map<String, dynamic>> roomEmojis(
+        String roomId,
+      ) {
+        return roomDoc(roomId).collection('emojis');
+      }
+
+      static CollectionReference<Map<String, dynamic>> roomGames(
+        String roomId,
+      ) {
+        return roomDoc(roomId).collection('games');
+      }
+
+      static Stream<QuerySnapshot<Map<String, dynamic>>> roomsStream({
+        String? ownerUid,
+        String? status,
+      }) {
+        Query<Map<String, dynamic>> query = rooms()
+            .where('status', isEqualTo: status ?? 'open');
+        if (ownerUid != null) {
+          query = query.where('ownerUid', isEqualTo: ownerUid);
+        }
+        return query.orderBy('updatedAt', descending: true).snapshots();
+      }
+
+      static Stream<DocumentSnapshot<Map<String, dynamic>>> roomStream(
+        String roomId,
+      ) {
+        return roomDoc(roomId).snapshots();
+      }
+
+      static Stream<QuerySnapshot<Map<String, dynamic>>> roomMembersStream(
+        String roomId,
+      ) {
+        return roomMembers(roomId)
+            .where('active', isEqualTo: true)
+            .snapshots();
+      }
+
+      static Stream<QuerySnapshot<Map<String, dynamic>>> roomMessagesStream(
+        String roomId,
+      ) {
+        return roomMessages(roomId)
+            .orderBy('createdAt', descending: true)
+            .limit(80)
+            .snapshots();
+      }
+
+      static Stream<QuerySnapshot<Map<String, dynamic>>> roomGiftsStream(
+        String roomId,
+      ) {
+        return roomGifts(roomId)
+            .orderBy('createdAt', descending: true)
+            .limit(30)
+            .snapshots();
+      }
+
+      static Stream<QuerySnapshot<Map<String, dynamic>>> roomEmojisStream(
+        String roomId,
+      ) {
+        return roomEmojis(roomId)
+            .orderBy('createdAt', descending: true)
+            .limit(20)
+            .snapshots();
+      }
+
+      static Future<String> createRoom({
+        required String ownerUid,
+        required String title,
+        required String description,
+        required int userCapacity,
+        required int micCapacity,
+        String? photoBase64,
+      }) async {
+        final cleanTitle = title.trim();
+        if (cleanTitle.isEmpty) {
+          throw Exception('Room name is required.');
+        }
+        if (cleanTitle.length > 40) {
+          throw Exception('Room name can be up to 40 characters.');
+        }
+        if (userCapacity < 100) {
+          throw Exception('Room capacity must be at least 100.');
+        }
+        if (![3, 8, 15].contains(micCapacity)) {
+          throw Exception('Mic capacity must be 3, 8 or 15.');
+        }
+
+        final owner = await userData(ownerUid) ?? {};
+        final roomRef = rooms().doc();
+        final memberRef = roomMembers(roomRef.id).doc(ownerUid);
+        final now = FieldValue.serverTimestamp();
+
+        final batch = db.batch();
+        batch.set(roomRef, {
+          'title': cleanTitle,
+          'description': description.trim(),
+          'photoBase64': photoBase64 ?? '',
+          'ownerUid': ownerUid,
+          'ownerName': owner['name'] ?? 'Party User',
+          'ownerPhotoURL': owner['photoURL'] ?? '',
+          'status': 'open',
+          'userCapacity': userCapacity,
+          'micCapacity': micCapacity,
+          'memberCount': 1,
+          'activeMicCount': 0,
+          'deputyUids': <String>[],
+          'adminUids': <String>[],
+          'musicUrl': '',
+          'musicName': '',
+          'createdAt': now,
+          'updatedAt': now,
+        });
+        batch.set(memberRef, {
+          'uid': ownerUid,
+          'name': owner['name'] ?? 'Party User',
+          'photoURL': owner['photoURL'] ?? '',
+          'photoBase64': owner['photoBase64'] ?? '',
+          'avatar': owner['avatar'] ?? '',
+          'role': 'leader',
+          'active': true,
+          'onSeat': false,
+          'banned': false,
+          'joinedAt': now,
+          'lastSeenAt': now,
+        });
+        batch.set(userDoc(ownerUid).collection('createdRooms').doc(roomRef.id), {
+          'roomId': roomRef.id,
+          'title': cleanTitle,
+          'role': 'leader',
+          'createdAt': now,
+          'updatedAt': now,
+        });
+        await batch.commit();
+        return roomRef.id;
+      }
+
+      static Future<void> joinRoom({
+        required String roomId,
+        required String uid,
+      }) async {
+        final roomRef = roomDoc(roomId);
+        final memberRef = roomMembers(roomId).doc(uid);
+        final historyRef = userDoc(uid).collection('roomHistory').doc(roomId);
+        final user = await userData(uid) ?? {};
+
+        await db.runTransaction((transaction) async {
+          final roomSnap = await transaction.get(roomRef);
+          if (!roomSnap.exists) throw Exception('Room not found.');
+          final room = roomSnap.data() ?? {};
+          if (room['status'] != 'open') throw Exception('This room is closed.');
+
+          final memberSnap = await transaction.get(memberRef);
+          if (memberSnap.exists && memberSnap.data()?['active'] == true) {
+            transaction.update(memberRef, {
+              'lastSeenAt': FieldValue.serverTimestamp(),
+            });
+            return;
+          }
+
+          final capacity = (room['userCapacity'] as num?)?.toInt() ?? 100;
+          final count = (room['memberCount'] as num?)?.toInt() ?? 0;
+          if (count >= capacity) throw Exception('This room is full.');
+
+          transaction.set(memberRef, {
+            'uid': uid,
+            'name': user['name'] ?? 'Party User',
+            'photoURL': user['photoURL'] ?? '',
+            'photoBase64': user['photoBase64'] ?? '',
+            'avatar': user['avatar'] ?? '',
+            'role': 'user',
+            'active': true,
+            'onSeat': false,
+            'banned': false,
+            'joinedAt': FieldValue.serverTimestamp(),
+            'lastSeenAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+          transaction.update(roomRef, {
+            'memberCount': count + 1,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        });
+
+        final joinedRoomData = (await roomRef.get()).data() ?? {};
+        await historyRef.set({
+          'roomId': roomId,
+          'roomTitle': joinedRoomData['title'] ?? 'PartyChat Room',
+          'lastJoinedAt': FieldValue.serverTimestamp(),
+          'keep': true,
+        }, SetOptions(merge: true));
+        await userDoc(uid).collection('joinedRooms').doc(roomId).set({
+          'roomId': roomId,
+          'roomTitle': joinedRoomData['title'] ?? 'PartyChat Room',
+          'active': true,
+          'joinedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
+      static Future<void> leaveRoom({
+        required String roomId,
+        required String uid,
+        bool keep = true,
+      }) async {
+        final roomRef = roomDoc(roomId);
+        final memberRef = roomMembers(roomId).doc(uid);
+        final historyRef = userDoc(uid).collection('roomHistory').doc(roomId);
+
+        await db.runTransaction((transaction) async {
+          final roomSnap = await transaction.get(roomRef);
+          final memberSnap = await transaction.get(memberRef);
+          if (!roomSnap.exists || !memberSnap.exists) return;
+
+          final room = roomSnap.data() ?? {};
+          final member = memberSnap.data() ?? {};
+          if (member['active'] != true) return;
+
+          final count = (room['memberCount'] as num?)?.toInt() ?? 1;
+          final micCount = (room['activeMicCount'] as num?)?.toInt() ?? 0;
+          final nextCount = math.max(0, count - 1);
+          final nextMic = member['onSeat'] == true
+              ? math.max(0, micCount - 1)
+              : micCount;
+
+          transaction.update(memberRef, {
+            'active': false,
+            'onSeat': false,
+            'lastSeenAt': FieldValue.serverTimestamp(),
+          });
+          transaction.update(roomRef, {
+            'memberCount': nextCount,
+            'activeMicCount': nextMic,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        });
+
+        await historyRef.set({
+          'roomId': roomId,
+          'lastLeftAt': FieldValue.serverTimestamp(),
+          'keep': keep,
+        }, SetOptions(merge: true));
+        await userDoc(uid).collection('joinedRooms').doc(roomId).set({
+          'roomId': roomId,
+          'active': false,
+          'leftAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
+      static Future<void> closeRoom({
+        required String roomId,
+        required String uid,
+      }) async {
+        final roomRef = roomDoc(roomId);
+        final snap = await roomRef.get();
+        if (!snap.exists || snap.data()?['ownerUid'] != uid) {
+          throw Exception('Only the Leader can close this room.');
+        }
+        await roomRef.update({
+          'status': 'closed',
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      static Future<void> setRoomRole({
+        required String roomId,
+        required String actorUid,
+        required String targetUid,
+        required String role,
+      }) async {
+        if (!['user', 'admin', 'deputy'].contains(role)) {
+          throw Exception('Invalid room role.');
+        }
+        final roomRef = roomDoc(roomId);
+        final targetRef = roomMembers(roomId).doc(targetUid);
+        await db.runTransaction((transaction) async {
+          final roomSnap = await transaction.get(roomRef);
+          final targetSnap = await transaction.get(targetRef);
+          if (!roomSnap.exists || !targetSnap.exists) {
+            throw Exception('Room member not found.');
+          }
+          final room = roomSnap.data() ?? {};
+          final target = targetSnap.data() ?? {};
+          if (room['ownerUid'] != actorUid) {
+            throw Exception('Only the Leader can change room roles.');
+          }
+          if (targetUid == actorUid) throw Exception('The Leader role cannot be changed.');
+
+          final deputies = List<String>.from(room['deputyUids'] ?? const <String>[]);
+          final admins = List<String>.from(room['adminUids'] ?? const <String>[]);
+          deputies.remove(targetUid);
+          admins.remove(targetUid);
+
+          if (role == 'deputy') {
+            if (deputies.length >= 2) throw Exception('Only 2 Deputy Leaders are allowed.');
+            deputies.add(targetUid);
+          }
+          if (role == 'admin') {
+            if (admins.length >= 15) throw Exception('Only 15 Admins are allowed.');
+            admins.add(targetUid);
+          }
+
+          transaction.update(targetRef, {'role': role});
+          transaction.update(roomRef, {
+            'deputyUids': deputies,
+            'adminUids': admins,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        });
+      }
+
+      static Future<void> setMemberBanned({
+        required String roomId,
+        required String actorUid,
+        required String targetUid,
+        required bool banned,
+      }) async {
+        final roomSnap = await roomDoc(roomId).get();
+        final targetSnap = await roomMembers(roomId).doc(targetUid).get();
+        if (!roomSnap.exists || !targetSnap.exists) throw Exception('Member not found.');
+        final room = roomSnap.data() ?? {};
+        final actor = await roomMembers(roomId).doc(actorUid).get();
+        final actorRole = actor.data()?['role']?.toString() ?? 'user';
+        final targetRole = targetSnap.data()?['role']?.toString() ?? 'user';
+        final allowed = room['ownerUid'] == actorUid ||
+            (actorRole == 'deputy' && targetRole != 'leader' && targetRole != 'deputy') ||
+            (actorRole == 'admin' && targetRole == 'user');
+        if (!allowed) throw Exception('You do not have permission for this user.');
+        await roomMembers(roomId).doc(targetUid).update({
+          'banned': banned,
+          'onSeat': banned ? false : (targetSnap.data()?['onSeat'] ?? false),
+          'lastSeenAt': FieldValue.serverTimestamp(),
+        });
+        if (banned) {
+          try {
+            await ZegoUIKit().turnMicrophoneOn(false, userID: targetUid);
+          } catch (_) {}
+        }
+      }
+
+      static Future<void> setMemberMuted({
+        required String roomId,
+        required String actorUid,
+        required String targetUid,
+        required bool muted,
+      }) async {
+        final roomSnap = await roomDoc(roomId).get();
+        final actorSnap = await roomMembers(roomId).doc(actorUid).get();
+        final targetSnap = await roomMembers(roomId).doc(targetUid).get();
+        if (!roomSnap.exists || !actorSnap.exists || !targetSnap.exists) {
+          throw Exception('Member not found.');
+        }
+        final actorRole = actorSnap.data()?['role']?.toString() ?? 'user';
+        final targetRole = targetSnap.data()?['role']?.toString() ?? 'user';
+        final owner = roomSnap.data()?['ownerUid'] == actorUid;
+        final allowed = owner ||
+            (actorRole == 'deputy' && targetRole != 'leader' && targetRole != 'deputy') ||
+            (actorRole == 'admin' && targetRole == 'user');
+        if (!allowed) throw Exception('You do not have permission for this user.');
+        await roomMembers(roomId).doc(targetUid).update({'muted': muted});
+        try {
+          await ZegoUIKit().turnMicrophoneOn(!muted, userID: targetUid);
+        } catch (_) {}
+      }
+
+      static Future<void> kickMember({
+        required String roomId,
+        required String actorUid,
+        required String targetUid,
+      }) async {
+        final roomSnap = await roomDoc(roomId).get();
+        final actorSnap = await roomMembers(roomId).doc(actorUid).get();
+        final targetSnap = await roomMembers(roomId).doc(targetUid).get();
+        if (!roomSnap.exists || !actorSnap.exists || !targetSnap.exists) {
+          throw Exception('Member not found.');
+        }
+        final actorRole = actorSnap.data()?['role']?.toString() ?? 'user';
+        final targetRole = targetSnap.data()?['role']?.toString() ?? 'user';
+        final owner = roomSnap.data()?['ownerUid'] == actorUid;
+        final allowed = owner ||
+            (actorRole == 'deputy' && targetRole != 'leader' && targetRole != 'deputy') ||
+            (actorRole == 'admin' && targetRole == 'user');
+        if (!allowed) throw Exception('You do not have permission for this user.');
+        await roomMembers(roomId).doc(targetUid).update({
+          'active': false,
+          'onSeat': false,
+          'lastSeenAt': FieldValue.serverTimestamp(),
+        });
+        final count = await roomMembers(roomId).where('active', isEqualTo: true).count().get();
+        await roomDoc(roomId).update({
+          'memberCount': count.count,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        try {
+          await ZegoUIKitPrebuiltLiveAudioRoomController().seat.host.removeSpeaker(
+            targetUid,
+            showDialogConfirm: false,
+          );
+        } catch (_) {}
+      }
+
+      static Future<void> updateRoomMicState({
+        required String roomId,
+        required String uid,
+        required bool onSeat,
+      }) async {
+        final roomRef = roomDoc(roomId);
+        final memberRef = roomMembers(roomId).doc(uid);
+        await db.runTransaction((transaction) async {
+          final roomSnap = await transaction.get(roomRef);
+          final memberSnap = await transaction.get(memberRef);
+          if (!roomSnap.exists || !memberSnap.exists) throw Exception('Room member not found.');
+          final room = roomSnap.data() ?? {};
+          final member = memberSnap.data() ?? {};
+          if (member['banned'] == true) throw Exception('You are banned from speaking.');
+          final current = member['onSeat'] == true;
+          if (current == onSeat) return;
+          final currentCount = (room['activeMicCount'] as num?)?.toInt() ?? 0;
+          final limit = (room['micCapacity'] as num?)?.toInt() ?? 15;
+          if (onSeat && currentCount >= limit) throw Exception('All mic seats are currently full.');
+          transaction.update(memberRef, {
+            'onSeat': onSeat,
+            'lastSeenAt': FieldValue.serverTimestamp(),
+          });
+          transaction.update(roomRef, {
+            'activeMicCount': onSeat ? currentCount + 1 : math.max(0, currentCount - 1),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        });
+      }
+
+      static Future<void> sendRoomMessage({
+        required String roomId,
+        required String uid,
+        required String text,
+      }) async {
+        final clean = text.trim();
+        if (clean.isEmpty) return;
+        final member = await roomMembers(roomId).doc(uid).get();
+        if (!member.exists || member.data()?['active'] != true) throw Exception('Join the room first.');
+        if (member.data()?['banned'] == true) throw Exception('Banned users cannot send messages.');
+        final data = await userData(uid) ?? {};
+        await roomMessages(roomId).add({
+          'uid': uid,
+          'name': data['name'] ?? 'Party User',
+          'photoURL': data['photoURL'] ?? '',
+          'photoBase64': data['photoBase64'] ?? '',
+          'avatar': data['avatar'] ?? '',
+          'text': clean,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      static Future<void> sendRoomEmoji({
+        required String roomId,
+        required String uid,
+        required String emoji,
+      }) async {
+        final member = await roomMembers(roomId).doc(uid).get();
+        if (!member.exists || member.data()?['active'] != true) throw Exception('Join the room first.');
+        final data = await userData(uid) ?? {};
+        await roomEmojis(roomId).add({
+          'uid': uid,
+          'name': data['name'] ?? 'Party User',
+          'emoji': emoji,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      static Future<void> sendRoomGift({
+        required String roomId,
+        required String fromUid,
+        required String toUid,
+        required String giftName,
+        required int cost,
+      }) async {
+        if (fromUid == toUid) throw Exception('You cannot send a gift to yourself.');
+        final roomMember = await roomMembers(roomId).doc(fromUid).get();
+        final receiverMember = await roomMembers(roomId).doc(toUid).get();
+        if (!roomMember.exists || roomMember.data()?['active'] != true) throw Exception('Join the room first.');
+        if (!receiverMember.exists || receiverMember.data()?['active'] != true) throw Exception('Receiver is not in the room.');
+        if (roomMember.data()?['banned'] == true) {
+          // Banned users may still send gifts, as decided for PartyChat rooms.
+        }
+        final senderRef = userDoc(fromUid);
+        final receiverRef = userDoc(toUid);
+        final roomGiftRef = roomGifts(roomId).doc();
+        final profileGiftRef = receiverRef.collection('gifts').doc();
+        final sentGiftRef = senderRef.collection('sentGifts').doc();
+        final transactionRef = senderRef.collection('transactions').doc();
+        final senderSnap = await senderRef.get();
+        final receiverSnap = await receiverRef.get();
+        final sender = senderSnap.data() ?? {};
+        final receiver = receiverSnap.data() ?? {};
+        final coins = (sender['coins'] as num?)?.toInt() ?? 0;
+        if (coins < cost) throw Exception('Not enough coins.');
+        final giftData = {
+          'giftName': giftName,
+          'cost': cost,
+          'senderUid': fromUid,
+          'senderName': sender['name'] ?? 'Party User',
+          'receiverUid': toUid,
+          'receiverName': receiver['name'] ?? 'Party User',
+          'roomId': roomId,
+          'createdAt': FieldValue.serverTimestamp(),
+        };
+        final batch = db.batch();
+        batch.update(senderRef, {'coins': coins - cost});
+        batch.set(roomGiftRef, giftData);
+        batch.set(profileGiftRef, giftData);
+        batch.set(sentGiftRef, giftData);
+        batch.set(transactionRef, {
+          'type': 'room_gift_sent',
+          'amount': -cost,
+          'giftName': giftName,
+          'roomId': roomId,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        await batch.commit();
+        ProfileUnreadService.createNotification(
+          uid: toUid,
+          type: 'gifts',
+          title: 'New Room Gift 🎁',
+          message: '${sender['name'] ?? 'Party User'} sent you $giftName in a room.',
+          actorUid: fromUid,
+          actorName: sender['name'] ?? 'Party User',
+          actorPhoto: sender['photoURL'] ?? '',
+          roomId: roomId,
+        ).catchError((_) {});
+      }
+
+      static Future<void> sendRoomGame({
+        required String roomId,
+        required String uid,
+        required String game,
+        String? targetUid,
+      }) async {
+        final member = await roomMembers(roomId).doc(uid).get();
+        if (!member.exists || member.data()?['active'] != true) throw Exception('Join the room first.');
+        final data = await userData(uid) ?? {};
+        await roomGames(roomId).add({
+          'game': game,
+          'starterUid': uid,
+          'starterName': data['name'] ?? 'Party User',
+          'targetUid': targetUid ?? '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      static Future<void> setRoomMusic({
+        required String roomId,
+        required String uid,
+      }) async {
+        final member = await roomMembers(roomId).doc(uid).get();
+        if (!member.exists || member.data()?['active'] != true) throw Exception('Join the room first.');
+        final files = await ZegoUIKitPrebuiltLiveAudioRoomController().media.pickPureAudioFile();
+        if (files.isEmpty) return;
+        final file = files.first;
+        final path = file.path;
+        if (path == null || path.isEmpty) throw Exception('Music file could not be read.');
+        final name = file.name;
+        final ref = FirebaseStorage.instance.ref().child('partychat_rooms/$roomId/music/${DateTime.now().millisecondsSinceEpoch}_$name');
+        await ref.putFile(File(path));
+        final url = await ref.getDownloadURL();
+        await roomDoc(roomId).update({
+          'musicUrl': url,
+          'musicName': name,
+          'musicByUid': uid,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
     /* ============================================================
        APP
        ============================================================ */
@@ -2644,18 +3245,8 @@ class _PartyLoadingState extends State<PartyLoading>
       int selectedMainTab = 0;
       int selectedMyRoomTab = 0;
 
-      static const mainTabs = [
-        'All Room',
-        'Popular Room',
-        'New Room',
-        'My Room',
-      ];
-
-      static const myRoomTabs = [
-        'Recently Joined',
-        'Joined',
-        'With Friend',
-      ];
+      static const mainTabs = ['All Room', 'Popular Room', 'New Room', 'My Room'];
+      static const myRoomTabs = ['Recently Joined', 'Joined', 'With Friend'];
 
       @override
       Widget build(BuildContext context) {
@@ -2663,10 +3254,7 @@ class _PartyLoadingState extends State<PartyLoading>
           child: ListView(
             padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
             children: [
-              const Text(
-                'Rooms',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
-              ),
+              const Text('Rooms', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
               const SizedBox(height: 14),
               GestureDetector(
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PartyChatSearchPage())),
@@ -2711,22 +3299,12 @@ class _PartyLoadingState extends State<PartyLoading>
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 13),
                     decoration: BoxDecoration(
-                      gradient: selected
-                          ? const LinearGradient(
-                              colors: [Color(0xFF7B3FF2), Color(0xFFD6A84F)],
-                            )
-                          : null,
+                      gradient: selected ? const LinearGradient(colors: [Color(0xFF7B3FF2), Color(0xFFD6A84F)]) : null,
                       color: selected ? null : const Color(0xFF171125),
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(color: const Color(0xFF7B3FF2)),
                     ),
-                    child: Text(
-                      mainTabs[index],
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+                    child: Text(mainTabs[index], style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
                   ),
                 ),
               );
@@ -2750,18 +3328,9 @@ class _PartyLoadingState extends State<PartyLoading>
                     decoration: BoxDecoration(
                       color: selected ? const Color(0xFF241A33) : const Color(0xFF120D1C),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: selected ? const Color(0xFFD6A84F) : const Color(0xFF40344F),
-                      ),
+                      border: Border.all(color: selected ? const Color(0xFFD6A84F) : const Color(0xFF40344F)),
                     ),
-                    child: Text(
-                      myRoomTabs[index],
-                                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: selected ? Colors.white : Colors.white70,
-                      ),
-                    ),
+                    child: Text(myRoomTabs[index], style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: selected ? Colors.white : Colors.white70)),
                   ),
                 ),
               );
@@ -2771,74 +3340,174 @@ class _PartyLoadingState extends State<PartyLoading>
       }
 
       Widget _buildRoomContent() {
-        if (selectedMainTab == 0) {
-          return const Column(
-            children: [
-              RoomTile('Friends Forever 💜', '2.4K online', Icons.people,
-                  subtitle: 'Make new friends & enjoy chat'),
-              RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games,
-                  subtitle: 'Play games & enjoy together'),
-              RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note,
-                  subtitle: 'Music • Vibes • Party'),
-              RoomTile('Chill Zone 🌙', '980 online', Icons.nightlight_round,
-                  subtitle: 'Relax • Talk • Be Yourself'),
-            ],
-          );
-        }
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return const Center(child: Text('Please login first.'));
 
-        if (selectedMainTab == 1) {
-          return const Column(
-            children: [
-              RoomTile('Friends Forever 💜', '2.4K online', Icons.people,
-                  subtitle: 'Popular • Active • Gifting'),
-              RoomTile('Gaming Zone 🎮', '1.8K online', Icons.games,
-                  subtitle: 'Popular gaming room'),
-              RoomTile('Music Lovers 🎵', '1.2K online', Icons.music_note,
-                  subtitle: 'Music • Vibes • Party'),
-            ],
+        if (selectedMainTab == 3) {
+          if (selectedMyRoomTab == 0) {
+            return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance.collection('users').doc(uid).collection('roomHistory').orderBy('lastJoinedAt', descending: true).limit(30).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const SizedBox(height: 180, child: PartyLoading());
+                final docs = snapshot.data!.docs;
+                if (docs.isEmpty) return const _RoomEmptyState(text: 'No recently joined rooms.');
+                return Column(children: docs.map((d) => _HistoryRoomTile(data: d.data())).toList());
+              },
+            );
+          }
+          if (selectedMyRoomTab == 1) {
+            return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance.collection('users').doc(uid).collection('joinedRooms').where('active', isEqualTo: true).snapshots(),
+              builder: (context, joinedSnapshot) {
+                if (!joinedSnapshot.hasData) return const SizedBox(height: 180, child: PartyLoading());
+                final ids = joinedSnapshot.data!.docs.map((d) => d.id).toList();
+                if (ids.isEmpty) return const _RoomEmptyState(text: 'No joined rooms yet.');
+                return Column(children: ids.map((id) => StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: PartyChatData.roomStream(id),
+                  builder: (context, roomSnapshot) {
+                    final room = roomSnapshot.data?.data();
+                    if (room == null || room['status'] != 'open') return const SizedBox.shrink();
+                    return LiveRoomTile(data: room, roomId: id);
+                  },
+                )).toList());
+              },
+            );
+          }
+          return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance.collection('users').doc(uid).collection('joinedRooms').where('active', isEqualTo: true).snapshots(),
+            builder: (context, joinedSnapshot) {
+              if (!joinedSnapshot.hasData) return const SizedBox(height: 180, child: PartyLoading());
+              final ids = joinedSnapshot.data!.docs.map((d) => d.id).toList();
+              if (ids.isEmpty) return const _RoomEmptyState(text: 'No rooms with friends yet.');
+              return Column(children: ids.map((id) => StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: PartyChatData.roomStream(id),
+                builder: (context, roomSnapshot) {
+                  final room = roomSnapshot.data?.data();
+                  if (room == null || room['status'] != 'open') return const SizedBox.shrink();
+                  return LiveRoomTile(data: room, roomId: id);
+                },
+              )).toList());
+            },
           );
-        }
-
-        if (selectedMainTab == 2) {
-          return const Column(
-            children: [
-              RoomTile('New Friends 🌟', '320 online', Icons.auto_awesome,
-                  subtitle: 'New room • Meet new people'),
-              RoomTile('Fresh Talk 💬', '210 online', Icons.chat_bubble,
-                  subtitle: 'New room • Start chatting'),
-              RoomTile('New Vibes 🎵', '145 online', Icons.music_note,
-                  subtitle: 'New room • Music & chat'),
-            ],
+          }
+          return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: PartyChatData.roomsStream(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox(height: 180, child: PartyLoading());
+              final rooms = snapshot.data!.docs;
+              if (rooms.isEmpty) return const _RoomEmptyState(text: 'No active rooms yet.');
+              return Column(children: rooms.map((d) => LiveRoomTile(data: d.data(), roomId: d.id)).toList());
+            },
           );
-        }
 
-        if (selectedMyRoomTab == 0) {
-          return const Column(
-            children: [
-              RoomTile('Recently Joined', 'Room history', Icons.history,
-                  subtitle: 'Your recently joined rooms'),
-            ],
-          );
-        }
-
-        if (selectedMyRoomTab == 1) {
-          return const Column(
-            children: [
-              RoomTile('Joined Rooms', 'Your rooms', Icons.meeting_room,
-                  subtitle: 'Rooms you have joined'),
-            ],
-          );
-        }
-
-        return const Column(
-          children: [
-            RoomTile('With Friend', 'Friends rooms', Icons.people_alt,
-                subtitle: 'Rooms you joined with friends'),
-          ],
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: PartyChatData.roomsStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) return const Center(child: Text('Could not load rooms.'));
+            if (!snapshot.hasData) return const SizedBox(height: 180, child: PartyLoading());
+            var docs = snapshot.data!.docs;
+            if (selectedMainTab == 1) {
+              docs = docs.where((d) => ((d.data()['memberCount'] as num?)?.toInt() ?? 0) >= 10).toList();
+            } else if (selectedMainTab == 2) {
+              docs = docs.where((d) {
+                final created = d.data()['createdAt'];
+                if (created is! Timestamp) return false;
+                return DateTime.now().difference(created.toDate()).inHours < 48;
+              }).toList();
+            }
+            if (docs.isEmpty) return const _RoomEmptyState(text: 'No live rooms yet. Create your own room from Profile.');
+            return Column(children: docs.map((d) => LiveRoomTile(data: d.data(), roomId: d.id)).toList());
+          },
         );
       }
     }
 
+    class _RoomEmptyState extends StatelessWidget {
+      final String text;
+      const _RoomEmptyState({required this.text});
+      @override
+      Widget build(BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 80),
+          child: Center(child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54))),
+        );
+      }
+    }
+
+    class LiveRoomTile extends StatelessWidget {
+      final Map<String, dynamic> data;
+      final String roomId;
+      const LiveRoomTile({super.key, required this.data, required this.roomId});
+
+      @override
+      Widget build(BuildContext context) {
+        final title = data['title']?.toString() ?? 'PartyChat Room';
+        final members = (data['memberCount'] as num?)?.toInt() ?? 0;
+        final mic = (data['activeMicCount'] as num?)?.toInt() ?? 0;
+        final limit = (data['micCapacity'] as num?)?.toInt() ?? 15;
+        final photo = data['photoBase64']?.toString();
+        ImageProvider<Object>? image;
+        if (photo != null && photo.isNotEmpty) {
+          try { image = MemoryImage(base64Decode(photo)); } catch (_) {}
+        }
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFF171126), Color(0xFF0D0917)]),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: PartyColors.purple),
+            boxShadow: const [BoxShadow(color: Color(0x331C00FF), blurRadius: 12)],
+          ),
+          child: Row(children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [PartyColors.purple, PartyColors.gold])),
+              padding: const EdgeInsets.all(2),
+              child: CircleAvatar(backgroundColor: PartyColors.panel, backgroundImage: image, child: image == null ? const Icon(Icons.meeting_room, color: PartyColors.gold) : null),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900)),
+              const SizedBox(height: 3),
+              Text('$members users • $mic/$limit mics', style: const TextStyle(color: Color(0xFF43F5B0), fontSize: 12, fontWeight: FontWeight.w700)),
+              Text(data['description']?.toString() ?? 'Chat • Friends • Fun', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+            ])),
+            _NeonAction(label: AppLanguage.text('join'), onPressed: () async {
+              final uid = FirebaseAuth.instance.currentUser?.uid;
+              if (uid == null) return;
+              try {
+                await PartyChatData.joinRoom(roomId: roomId, uid: uid);
+                if (!context.mounted) return;
+                Navigator.push(context, MaterialPageRoute(builder: (_) => RoomPage(roomId: roomId, title: title)));
+              } catch (e) {
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+              }
+            }),
+          ]),
+        );
+      }
+    }
+
+    class _HistoryRoomTile extends StatelessWidget {
+      final Map<String, dynamic> data;
+      const _HistoryRoomTile({required this.data});
+      @override
+      Widget build(BuildContext context) {
+        final roomId = data['roomId']?.toString() ?? '';
+        final title = data['roomTitle']?.toString() ?? 'PartyChat Room';
+        if (roomId.isEmpty) return const SizedBox.shrink();
+        return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: PartyChatData.roomStream(roomId),
+          builder: (context, snapshot) {
+            final room = snapshot.data?.data();
+            if (room == null || room['status'] != 'open') return const SizedBox.shrink();
+            return LiveRoomTile(data: room, roomId: roomId);
+          },
+        );
+      }
+    }
 
     class SimpleUserProfilePage extends StatelessWidget {
       final String uid;
@@ -2884,15 +3553,7 @@ class _PartyLoadingState extends State<PartyLoading>
       bool searching = false;
       String lastQuery = '';
 
-      static const rooms = [
-        {'title': 'Friends Forever 💜', 'online': '2.4K online'},
-        {'title': 'Gaming Zone 🎮', 'online': '1.8K online'},
-        {'title': 'Music Lovers 🎵', 'online': '1.2K online'},
-        {'title': 'Chill Zone 🌙', 'online': '980 online'},
-        {'title': 'New Friends 🌟', 'online': '320 online'},
-        {'title': 'Fresh Talk 💬', 'online': '210 online'},
-        {'title': 'New Vibes 🎵', 'online': '145 online'},
-      ];
+      static const List<Map<String, String>> rooms = [];
 
       @override
       void initState() {
@@ -2915,7 +3576,12 @@ class _PartyLoadingState extends State<PartyLoading>
         List<Map<String, dynamic>> nameMatches = [];
         try { nameMatches = await PartyChatData.searchUsersByName(query); } catch (_) {}
         final q = query.toLowerCase();
-        final roomsFound = rooms.where((room) => room['title']!.toLowerCase().contains(q)).toList();
+        final roomSnapshot = await FirebaseFirestore.instance.collection('rooms').where('status', isEqualTo: 'open').limit(100).get();
+        final roomsFound = roomSnapshot.docs.where((doc) => (doc.data()['title']?.toString() ?? '').toLowerCase().contains(q)).map((doc) {
+          final data = doc.data();
+          final count = (data['memberCount'] as num?)?.toInt() ?? 0;
+          return <String, String>{'roomId': doc.id, 'title': data['title']?.toString() ?? 'PartyChat Room', 'online': '$count online'};
+        }).toList();
         final users = <Map<String, dynamic>>[];
         if (exactUser != null) {
           users.add(exactUser);
@@ -3034,7 +3700,18 @@ class _PartyLoadingState extends State<PartyLoading>
                   title: Text(room['title']!, style: const TextStyle(fontWeight: FontWeight.w800)),
                   subtitle: Text(room['online']!),
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Color(0xFFFFC83D)),
-                  onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RoomPage(title: room['title']!, online: room['online']!))),
+                  onTap: () async {
+                    final roomId = room['roomId'];
+                    final uid = FirebaseAuth.instance.currentUser?.uid;
+                    if (roomId == null || uid == null) return;
+                    try {
+                      await PartyChatData.joinRoom(roomId: roomId, uid: uid);
+                      if (!context.mounted) return;
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RoomPage(roomId: roomId, title: room['title']!)));
+                    } catch (e) {
+                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+                    }
+                  },
                 ),
               )),
             ],
@@ -3480,48 +4157,53 @@ class _PartyLoadingState extends State<PartyLoading>
           decoration: BoxDecoration(
             gradient: const LinearGradient(colors: [Color(0xFF171126), Color(0xFF0D0917)]),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFF7B3FF2)),
-            boxShadow: const [BoxShadow(color: Color(0x331C00FF), blurRadius: 12)],
+            border: Border.all(color: PartyColors.purple),
           ),
           child: Row(children: [
-            Container(width: 52, height: 52, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFF7B3FF2), Color(0xFFD6A84F)]), boxShadow: const [BoxShadow(color: Color(0x665B1CFF), blurRadius: 14)]), child: Icon(icon, color: Colors.white)),
+            Container(width: 52, height: 52, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [PartyColors.purple, PartyColors.gold])), child: Icon(icon, color: Colors.white)),
             const SizedBox(width: 12),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
               Text(online, style: const TextStyle(color: Color(0xFF43F5B0), fontSize: 12, fontWeight: FontWeight.w700)),
               Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white54, fontSize: 11)),
             ])),
-            _NeonAction(label: AppLanguage.text('join'), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RoomPage(title: title, online: online)))),
+            _NeonAction(label: AppLanguage.text('join'), onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This is a legacy room card. Use a live room from the Rooms tab.')));
+            }),
           ]),
         );
       }
     }
 
     /* ============================================================
-       ROOM + MIC GLOW
+       REAL ROOM + MIC SYSTEM
        ============================================================ */
 
     class RoomPage extends StatefulWidget {
+      final String roomId;
       final String title;
-      final String online;
 
-      late final String userId = FirebaseAuth.instance.currentUser?.uid ??
-          'party_user_${DateTime.now().millisecondsSinceEpoch}';
-
-      RoomPage({
-        super.key,
-        required this.title,
-        required this.online,
-      });
+      const RoomPage({super.key, required this.roomId, required this.title});
 
       @override
       State<RoomPage> createState() => _RoomPageState();
     }
 
     class _RoomPageState extends State<RoomPage> {
+      final messageController = TextEditingController();
+      StreamSubscription<double>? soundLevelSubscription;
       bool micOn = false;
+      bool isSpeaking = false;
+      bool loadingAction = false;
       String roomUserName = 'Party User';
       String? roomPhotoUrl;
+      String role = 'user';
+      bool banned = false;
+      bool muted = false;
+      String? selectedReceiverUid;
+      String? selectedReceiverName;
+
+      ZegoUIKitPrebuiltLiveAudioRoomController get zegoController => ZegoUIKitPrebuiltLiveAudioRoomController();
 
       @override
       void initState() {
@@ -3540,105 +4222,213 @@ class _PartyLoadingState extends State<PartyLoading>
         });
       }
 
-      bool isSpeaking = false;
-      bool speakerOn = true;
+      bool get canManageUsers => role == 'leader' || role == 'deputy' || role == 'admin';
+      bool get canManageRoom => role == 'leader';
 
-      StreamSubscription<double>? soundLevelSubscription;
+      Future<void> _syncMember() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        final snap = await PartyChatData.roomMembers(widget.roomId).doc(uid).get();
+        if (!mounted || !snap.exists) return;
+        final data = snap.data() ?? {};
+        setState(() {
+          role = data['role']?.toString() ?? 'user';
+          banned = data['banned'] == true;
+          muted = data['muted'] == true;
+        });
+      }
 
-      final messageController = TextEditingController();
-      final List<String> messages = [];
+      Future<void> _toggleMic() async {
+        if (banned || muted || loadingAction) return;
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        setState(() => loadingAction = true);
+        try {
+          if (!micOn) {
+            await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: true);
+            final empty = zegoController.seat.getEmptySeats();
+            if (empty.isEmpty) throw Exception('No empty mic seat is available.');
+            await zegoController.seat.audience.take(empty.first);
+            ZegoUIKit().turnMicrophoneOn(true, userID: uid);
+            if (mounted) setState(() => micOn = true);
+            _startMicGlow();
+          } else {
+            try { await zegoController.seat.speaker.leave(showDialog: false); } catch (_) {}
+            ZegoUIKit().turnMicrophoneOn(false, userID: uid);
+            await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: false);
+            if (mounted) setState(() { micOn = false; isSpeaking = false; });
+            await soundLevelSubscription?.cancel();
+            soundLevelSubscription = null;
+          }
+        } catch (e) {
+          try { ZegoUIKit().turnMicrophoneOn(false, userID: uid); } catch (_) {}
+          try { await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: false); } catch (_) {}
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        } finally {
+          if (mounted) setState(() => loadingAction = false);
+        }
+      }
 
-      Widget _buildMicButton() {
-        return GestureDetector(
-          onTap: toggleMic,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: micOn ? PartyColors.gold : PartyColors.panel,
-              boxShadow: isSpeaking
-                  ? [
-                      BoxShadow(
-                        color: PartyColors.gold.withOpacity(0.9),
-                        blurRadius: 22,
-                        spreadRadius: 7,
-                      ),
-                      BoxShadow(
-                        color: PartyColors.purpleBright.withOpacity(0.35),
-                        blurRadius: 40,
-                        spreadRadius: 12,
-                      ),
-                    ]
-                  : [],
-            ),
-            child: Icon(
-              micOn ? Icons.mic : Icons.mic_off,
-              color: micOn ? Colors.black : PartyColors.text,
-              size: 29,
-            ),
-          ),
+      void _startMicGlow() {
+        soundLevelSubscription?.cancel();
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        soundLevelSubscription = ZegoUIKit().getSoundLevelStream(uid).listen((level) {
+          if (!micOn || !mounted) return;
+          final speaking = level > 20;
+          if (speaking != isSpeaking) setState(() => isSpeaking = speaking);
+        });
+      }
+
+      Future<void> _sendMessage() async {
+        if (banned) return;
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        final text = messageController.text.trim();
+        if (text.isEmpty) return;
+        messageController.clear();
+        try {
+          await PartyChatData.sendRoomMessage(roomId: widget.roomId, uid: uid, text: text);
+        } catch (e) {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        }
+      }
+
+      Future<void> _showMembers() async {
+        await showModalBottomSheet(
+          context: context,
+          backgroundColor: PartyColors.black2,
+          isScrollControlled: true,
+          builder: (_) => RoomMembersSheet(roomId: widget.roomId, canManage: canManageUsers, actorUid: FirebaseAuth.instance.currentUser?.uid ?? ''),
+        );
+        await _syncMember();
+      }
+
+      Future<void> _showGiftSheet() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        final members = await PartyChatData.roomMembers(widget.roomId).where('active', isEqualTo: true).get();
+        final candidates = members.docs.where((d) => d.id != uid).toList();
+        if (candidates.isEmpty) {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No other user is in the room yet.')));
+          return;
+        }
+        String? receiver;
+        int cost = 100;
+        String gift = 'Rose 🌹';
+        await showModalBottomSheet(
+          context: context,
+          backgroundColor: PartyColors.black2,
+          builder: (sheetContext) => StatefulBuilder(builder: (context, setSheetState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Text('Send Gift', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: receiver,
+                    dropdownColor: PartyColors.panel,
+                    decoration: const InputDecoration(labelText: 'Receiver'),
+                    items: candidates.map((d) => DropdownMenuItem(value: d.id, child: Text(d.data()['name']?.toString() ?? 'Party User'))).toList(),
+                    onChanged: (value) => setSheetState(() => receiver = value),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(spacing: 8, children: [
+                    ChoiceChip(label: const Text('Rose 🌹 • 100'), selected: gift == 'Rose 🌹', onSelected: (_) => setSheetState(() { gift = 'Rose 🌹'; cost = 100; })),
+                    ChoiceChip(label: const Text('Heart 💜 • 500'), selected: gift == 'Heart 💜', onSelected: (_) => setSheetState(() { gift = 'Heart 💜'; cost = 500; })),
+                    ChoiceChip(label: const Text('Crown 👑 • 1000'), selected: gift == 'Crown 👑', onSelected: (_) => setSheetState(() { gift = 'Crown 👑'; cost = 1000; })),
+                  ]),
+                  const SizedBox(height: 14),
+                  SizedBox(width: double.infinity, child: _NeonAction(label: 'Send Gift', onPressed: receiver == null ? () {} : () async {
+                    final name = candidates.firstWhere((d) => d.id == receiver).data()['name']?.toString() ?? 'Party User';
+                    try {
+                      await PartyChatData.sendRoomGift(roomId: widget.roomId, fromUid: uid, toUid: receiver!, giftName: gift, cost: cost);
+                      if (sheetContext.mounted) Navigator.pop(sheetContext);
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gift sent to $name')));
+                    } catch (e) {
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+                    }
+                  })),
+                ]),
+              ),
+            );
+          }),
         );
       }
 
-      void startMicGlow() {
-        soundLevelSubscription?.cancel();
-
-        soundLevelSubscription = ZegoUIKit()
-            .getSoundLevelStream(widget.userId)
-            .listen((level) {
-          if (!micOn) return;
-
-          final speaking = level > 20;
-
-          if (speaking != isSpeaking && mounted) {
-            setState(() {
-              isSpeaking = speaking;
-            });
-          }
-        });
+      Future<void> _showGameSheet() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        final members = await PartyChatData.roomMembers(widget.roomId).where('active', isEqualTo: true).where('onSeat', isEqualTo: true).get();
+        if (members.docs.isEmpty) {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('At least one mic user is needed.')));
+          return;
+        }
+        await showModalBottomSheet(
+          context: context,
+          backgroundColor: PartyColors.black2,
+          builder: (_) => SafeArea(child: Padding(padding: const EdgeInsets.all(18), child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('Room Games', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 12),
+            _NeonAction(label: 'Bomb 💣', onPressed: () async {
+              final random = math.Random();
+              final target = members.docs[random.nextInt(members.docs.length)].id;
+              await PartyChatData.sendRoomGame(roomId: widget.roomId, uid: uid, game: 'bomb', targetUid: target);
+              if (mounted) Navigator.pop(context);
+            }),
+            const SizedBox(height: 8),
+            const Text('The bomb spins over the mic seats and lands on one user.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54)),
+          ]))),
+        );
       }
 
-      Future<void> toggleMic() async {
-        final next = !micOn;
-
-        if (mounted) {
-          setState(() {
-            micOn = next;
-
-            if (!next) {
-              isSpeaking = false;
-            }
-          });
-        }
-
+      Future<void> _pickMusic() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
         try {
-          ZegoUIKit().turnMicrophoneOn(
-            next,
-            userID: widget.userId,
-          );
+          await PartyChatData.setRoomMusic(roomId: widget.roomId, uid: uid);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Music added to the room.')));
         } catch (e) {
-          debugPrint('Microphone change failed: $e');
-        }
-
-        if (next) {
-          startMicGlow();
-        } else {
-          await soundLevelSubscription?.cancel();
-          soundLevelSubscription = null;
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
         }
       }
 
-      void sendMessage() {
-        final text = messageController.text.trim();
+      Future<void> _showEmojiSheet() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null || banned) return;
+        const emojis = ['❤️', '😂', '🔥', '😍', '👏', '🎉', '💜', '👑'];
+        await showModalBottomSheet(
+          context: context,
+          backgroundColor: PartyColors.black2,
+          builder: (_) => SafeArea(child: Wrap(alignment: WrapAlignment.center, children: emojis.map((emoji) => IconButton(iconSize: 34, onPressed: () async { await PartyChatData.sendRoomEmoji(roomId: widget.roomId, uid: uid, emoji: emoji); if (mounted) Navigator.pop(context); }, icon: Text(emoji))).toList())),
+        );
+      }
 
-        if (text.isEmpty) return;
+      Future<void> _leaveFlow() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        final keep = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Leave Room'),
+            content: const Text('Keep this room in your room history?'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Leave')), 
+              FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Keep')),
+            ],
+          ),
+        );
+        if (keep == null) return;
+        try { if (micOn) await PartyChatData.updateRoomMicState(roomId: widget.roomId, uid: uid, onSeat: false); } catch (_) {}
+        try { ZegoUIKit().turnMicrophoneOn(false, userID: uid); } catch (_) {}
+        try { await PartyChatData.leaveRoom(roomId: widget.roomId, uid: uid, keep: keep); } catch (_) {}
+        if (mounted) Navigator.pop(context);
+      }
 
-        setState(() {
-          messages.add(text);
-          messageController.clear();
-        });
+      Future<void> _manageRoom() async {
+        await Navigator.push(context, MaterialPageRoute(builder: (_) => RoomManagePage(roomId: widget.roomId)));
+        await _syncMember();
       }
 
       @override
@@ -3650,60 +4440,312 @@ class _PartyLoadingState extends State<PartyLoading>
 
       @override
       Widget build(BuildContext context) {
-        final roomId = widget.title
-            .toLowerCase()
-            .replaceAll(
-              RegExp(r'[^a-z0-9]+'),
-              '_',
-            );
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return const Scaffold(body: Center(child: Text('Please login first.')));
 
-        return Scaffold(
-      body: Stack(
-        children: [
-          ZegoUIKitPrebuiltLiveAudioRoom(
-            appID: zegoAppId,
-            appSign: zegoAppSign,
-            userID: widget.userId,
-            userName: roomUserName,
-            roomID: roomId,
-            config: (ZegoUIKitPrebuiltLiveAudioRoomConfig.host()
-              ..seat.avatarBuilder = (context, size, user, extraInfo) =>
-                  _ZegoFirebaseAvatar(
-                    userId: user?.id ?? '',
-                    size: size,
-                  )),
-          ),
-          Positioned(
-            top: 42,
-            right: 12,
-            child: SafeArea(
-              child: IconButton.filled(
-                tooltip: 'Invite Friend',
-                icon: const Icon(Icons.person_add),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RoomInviteFriendsPage(
-                        roomId: roomId,
-                        roomTitle: widget.title,
+        return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: PartyChatData.roomStream(widget.roomId),
+          builder: (context, roomSnapshot) {
+            if (!roomSnapshot.hasData) return const Scaffold(body: PartyLoading());
+            final room = roomSnapshot.data?.data();
+            if (room == null) return const Scaffold(body: Center(child: Text('Room no longer exists.')));
+            return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: PartyChatData.roomMembers(widget.roomId).doc(uid).snapshots(),
+              builder: (context, memberSnapshot) {
+                final member = memberSnapshot.data?.data() ?? {};
+                role = member['role']?.toString() ?? role;
+                banned = member['banned'] == true;
+                muted = member['muted'] == true;
+                final zegoRole = role == 'leader' ? ZegoLiveAudioRoomRole.host : role == 'user' ? ZegoLiveAudioRoomRole.audience : ZegoLiveAudioRoomRole.speaker;
+                final config = (zegoRole == ZegoLiveAudioRoomRole.host ? ZegoUIKitPrebuiltLiveAudioRoomConfig.host() : ZegoUIKitPrebuiltLiveAudioRoomConfig.audience())
+                  ..role = zegoRole
+                  ..turnOnMicrophoneWhenJoining = false
+                  ..useSpeakerWhenJoining = true
+                  ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
+                    rowSpacing: 12,
+                    rowConfigs: const [
+                      ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
+                      ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
+                      ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
+                      ZegoLiveAudioRoomLayoutRowConfig(count: 3, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
+                    ],
+                  )
+                  ..seat.hostIndexes = const [0]
+                  ..seat.closeWhenJoining = false
+                  ..seat.avatarBuilder = (context, size, user, extraInfo) => _ZegoFirebaseAvatar(userId: user?.id ?? '', size: size);
+
+                return Scaffold(
+                  backgroundColor: PartyColors.black,
+                  body: Stack(children: [
+                    ZegoUIKitPrebuiltLiveAudioRoom(
+                      appID: zegoAppId,
+                      appSign: zegoAppSign,
+                      userID: uid,
+                      userName: roomUserName,
+                      roomID: widget.roomId,
+                      config: config,
+                    ),
+                    Positioned.fill(child: _RoomGiftOverlay(roomId: widget.roomId)),
+                    Positioned.fill(child: _RoomGameOverlay(roomId: widget.roomId)),
+                    Positioned(top: 44, left: 10, child: SafeArea(child: Row(children: [
+                      IconButton.filled(onPressed: _showMembers, icon: const Icon(Icons.people_alt_rounded)),
+                      if (canManageRoom) IconButton.filled(onPressed: _manageRoom, icon: const Icon(Icons.admin_panel_settings_rounded)),
+                    ]))),
+                    Positioned(top: 44, right: 10, child: SafeArea(child: Row(children: [
+                      IconButton.filled(onPressed: _leaveFlow, icon: const Icon(Icons.close_rounded)),
+                    ]))),
+                    if (banned) Positioned(left: 14, right: 14, top: 118, child: SafeArea(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.red.withOpacity(.22), borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.red)), child: const Text('You are banned in this room. You can only send gifts.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))))),
+                    Positioned(left: 12, right: 12, bottom: 88, child: _RoomChatBar(roomId: widget.roomId, controller: messageController, banned: banned, onSend: _sendMessage)),
+                    Positioned(left: 12, right: 12, bottom: 18, child: SafeArea(child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                      _RoomControl(icon: Icons.chat_bubble_outline, label: 'SMS', onTap: banned ? null : () => messageController.text.isEmpty ? null : _sendMessage()),
+                      _RoomControl(icon: micOn ? Icons.mic : Icons.mic_off, label: 'Mic', onTap: banned || muted ? null : _toggleMic, active: micOn, glow: isSpeaking),
+                      _RoomControl(icon: Icons.emoji_emotions_outlined, label: 'Emoji', onTap: banned ? null : _showEmojiSheet),
+                      _RoomControl(icon: Icons.music_note_rounded, label: 'Music', onTap: _pickMusic),
+                      _RoomControl(icon: Icons.games_rounded, label: 'Game', onTap: _showGameSheet),
+                      _RoomControl(icon: Icons.card_giftcard_rounded, label: 'Gift', onTap: _showGiftSheet),
+                    ]))),
+                    if (room['musicUrl']?.toString().isNotEmpty == true)
+                      Positioned(left: 18, right: 18, bottom: 154, child: SafeArea(child: _RoomMusicBar(room: room))),
+                  ]),
+                );
+              },
+            );
+          },
+        );
+      }
+    }
+
+    class _RoomControl extends StatelessWidget {
+      final IconData icon;
+      final String label;
+      final VoidCallback? onTap;
+      final bool active;
+      final bool glow;
+      const _RoomControl({required this.icon, required this.label, required this.onTap, this.active = false, this.glow = false});
+      @override
+      Widget build(BuildContext context) {
+        return GestureDetector(
+          onTap: onTap,
+          child: Column(children: [
+            AnimatedContainer(duration: const Duration(milliseconds: 180), width: 48, height: 48, decoration: BoxDecoration(shape: BoxShape.circle, color: active ? PartyColors.gold : PartyColors.panel, border: Border.all(color: onTap == null ? Colors.white24 : PartyColors.purpleBright), boxShadow: glow ? [BoxShadow(color: PartyColors.gold.withOpacity(.8), blurRadius: 20, spreadRadius: 5)] : []), child: Icon(icon, color: active ? Colors.black : (onTap == null ? Colors.white30 : PartyColors.text), size: 22)),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(color: onTap == null ? Colors.white30 : Colors.white70, fontSize: 10, fontWeight: FontWeight.w700)),
+          ]),
+        );
+      }
+    }
+
+    class _RoomChatBar extends StatelessWidget {
+      final String roomId;
+      final TextEditingController controller;
+      final bool banned;
+      final VoidCallback onSend;
+      const _RoomChatBar({required this.roomId, required this.controller, required this.banned, required this.onSend});
+      @override
+      Widget build(BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(color: PartyColors.black.withOpacity(.86), borderRadius: BorderRadius.circular(20), border: Border.all(color: PartyColors.purpleDark)),
+          child: Row(children: [
+            Expanded(child: TextField(controller: controller, enabled: !banned, decoration: const InputDecoration(hintText: 'Write a room message...', border: InputBorder.none, isDense: true))),
+            IconButton(onPressed: banned ? null : onSend, icon: const Icon(Icons.send_rounded, color: PartyColors.gold)),
+          ]),
+        );
+      }
+    }
+
+    class _RoomMusicBar extends StatelessWidget {
+      final Map<String, dynamic> room;
+      const _RoomMusicBar({required this.room});
+      @override
+      Widget build(BuildContext context) {
+        final name = room['musicName']?.toString() ?? 'Room Music';
+        final url = room['musicUrl']?.toString() ?? '';
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(color: PartyColors.black2.withOpacity(.92), borderRadius: BorderRadius.circular(16), border: Border.all(color: PartyColors.goldDark)),
+          child: Row(children: [
+            const Icon(Icons.music_note, color: PartyColors.gold),
+            const SizedBox(width: 8),
+            Expanded(child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis)),
+            IconButton(onPressed: url.isEmpty ? null : () async { await ZegoUIKitPrebuiltLiveAudioRoomController().media.play(filePathOrURL: url, enableRepeat: true); }, icon: const Icon(Icons.play_arrow, color: PartyColors.purpleBright)),
+            IconButton(onPressed: () async { await ZegoUIKitPrebuiltLiveAudioRoomController().media.stop(); }, icon: const Icon(Icons.stop, color: Colors.white70)),
+          ]),
+        );
+      }
+    }
+
+    class _RoomGiftOverlay extends StatelessWidget {
+      final String roomId;
+      const _RoomGiftOverlay({required this.roomId});
+      @override
+      Widget build(BuildContext context) {
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: PartyChatData.roomGiftsStream(roomId),
+          builder: (context, snapshot) {
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) return const SizedBox.shrink();
+            final visible = docs.take(3).toList();
+            return Align(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: visible.map((doc) {
+                  final gift = doc.data();
+                  return GestureDetector(
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: Text('${gift['giftName'] ?? 'Gift'} 🎁'),
+                        content: Text('${gift['senderName'] ?? 'User'} sent this gift to ${gift['receiverName'] ?? 'User'}.'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Close')),
+                          FilledButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Enter Room')),
+                        ],
                       ),
                     ),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 7),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+                      decoration: BoxDecoration(
+                        color: PartyColors.black2.withOpacity(.92),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: PartyColors.gold),
+                        boxShadow: const [BoxShadow(color: Color(0x995B1CFF), blurRadius: 24)],
+                      ),
+                      child: Text('${gift['senderName'] ?? 'User'} → ${gift['receiverName'] ?? 'User'}  ${gift['giftName'] ?? '🎁'}', style: const TextStyle(color: PartyColors.goldBright, fontWeight: FontWeight.w900)),
+                    ),
                   );
+                }).toList(),
+              ),
+            );
+          },
+        );
+      }
+    }
+
+    class _RoomGameOverlay extends StatelessWidget {
+      final String roomId;
+      const _RoomGameOverlay({required this.roomId});
+      @override
+      Widget build(BuildContext context) {
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: PartyChatData.roomGames(roomId).orderBy('createdAt', descending: true).limit(1).snapshots(),
+          builder: (context, snapshot) {
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) return const SizedBox.shrink();
+            final game = docs.first.data();
+            if (game['game'] != 'bomb') return const SizedBox.shrink();
+            final targetUid = game['targetUid']?.toString() ?? '';
+            return Align(
+              alignment: Alignment.center,
+              child: Container(
+                width: 190,
+                height: 190,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: PartyColors.black2.withOpacity(.92), border: Border.all(color: PartyColors.gold, width: 2), boxShadow: const [BoxShadow(color: Color(0xAA7A2CFF), blurRadius: 35, spreadRadius: 8)]),
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text('💣', style: TextStyle(fontSize: 68)),
+                  const SizedBox(height: 5),
+                  Text('Target: ${targetUid.isEmpty ? 'Mic User' : targetUid.substring(0, math.min(6, targetUid.length))}', style: const TextStyle(color: PartyColors.goldBright, fontWeight: FontWeight.w900)),
+                ]),
+              ),
+            );
+          },
+        );
+      }
+    }
+
+    class RoomMembersSheet extends StatelessWidget {
+      final String roomId;
+      final bool canManage;
+      final String actorUid;
+      const RoomMembersSheet({super.key, required this.roomId, required this.canManage, required this.actorUid});
+      @override
+      Widget build(BuildContext context) {
+        return SafeArea(child: SizedBox(height: MediaQuery.of(context).size.height * .72, child: Column(children: [
+          const SizedBox(height: 12),
+          const Text('Room Users', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 10),
+          Expanded(child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(stream: PartyChatData.roomMembersStream(roomId), builder: (context, snapshot) {
+            if (!snapshot.hasData) return const PartyLoading();
+            final docs = snapshot.data!.docs;
+            return ListView.builder(itemCount: docs.length, itemBuilder: (context, index) {
+              final d = docs[index];
+              final data = d.data();
+              return ListTile(
+                leading: _NetworkOrAvatar(photoUrl: data['photoURL']?.toString(), photoBase64: data['photoBase64']?.toString(), avatar: data['avatar']?.toString()),
+                title: Text('${data['name'] ?? 'Party User'} ${data['role'] == 'leader' ? '👑' : data['role'] == 'deputy' ? '🛡️' : data['role'] == 'admin' ? '⭐' : ''}'),
+                subtitle: Text('${data['role'] ?? 'user'}${data['onSeat'] == true ? ' • mic' : ''}${data['banned'] == true ? ' • banned' : ''}'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: d.id)));
                 },
-              ),
-            ),
-          ),
-              Positioned(
-                bottom: 24,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: _buildMicButton(),
-                ),
-              ),
-            ],
-          ),
+                trailing: canManage && d.id != actorUid ? IconButton(icon: const Icon(Icons.more_vert), onPressed: () async {
+                  await _roomMemberActions(context, d.id, data);
+                }) : null,
+              );
+            });
+          })),
+        ])));
+      }
+
+      Future<void> _roomMemberActions(BuildContext context, String targetUid, Map<String, dynamic> data) async {
+        final actor = await PartyChatData.roomMembers(roomId).doc(actorUid).get();
+        final actorRole = actor.data()?['role']?.toString() ?? 'user';
+        final action = await showModalBottomSheet<String>(context: context, backgroundColor: PartyColors.black2, builder: (_) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(leading: const Icon(Icons.volume_off), title: const Text('Mute'), onTap: () => Navigator.pop(context, 'mute')),
+          ListTile(leading: const Icon(Icons.person_remove), title: const Text('Kick'), onTap: () => Navigator.pop(context, 'kick')),
+          ListTile(leading: const Icon(Icons.block), title: Text(data['banned'] == true ? 'Unban' : 'Ban'), onTap: () => Navigator.pop(context, data['banned'] == true ? 'unban' : 'ban')),
+          if (actorRole == 'leader' && data['role'] == 'user') ListTile(leading: const Icon(Icons.shield), title: const Text('Make Deputy Leader'), onTap: () => Navigator.pop(context, 'deputy')),
+          if (actorRole == 'leader' && data['role'] == 'deputy') ListTile(leading: const Icon(Icons.person), title: const Text('Remove Deputy Leader'), onTap: () => Navigator.pop(context, 'user')),
+          if (actorRole == 'leader' && data['role'] == 'user') ListTile(leading: const Icon(Icons.star), title: const Text('Make Admin'), onTap: () => Navigator.pop(context, 'admin')),
+          if (actorRole == 'leader' && data['role'] == 'admin') ListTile(leading: const Icon(Icons.person), title: const Text('Remove Admin'), onTap: () => Navigator.pop(context, 'user')),
+        ])));
+        try {
+          if (action == 'mute') await PartyChatData.setMemberMuted(roomId: roomId, actorUid: actorUid, targetUid: targetUid, muted: true);
+          if (action == 'kick') await PartyChatData.kickMember(roomId: roomId, actorUid: actorUid, targetUid: targetUid);
+          if (action == 'ban' || action == 'unban') await PartyChatData.setMemberBanned(roomId: roomId, actorUid: actorUid, targetUid: targetUid, banned: action == 'ban');
+          if (action == 'admin') await PartyChatData.setRoomRole(roomId: roomId, actorUid: actorUid, targetUid: targetUid, role: 'admin');
+          if (action == 'deputy') await PartyChatData.setRoomRole(roomId: roomId, actorUid: actorUid, targetUid: targetUid, role: 'deputy');
+          if (action == 'user') await PartyChatData.setRoomRole(roomId: roomId, actorUid: actorUid, targetUid: targetUid, role: 'user');
+        } catch (e) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        }
+      }
+    }
+
+    class RoomManagePage extends StatelessWidget {
+      final String roomId;
+      const RoomManagePage({super.key, required this.roomId});
+      @override
+      Widget build(BuildContext context) {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return const Scaffold(body: Center(child: Text('Please login first.')));
+        return Scaffold(
+          appBar: AppBar(title: const Text('Room Management')),
+          body: _NeonBackground(child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(stream: PartyChatData.roomStream(roomId), builder: (context, roomSnapshot) {
+            if (!roomSnapshot.hasData) return const PartyLoading();
+            final room = roomSnapshot.data?.data() ?? {};
+            return ListView(padding: const EdgeInsets.all(18), children: [
+              _NeonPanel(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(room['title']?.toString() ?? 'Room', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 6),
+                Text('${room['memberCount'] ?? 0}/${room['userCapacity'] ?? 100} users • ${room['activeMicCount'] ?? 0}/${room['micCapacity'] ?? 15} mics', style: const TextStyle(color: PartyColors.muted)),
+              ])),
+              const SizedBox(height: 14),
+              _NeonAction(label: 'Manage Users & Roles', onPressed: () => showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: PartyColors.black2, builder: (_) => RoomMembersSheet(roomId: roomId, canManage: true, actorUid: uid))),
+              const SizedBox(height: 10),
+              _NeonAction(label: 'Mic Capacity: ${room['micCapacity'] ?? 15}', onPressed: () async {
+                final value = await showModalBottomSheet<int>(context: context, backgroundColor: PartyColors.black2, builder: (_) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [3, 8, 15].map((v) => ListTile(title: Text('$v Mic Seats'), onTap: () => Navigator.pop(context, v))).toList())));
+                if (value != null) await PartyChatData.roomDoc(roomId).update({'micCapacity': value, 'updatedAt': FieldValue.serverTimestamp()});
+              }),
+              const SizedBox(height: 10),
+              _NeonAction(label: 'Close Room', onPressed: () async {
+                final ok = await showDialog<bool>(context: context, builder: (dialogContext) => AlertDialog(title: const Text('Close Room?'), content: const Text('The room will no longer accept new users.'), actions: [TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Close'))]));
+                if (ok == true) { await PartyChatData.closeRoom(roomId: roomId, uid: uid); if (context.mounted) Navigator.pop(context); }
+              }),
+            ]);
+          })),
         );
       }
     }
@@ -4044,6 +5086,85 @@ class _PartyLoadingState extends State<PartyLoading>
     /* ============================================================
        PROFILE
        ============================================================ */
+
+    class CreateRoomPage extends StatefulWidget {
+      const CreateRoomPage({super.key});
+      @override
+      State<CreateRoomPage> createState() => _CreateRoomPageState();
+    }
+
+    class _CreateRoomPageState extends State<CreateRoomPage> {
+      final titleController = TextEditingController();
+      final descriptionController = TextEditingController();
+      int userCapacity = 100;
+      int micCapacity = 15;
+      bool saving = false;
+      String? photoBase64;
+
+      Future<void> _pickRoomPhoto() async {
+        final image = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 20, maxWidth: 512, maxHeight: 512);
+        if (image == null) return;
+        final bytes = await image.readAsBytes();
+        if (bytes.length > 500000) {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Room photo is too large.')));
+          return;
+        }
+        setState(() => photoBase64 = base64Encode(bytes));
+      }
+
+      Future<void> _create() async {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+        setState(() => saving = true);
+        try {
+          final roomId = await PartyChatData.createRoom(
+            ownerUid: uid,
+            title: titleController.text,
+            description: descriptionController.text,
+            userCapacity: userCapacity,
+            micCapacity: micCapacity,
+            photoBase64: photoBase64,
+          );
+          if (!mounted) return;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RoomPage(roomId: roomId, title: titleController.text.trim())));
+        } catch (e) {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        } finally {
+          if (mounted) setState(() => saving = false);
+        }
+      }
+
+      @override
+      void dispose() { titleController.dispose(); descriptionController.dispose(); super.dispose(); }
+
+      @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Create New Room')),
+          body: _NeonBackground(child: ListView(padding: const EdgeInsets.all(18), children: [
+            GestureDetector(onTap: _pickRoomPhoto, child: Container(height: 150, decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), border: Border.all(color: PartyColors.purple), gradient: const LinearGradient(colors: [Color(0xFF1B1129), Color(0xFF0D0917)])), child: photoBase64 == null ? const Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_a_photo, size: 42, color: PartyColors.gold), SizedBox(height: 8), Text('Add Room Picture')]) : ClipRRect(borderRadius: BorderRadius.circular(23), child: Image.memory(base64Decode(photoBase64!), fit: BoxFit.cover)))),
+            const SizedBox(height: 18),
+            TextField(controller: titleController, maxLength: 40, decoration: const InputDecoration(labelText: 'Room Name', prefixIcon: Icon(Icons.meeting_room))),
+            const SizedBox(height: 12),
+            TextField(controller: descriptionController, maxLength: 120, maxLines: 3, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.description))),
+            const SizedBox(height: 14),
+            _NeonPanel(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('User Capacity', style: TextStyle(fontWeight: FontWeight.w800)),
+              DropdownButton<int>(value: userCapacity, isExpanded: true, items: const [100, 200, 500, 1000, 2000].map((v) => DropdownMenuItem(value: v, child: Text('$v Users'))).toList(), onChanged: (v) => setState(() => userCapacity = v ?? 100)),
+              const SizedBox(height: 8),
+              const Text('Mic Capacity', style: TextStyle(fontWeight: FontWeight.w800)),
+              DropdownButton<int>(value: micCapacity, isExpanded: true, items: const [3, 8, 15].map((v) => DropdownMenuItem(value: v, child: Text('$v Mic Seats'))).toList(), onChanged: (v) => setState(() => micCapacity = v ?? 15)),
+              const SizedBox(height: 6),
+              const Text('The room always has 15 actual mic seats. This setting controls how many can be active.', style: TextStyle(color: PartyColors.muted, fontSize: 12)),
+            ])),
+            const SizedBox(height: 14),
+            _NeonPanel(child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Room Roles', style: TextStyle(fontWeight: FontWeight.w900)), SizedBox(height: 6), Text('You become Leader automatically. After creation you can assign up to 2 Deputy Leaders and 15 Admins from Room Management.', style: TextStyle(color: PartyColors.muted, fontSize: 12))])),
+            const SizedBox(height: 18),
+            saving ? const SizedBox(height: 100, child: PartyLoading()) : _NeonAction(label: 'Create Room', onPressed: _create),
+          ])),
+        );
+      }
+    }
 
     class ProfileTab extends StatefulWidget {
       const ProfileTab({super.key});
@@ -4612,6 +5733,31 @@ class _PartyLoadingState extends State<PartyLoading>
                 ]),
               ),
               const SizedBox(height: 18),
+              GestureDetector(
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateRoomPage())),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+
+
+                                          gradient: const LinearGradient(colors: [Color(0xFF20102F), Color(0xFF0B0711)]),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: PartyColors.gold, width: 1.2),
+                    boxShadow: const [BoxShadow(color: Color(0x553F00FF), blurRadius: 18)],
+                  ),
+                  child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.add_home_work_rounded, size: 42, color: PartyColors.gold),
+                    SizedBox(width: 14),
+                    Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Create New Room', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+                      SizedBox(height: 5),
+                      Text('Create your own live room', style: TextStyle(color: PartyColors.muted, fontSize: 12)),
+                    ]),
+                  ]),
+                ),
+              ),
+
+              const SizedBox(height: 18),
               StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                 stream: unreadDoc.snapshots(),
                 builder: (context, unreadSnapshot) {
@@ -4737,9 +5883,13 @@ class _PartyLoadingState extends State<PartyLoading>
                         subtitle: Text('${profile['name'] ?? d['inviterName'] ?? 'Someone'} ne invite kiya.'),
                         trailing: FilledButton(
                           onPressed: () async {
+                            final roomId = d['roomId']?.toString();
+                            final uid = FirebaseAuth.instance.currentUser?.uid;
+                            if (roomId == null || uid == null) return;
+                            await PartyChatData.joinRoom(roomId: roomId, uid: uid);
                             await doc.reference.update({'status': 'accepted'});
                             if (!context.mounted) return;
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => RoomPage(title: d['roomTitle'] ?? 'PartyChat Room', online: 'Live')));
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => RoomPage(roomId: roomId, title: d['roomTitle'] ?? 'PartyChat Room')));
                           },
                           child: const Text('Join'),
                         ),
@@ -6025,6 +7175,7 @@ class _PartyLoadingState extends State<PartyLoading>
       void initState() {
         super.initState();
         _loadNotificationSettings();
+
       }
 
       Future<void> _loadNotificationSettings() async {
@@ -7460,3 +8611,5 @@ class AdminSupportPanelPage extends StatelessWidget {
       }
     }
      
+
+          
