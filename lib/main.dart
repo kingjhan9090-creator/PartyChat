@@ -1584,16 +1584,6 @@ class _PartyLoadingState extends State<PartyLoading>
           roomId: roomId,
         );
       }
-    }
-
-
-
-
-
-
-
-        
-          
 
       /* ============================================================
          REAL ROOM SYSTEM
@@ -2875,7 +2865,8 @@ class _PartyLoadingState extends State<PartyLoading>
           if (!mounted) return;
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+
+                          SnackBar(
               content: Text(e.toString()),
             ),
           );
@@ -3050,6 +3041,8 @@ class _PartyLoadingState extends State<PartyLoading>
       }
     }
 
+    }
+
     /* ============================================================
        MAIN PAGE
        ============================================================ */
@@ -3122,8 +3115,7 @@ class _PartyLoadingState extends State<PartyLoading>
               _HomeBigBox(title: 'Free Reward', icon: Icons.card_giftcard_rounded, subtitle: 'Collect your free daily reward'),
               const SizedBox(height: 14),
               _HomeBigBox(title: 'Daily Task', icon: Icons.task_alt_rounded, subtitle: 'Complete today\'s tasks'),
-
-                       ],
+            ],
           ),
         );
       }
@@ -4308,6 +4300,7 @@ class _PartyLoadingState extends State<PartyLoading>
       Future<void> _showGiftSheet() async {
         final uid = FirebaseAuth.instance.currentUser?.uid;
         if (uid == null) return;
+
         final members = await PartyChatData.roomMembers(widget.roomId).where('active', isEqualTo: true).get();
         final candidates = members.docs.where((d) => d.id != uid).toList();
         if (candidates.isEmpty) {
@@ -4428,7 +4421,6 @@ class _PartyLoadingState extends State<PartyLoading>
       }
 
       Future<void> _manageRoom() async {
-
         await Navigator.push(context, MaterialPageRoute(builder: (_) => RoomManagePage(roomId: widget.roomId)));
         await _syncMember();
       }
@@ -4465,7 +4457,7 @@ class _PartyLoadingState extends State<PartyLoading>
                   ..useSpeakerWhenJoining = true
                   ..seat.layout = ZegoLiveAudioRoomLayoutConfig(
                     rowSpacing: 12,
-                    rowConfigs: const [
+                    rowConfigs: [
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
                       ZegoLiveAudioRoomLayoutRowConfig(count: 4, alignment: ZegoLiveAudioRoomLayoutAlignment.spaceAround),
@@ -6943,8 +6935,7 @@ class _PartyLoadingState extends State<PartyLoading>
                 subtitle: Text(messagePermission),
                 trailing: const Icon(
                   Icons.chevron_right,
-
-                                    ),
+                ),
                 onTap: () {
                   _chooseOption(
                     context,
