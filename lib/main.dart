@@ -2401,8 +2401,7 @@ class _PartyLoadingState extends State<PartyLoading>
        ROOMS PAGE
        ============================================================ */
 
-
-    class RoomsTab extends StatelessWidget {
+class RoomsTab extends StatelessWidget {
   const RoomsTab({super.key});
 
   void _openRoom(BuildContext context) {
@@ -2417,126 +2416,143 @@ class _PartyLoadingState extends State<PartyLoading>
   Widget _roomCard(
     BuildContext context, {
     required String roomName,
-    required String description,
-    required int members,
+    required String roomId,
     required String hostName,
+    required int members,
+    required int level,
     required IconData icon,
   }) {
     return GestureDetector(
       onTap: () => _openRoom(context),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(18),
           gradient: const LinearGradient(
             colors: [
-              Color(0xFF211034),
-              Color(0xFF100A19),
+              Color(0xFF21152E),
+              Color(0xFF0F0A15),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           border: Border.all(
             color: const Color(0xFF8D3DFF),
-            width: 1.2,
+            width: 1,
           ),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x558D3DFF),
-              blurRadius: 14,
+              color: Color(0x338D3DFF),
+              blurRadius: 12,
               spreadRadius: 1,
             ),
           ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Room image / frame
             Container(
-              width: 68,
-              height: 68,
+              width: 82,
+              height: 82,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(17),
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFFFFC83D),
+                    Color(0xFFFFD45C),
                     Color(0xFF8D3DFF),
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
                 boxShadow: const [
                   BoxShadow(
-                    color: Color(0x668D3DFF),
-                    blurRadius: 12,
-                    spreadRadius: 2,
+                    color: Color(0x558D3DFF),
+                    blurRadius: 10,
                   ),
                 ],
               ),
               child: Container(
                 margin: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF120A1D),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: const Color(0xFF120A1D),
                 ),
                 child: Icon(
                   icon,
-                  color: Color(0xFFFFD45C),
-                  size: 30,
+                  color: const Color(0xFFFFD45C),
+                  size: 38,
                 ),
               ),
             ),
-            const SizedBox(width: 13),
+
+            const SizedBox(width: 12),
+
+            // Room information
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          roomName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Text(
-                        '👑',
-                        style: TextStyle(fontSize: 17),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
                   Text(
-                    description,
+                    roomName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Colors.white60,
-                      fontSize: 12,
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
+
                   const SizedBox(height: 8),
+
                   Row(
                     children: [
                       const Icon(
-                        Icons.people_alt_rounded,
-                        color: Color(0xFFC7A7FF),
-                        size: 16,
+                        Icons.flag_rounded,
+                        color: Color(0xFF4CAF50),
+                        size: 17,
                       ),
                       const SizedBox(width: 5),
-                      Text(
-                        '$members / 100',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0x3348A9FF),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '$level',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Room ID: $roomId',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF6EDFFF),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 7),
+
+                  Row(
+                    children: [
                       const Icon(
                         Icons.person_rounded,
                         color: Color(0xFFFFD45C),
@@ -2549,10 +2565,24 @@ class _PartyLoadingState extends State<PartyLoading>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFFFFD45C),
+                            color: Colors.white70,
                             fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                           ),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.people_alt_rounded,
+                        color: Color(0xFFC7A7FF),
+                        size: 15,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$members',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
@@ -2560,11 +2590,13 @@ class _PartyLoadingState extends State<PartyLoading>
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+
+            const SizedBox(width: 5),
+
             const Icon(
               Icons.arrow_forward_ios_rounded,
               color: Color(0xFFB77CFF),
-              size: 18,
+              size: 17,
             ),
           ],
         ),
@@ -2589,63 +2621,103 @@ class _PartyLoadingState extends State<PartyLoading>
         bottom: false,
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(18, 18, 18, 12),
+            // Rooms title
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
               child: Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Text(
                       'Rooms',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 28,
+                        fontSize: 27,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.search_rounded,
-                    color: Colors.white70,
-                    size: 27,
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFF1A1025),
+                      border: Border.all(
+                        color: const Color(0xFF8D3DFF),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.search_rounded,
+                      color: Colors.white,
+                      size: 23,
+                    ),
                   ),
                 ],
               ),
             ),
+
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 110),
                 children: [
                   _roomCard(
                     context,
-                    roomName: 'Party Vibes Room',
-                    description: 'Good Vibes • Make Friends • Have Fun',
-                    members: 37,
+                    roomName: 'Party Vibes Room 👑',
+                    roomId: '910870',
                     hostName: 'Hamza',
+                    members: 37,
+                    level: 5,
                     icon: Icons.workspace_premium_rounded,
                   ),
+
                   _roomCard(
                     context,
-                    roomName: 'Music Lovers',
-                    description: 'Music • Chat • Fun Together',
-                    members: 64,
+                    roomName: 'Royal World 🌙',
+                    roomId: '316472',
                     hostName: 'Ayesha',
+                    members: 42,
+                    level: 3,
+                    icon: Icons.favorite_rounded,
+                  ),
+
+                  _roomCard(
+                    context,
+                    roomName: 'Attack Family 👨‍👩‍👧',
+                    roomId: '828515',
+                    hostName: 'Zain',
+                    members: 68,
+                    level: 4,
+                    icon: Icons.groups_rounded,
+                  ),
+
+                  _roomCard(
+                    context,
+                    roomName: 'Lovely Time 💕',
+                    roomId: '466939',
+                    hostName: 'Sara',
+                    members: 31,
+                    level: 3,
+                    icon: Icons.auto_awesome_rounded,
+                  ),
+
+                  _roomCard(
+                    context,
+                    roomName: 'Music & Friends 🎵',
+                    roomId: '652378',
+                    hostName: 'Noor',
+                    members: 52,
+                    level: 11,
                     icon: Icons.music_note_rounded,
                   ),
+
                   _roomCard(
                     context,
-                    roomName: 'Chill & Chat',
-                    description: 'Relax • Talk • Meet New Friends',
-                    members: 28,
-                    hostName: 'Zain',
-                    icon: Icons.forum_rounded,
-                  ),
-                  _roomCard(
-                    context,
-                    roomName: 'Friends Zone',
-                    description: 'Friends • Games • Good Times',
-                    members: 52,
-                    hostName: 'Sara',
-                    icon: Icons.groups_rounded,
+                    roomName: 'Chill Vibes ✨',
+                    roomId: '583214',
+                    hostName: 'Ali',
+                    members: 24,
+                    level: 6,
+                    icon: Icons.nightlife_rounded,
                   ),
                 ],
               ),
@@ -2656,6 +2728,9 @@ class _PartyLoadingState extends State<PartyLoading>
     );
   }
 }
+                
+                            
+                    
 
 
 
