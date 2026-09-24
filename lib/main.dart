@@ -6655,4 +6655,315 @@ class AdminSupportPanelPage extends StatelessWidget {
         );
       }
     }
-     
+
+
+
+/* ============================================================
+   NEW PARTY ROOM - STEP 1
+   ============================================================ */
+
+class NewPartyRoomPage extends StatelessWidget {
+  const NewPartyRoomPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF050307),
+      body: SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment.topCenter,
+              radius: 1.2,
+              colors: [
+                Color(0xFF241044),
+                Color(0xFF0C0615),
+                Color(0xFF050307),
+              ],
+            ),
+          ),
+          child: Column(
+            children: [
+              const _NewRoomHeader(),
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    'Room',
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   NEW PARTY ROOM - STEP 1
+   ============================================================ */
+
+
+class _NewRoomHeader extends StatelessWidget {
+  const _NewRoomHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xCC08050D),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0x66FFC928),
+          width: 1,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x331000FF),
+            blurRadius: 25,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFFFC928),
+                  Color(0xFFB65CFF),
+                ],
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x66FFC928),
+                  blurRadius: 18,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(3),
+            child: ClipOval(
+              child: Container(
+                color: const Color(0xFF120A20),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Color(0xFFFFC928),
+                  size: 42,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Party Vibes Room 👑',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                SizedBox(height: 7),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.people_alt_rounded,
+                      color: Colors.white70,
+                      size: 18,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      '37 / 100',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    _RoomLeaderBadge(),
+                  ],
+                ),
+                SizedBox(height: 7),
+                Text(
+                  'Good Vibes • Make Friends • Have Fun',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          _RoomHeaderButton(
+            icon: Icons.groups_rounded,
+            label: 'Members',
+            badge: '3',
+          ),
+          const SizedBox(width: 5),
+          _RoomHeaderButton(
+            icon: Icons.settings_rounded,
+            label: 'Manage',
+          ),
+          const SizedBox(width: 5),
+          _RoomHeaderButton(
+            icon: Icons.close_rounded,
+            label: 'Leave',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoomLeaderBadge extends StatelessWidget {
+  const _RoomLeaderBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 9,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0x33222200),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFFC928),
+        ),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.workspace_premium_rounded,
+            color: Color(0xFFFFC928),
+            size: 15,
+          ),
+          SizedBox(width: 4),
+          Text(
+            'Leader',
+            style: TextStyle(
+              color: Color(0xFFFFD95A),
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoomHeaderButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String? badge;
+
+  const _RoomHeaderButton({
+    required this.icon,
+    required this.label,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0x22100020),
+                border: Border.all(
+                  color: const Color(0xFF8D3DFF),
+                  width: 1.3,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x441000FF),
+                    blurRadius: 12,
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+            if (badge != null)
+              Positioned(
+                right: -3,
+                top: -5,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 4,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF3158),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    badge!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
