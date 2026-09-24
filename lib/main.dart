@@ -2401,7 +2401,7 @@ class _PartyLoadingState extends State<PartyLoading>
        ROOMS PAGE
        ============================================================ */
 
-class RoomsTab extends StatefulWidget {
+         class RoomsTab extends StatefulWidget {
   const RoomsTab({super.key});
 
   @override
@@ -2409,58 +2409,35 @@ class RoomsTab extends StatefulWidget {
 }
 
 class _RoomsTabState extends State<RoomsTab> {
-  int selectedMainTab = 0;
-  int selectedMyRoomTab = 0;
+  int selectedTab = 0;
+  final TextEditingController searchController = TextEditingController();
 
-  static const mainTabs = [
+  static const List<String> tabs = [
     'All Room',
     'Popular Room',
-    'New Room',
     'My Room',
   ];
 
-  static const myRoomTabs = [
-    'Recently Joined',
-    'Joined',
-    'With Friend',
-  ];
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return _NeonBackground(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 110),
+        padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Rooms',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PartyChatSearchPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.search_rounded,
-                  color: Color(0xFFFFC83D),
-                  size: 28,
-                ),
-              ),
-            ],
+          const Text(
+            'Rooms',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
 
           GestureDetector(
             onTap: () {
@@ -2472,28 +2449,29 @@ class _RoomsTabState extends State<RoomsTab> {
               );
             },
             child: Container(
-              height: 52,
-              padding: const EdgeInsets.symmetric(horizontal: 15),
+              height: 54,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: const Color(0xFF0D0A12),
-                borderRadius: BorderRadius.circular(17),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: const Color(0xFF7B3FF2),
+                  color: PartyColors.purple,
+                  width: 1.2,
                 ),
               ),
               child: const Row(
                 children: [
                   Icon(
                     Icons.search_rounded,
-                    color: Color(0xFFFFC83D),
+                    color: PartyColors.gold,
                   ),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Search UID, name or room name',
+                      'Search UID / Name / Room',
                       style: TextStyle(
                         color: Colors.white54,
-                        fontSize: 14,
+                        fontSize: 15,
                       ),
                     ),
                   ),
@@ -2502,189 +2480,112 @@ class _RoomsTabState extends State<RoomsTab> {
             ),
           ),
 
-          const SizedBox(height: 14),
-
-          SizedBox(
-            height: 46,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: mainTabs.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final selected = selectedMainTab == index;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedMainTab = index;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                    ),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      gradient: selected
-                          ? const LinearGradient(
-                              colors: [
-                                Color(0xFF7B3FF2),
-                                Color(0xFFD6A84F),
-                              ],
-                            )
-                          : null,
-                      color: selected
-                          ? null
-                          : const Color(0xFF15101E),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: const Color(0xFF7B3FF2),
-                      ),
-                    ),
-                    child: Text(
-                      mainTabs[index],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          if (selectedMainTab == 3) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 42,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: myRoomTabs.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final selected = selectedMyRoomTab == index;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedMyRoomTab = index;
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 13,
-                      ),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? const Color(0xFF2B1940)
-                            : const Color(0xFF110C18),
-                        borderRadius: BorderRadius.circular(13),
-                        border: Border.all(
-                          color: selected
-                              ? const Color(0xFFD6A84F)
-                              : const Color(0xFF3B2553),
-                        ),
-                      ),
-                      child: Text(
-                        myRoomTabs[index],
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-
           const SizedBox(height: 18),
 
-          _buildRealRooms(),
+          _buildTabs(),
+
+          const SizedBox(height: 22),
+
+          _buildRooms(),
         ],
       ),
     );
   }
 
-  Widget _buildRealRooms() {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+  Widget _buildTabs() {
+    return Row(
+      children: List.generate(
+        tabs.length,
+        (index) {
+          final selected = selectedTab == index;
 
-    if (selectedMainTab == 3 && uid == null) {
-      return const _RoomEmptyState(
-        text: 'Please login first.',
-      );
-    }
-
-    if (selectedMainTab == 3) {
-      return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('joinedRooms')
-            .where('active', isEqualTo: true)
-            .snapshots(),
-        builder: (context, joinedSnapshot) {
-          if (joinedSnapshot.hasError) {
-            return const _RoomEmptyState(
-              text: 'Could not load your rooms.',
-            );
-          }
-
-          if (!joinedSnapshot.hasData) {
-            return const SizedBox(
-              height: 180,
-              child: PartyLoading(),
-            );
-          }
-
-          final ids = joinedSnapshot.data!.docs
-              .map((doc) => doc.id)
-              .toList();
-
-          if (ids.isEmpty) {
-            return const _RoomEmptyState(
-              text: 'You have not joined any rooms yet.',
-            );
-          }
-
-          return Column(
-            children: ids.map((roomId) {
-              return StreamBuilder<
-                  DocumentSnapshot<Map<String, dynamic>>>(
-                stream: PartyChatData.roomStream(roomId),
-                builder: (context, roomSnapshot) {
-                  final room = roomSnapshot.data?.data();
-
-                  if (room == null ||
-                      room['status'] != 'open') {
-                    return const SizedBox.shrink();
-                  }
-
-                  return LiveRoomTile(
-                    data: room,
-                    roomId: roomId,
-                  );
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: index == tabs.length - 1 ? 0 : 7,
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedTab = index;
+                  });
                 },
-              );
-            }).toList(),
+                child: Container(
+                  height: 46,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: selected
+                        ? const LinearGradient(
+                            colors: [
+                              PartyColors.purple,
+                              PartyColors.gold,
+                            ],
+                          )
+                        : null,
+                    color: selected
+                        ? null
+                        : const Color(0xFF171125),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: selected
+                          ? PartyColors.gold
+                          : PartyColors.purple,
+                    ),
+                  ),
+                  child: Text(
+                    tabs[index],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: selected
+                          ? Colors.white
+                          : Colors.white70,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildRooms() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 80),
+        child: Center(
+          child: Text(
+            'Please login first.',
+            style: TextStyle(
+              color: Colors.white54,
+            ),
+          ),
+        ),
       );
     }
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: PartyChatData.roomsStream(),
+      stream: FirebaseFirestore.instance
+          .collection('rooms')
+          .where('status', isEqualTo: 'open')
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const _RoomEmptyState(
-            text: 'Could not load rooms.',
+          return const Padding(
+            padding: EdgeInsets.only(top: 80),
+            child: Center(
+              child: Text(
+                'Could not load rooms.',
+                style: TextStyle(
+                  color: Colors.white54,
+                ),
+              ),
+            ),
           );
         }
 
@@ -2695,51 +2596,222 @@ class _RoomsTabState extends State<RoomsTab> {
           );
         }
 
-        var docs = snapshot.data!.docs;
+        List<QueryDocumentSnapshot<Map<String, dynamic>>> rooms =
+            List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(
+          snapshot.data!.docs,
+        );
 
-        if (selectedMainTab == 1) {
-          docs = docs.where((doc) {
-            final members =
-                (doc.data()['memberCount'] as num?)?.toInt() ?? 0;
-            return members >= 10;
-          }).toList();
+        if (selectedTab == 2) {
+          rooms = rooms
+              .where(
+                (room) =>
+                    room.data()['ownerUid']?.toString() == uid,
+              )
+              .toList();
         }
 
-        if (selectedMainTab == 2) {
-          docs = docs.where((doc) {
-            final created = doc.data()['createdAt'];
+        if (selectedTab == 1) {
+          rooms.sort((a, b) {
+            final aCount =
+                (a.data()['memberCount'] as num?)?.toInt() ?? 0;
+            final bCount =
+                (b.data()['memberCount'] as num?)?.toInt() ?? 0;
 
-            if (created is! Timestamp) {
-              return false;
+            return bCount.compareTo(aCount);
+          });
+        } else {
+          rooms.sort((a, b) {
+            final aTime = a.data()['updatedAt'];
+            final bTime = b.data()['updatedAt'];
+
+            if (aTime is Timestamp && bTime is Timestamp) {
+              return bTime.compareTo(aTime);
             }
 
-            return DateTime.now()
-                    .difference(created.toDate())
-                    .inHours <
-                48;
-          }).toList();
+            return 0;
+          });
         }
 
-        if (docs.isEmpty) {
-          return const _RoomEmptyState(
-            text: 'No live rooms yet.',
+        if (rooms.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 80),
+            child: Center(
+              child: Text(
+                selectedTab == 2
+                    ? 'You have not created any rooms yet.'
+                    : 'No active rooms yet.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white54,
+                ),
+              ),
+            ),
           );
         }
 
         return Column(
-          children: docs.map((doc) {
-            return LiveRoomTile(
-              data: doc.data(),
-              roomId: doc.id,
-            );
-          }).toList(),
+          children: rooms
+              .map<Widget>(
+                (room) => _RoomListCard(
+                  roomId: room.id,
+                  data: room.data(),
+                ),
+              )
+              .toList(),
         );
       },
     );
   }
 }
-                      
-                            
+
+class _RoomListCard extends StatelessWidget {
+  final String roomId;
+  final Map<String, dynamic> data;
+
+  const _RoomListCard({
+    required this.roomId,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final title =
+        data['title']?.toString() ?? 'PartyChat Room';
+
+    final description =
+        data['description']?.toString() ?? '';
+
+    final members =
+        (data['memberCount'] as num?)?.toInt() ?? 0;
+
+    final capacity =
+        (data['userCapacity'] as num?)?.toInt() ?? 100;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF171126),
+            Color(0xFF0D0917),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: PartyColors.purple,
+          width: 1,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x331C00FF),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  'ID: $roomId',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: PartyColors.gold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  description.isEmpty
+                      ? 'Chat • Friends • Fun'
+                      : description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                  ),
+                ),
+
+                const SizedBox(height: 7),
+
+                Text(
+                  '$members / $capacity users',
+                  style: const TextStyle(
+                    color: Color(0xFF43F5B0),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          _NeonAction(
+            label: 'Join',
+            onPressed: () async {
+              final uid =
+                  FirebaseAuth.instance.currentUser?.uid;
+
+              if (uid == null) return;
+
+              try {
+                await PartyChatData.joinRoom(
+                  roomId: roomId,
+                  uid: uid,
+                );
+
+                if (!context.mounted) return;
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RoomPage(
+                      roomId: roomId,
+                      title: title,
+                    ),
+                  ),
+                );
+              } catch (e) {
+                if (!context.mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      e.toString(),
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}           
                     
 
 
