@@ -3430,9 +3430,12 @@ class _RoomListCard extends StatelessWidget {
                         ),
                       )
                     else
-                      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>
+                      StreamBuilder<
+                          DocumentSnapshot<
+                              Map<String, dynamic>>>(
                         stream: FirebaseFirestore.instance
                             .collection('users')
+                            .doc(ownerUid)
                             .snapshots(),
                         builder: (
                           context,
@@ -5150,14 +5153,14 @@ class _PartyRoomTopAction extends StatelessWidget {
                                 Color(0xCC05030B),
                               ],
                             ),
-),
-child: Text(
-  title,
-  maxLines: 1,
-  overflow: TextOverflow.ellipsis,
-  style: const TextStyle(
-    fontWeight: FontWeight.w900,
-    fontSize: 16,
+                          ),
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
                             ),
                           ),
                         ),
