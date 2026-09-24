@@ -3203,42 +3203,86 @@ class _RoomListCard extends StatelessWidget {
   }
 
   Future<void> _joinRoom(
-    BuildContext context,
-    String title,
-  ) async {
-    final uid =
-        FirebaseAuth.instance.currentUser?.uid;
+  BuildContext context,
+  String title,
+) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
 
-    if (uid == null) return;
+  final description = data['description']?.toString() ?? '';
+  final capacity =
+      (data['userCapacity'] as num?)?.toInt() ?? 100;
+  final roomRef =
+      FirebaseFirestore.instance.collection('rooms').doc(roomId);
 
-    try {
-      await PartyChatData.joinRoom(
-        roomId: roomId,
-        uid: uid,
-      );
+  try {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(roomRef);
 
-      if (!context.mounted) return;
+      if (!snapshot.exists) {
+        throw Exception('Room no longer exists.');
+      }
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RoomPage(
-            roomId: roomId,
-            title: title,
-          ),
+      final current =
+          snapshot.data() ?? <String, dynamic>{};
+
+      final status =
+          current['status']?.toString().toLowerCase();
+
+      if (status != null &&
+          status.isNotEmpty &&
+          status != 'open') {
+        throw Exception('This room is closed.');
+      }
+
+      final currentCount =
+          (current['memberCount'] as num?)?.toInt() ?? 0;
+
+      if (currentCount >= capacity) {
+        throw Exception('This room is full.');
+      }
+
+      final memberRef =
+          roomRef.collection('members').doc(user.uid);
+
+      final memberSnapshot =
+          await transaction.get(memberRef);
+
+      if (!memberSnapshot.exists) {
+        transaction.set(memberRef, {
+          'uid': user.uid,
+          'joinedAt': FieldValue.serverTimestamp(),
+        });
+
+        transaction.update(roomRef, {
+          'memberCount': currentCount + 1,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    });
+
+    if (!context.mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PartyRoomPage(
+          roomId: roomId,
+          title: title,
+          description: description,
         ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
+      ),
+    );
+  } catch (e) {
+    if (!context.mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-          ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          e.toString().replaceFirst('Exception: ', ''),
         ),
-      );
-    }
+      ),
+    );
   }
 }
 
@@ -3836,12 +3880,12 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 }
 
-class _RoomTopAction extends StatelessWidget {
+class _PartyRoomTopAction extends StatelessWidget
   final IconData icon;
   final String? label;
   final VoidCallback? onTap;
 
-  const _RoomTopAction({
+  const _PartyRoomTopAction({
     required this.icon,
     required this.onTap,
     this.label,
@@ -3891,33 +3935,7 @@ class _RoomTopAction extends StatelessWidget {
   }
 }
 
-class _RoomBottomAction extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
 
-  const _RoomBottomAction({
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding:
-            const EdgeInsets.symmetric(
-          horizontal: 5,
-        ),
-        child: Icon(
-          icon,
-          color: PartyColors.gold,
-          size: 23,
-        ),
-      ),
-    );
-  }
-}
 
 
 
