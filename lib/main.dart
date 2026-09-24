@@ -2544,7 +2544,7 @@ class _RoomsTabState extends State<RoomsTab> {
                     color: selected
                         ? null
                         : const Color(0xFF171125),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: selected
                           ? PartyColors.gold
@@ -2863,11 +2863,12 @@ class _RoomListCard extends StatelessWidget {
     final capacity =
         (data['userCapacity'] as num?)?.toInt() ?? 100;
 
-    final micCapacity =
-        (data['micCapacity'] as num?)?.toInt() ?? 15;
+    final description =
+        data['description']?.toString() ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -2891,247 +2892,171 @@ class _RoomListCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              14,
-              13,
-              10,
-              10,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0D0A12),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: PartyColors.gold,
-                      width: 1,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.image_outlined,
+          Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D0A12),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
                     color: PartyColors.gold,
-                    size: 28,
+                    width: 1,
                   ),
                 ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      if (ownerUid.isEmpty)
-                        const Text(
-                          'ID: ------',
-                          style: TextStyle(
-                            color: PartyColors.gold,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                      else
-                        StreamBuilder<
-                            DocumentSnapshot<
-                                Map<String, dynamic>>>(
-                          stream: FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(ownerUid)
-                              .snapshots(),
-                          builder: (
-                            context,
-                            snapshot,
-                          ) {
-                            final ownerData =
-                                snapshot.data?.data();
-
-                            final ownerUserId =
-                                ownerData?['userId']
-                                        ?.toString() ??
-                                    '------';
-
-                            return Text(
-                              'ID: $ownerUserId',
-                              style: const TextStyle(
-                                color: PartyColors.gold,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            );
-                          },
-                        ),
-                    ],
-                  ),
+                child: const Icon(
+                  Icons.image_outlined,
+                  color: PartyColors.gold,
+                  size: 28,
                 ),
+              ),
 
-                _RoomTopAction(
-                  icon: Icons.person_add_alt_1_rounded,
-                  onTap: () async {
-                    await _joinRoom(
-                      context,
+              const SizedBox(width: 11),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       title,
-                    );
-                  },
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    if (ownerUid.isEmpty)
+                      const Text(
+                        'ID: ------',
+                        style: TextStyle(
+                          color: PartyColors.gold,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      )
+                    else
+                      StreamBuilder<
+                          DocumentSnapshot<
+                              Map<String, dynamic>>>(
+                        stream: FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(ownerUid)
+                            .snapshots(),
+                        builder: (
+                          context,
+                          snapshot,
+                        ) {
+                          final ownerData =
+                              snapshot.data?.data();
+
+                          final ownerUserId =
+                              ownerData?['userId']
+                                      ?.toString() ??
+                                  '------';
+
+                          return Text(
+                            'ID: $ownerUserId',
+                            style: const TextStyle(
+                              color: PartyColors.gold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          );
+                        },
+                      ),
+                  ],
                 ),
+              ),
 
-                const SizedBox(width: 4),
-
-                _RoomTopAction(
-                  icon: Icons.people_alt_outlined,
-                  label: '$members',
-                  onTap: () {},
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 9,
+                  vertical: 6,
                 ),
-
-                const SizedBox(width: 4),
-
-                _RoomTopAction(
-                  icon: Icons.more_vert_rounded,
-                  onTap: () {},
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D0A12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: PartyColors.purple,
+                  ),
                 ),
-
-                const SizedBox(width: 4),
-
-                _RoomTopAction(
-                  icon: Icons.close_rounded,
-                  onTap: () {},
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.people_alt_outlined,
+                      color: PartyColors.gold,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$members/$capacity',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
 
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: PartyColors.purple.withOpacity(0.45),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              12,
-              14,
-              12,
-              14,
-            ),
-            child: Column(
-              children: [
-                _buildMicRow(0, 5, micCapacity),
-                const SizedBox(height: 12),
-                _buildMicRow(5, 10, micCapacity),
-                const SizedBox(height: 12),
-                _buildMicRow(10, 15, micCapacity),
-              ],
-            ),
-          ),
-
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: PartyColors.purple.withOpacity(0.45),
-          ),
-
-          Container(
-            height: 145,
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            alignment: Alignment.topLeft,
-            child: const Text(
-              'User messages will appear here',
-              style: TextStyle(
-                color: Colors.white38,
+          if (description.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white60,
                 fontSize: 12,
+                height: 1.35,
               ),
             ),
-          ),
+          ],
 
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: PartyColors.purple.withOpacity(0.45),
-          ),
+          const SizedBox(height: 12),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              10,
-              10,
-              10,
-              12,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 44,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D0A12),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: PartyColors.purple,
-                      ),
-                    ),
-                    child: const Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'SMS',
-                            style: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.send_rounded,
-                          color: PartyColors.gold,
-                          size: 21,
-                        ),
-                      ],
-                    ),
-                  ),
+          SizedBox(
+            width: double.infinity,
+            height: 42,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                await _joinRoom(
+                  context,
+                  title,
+                );
+              },
+              icon: const Icon(
+                Icons.login_rounded,
+                size: 19,
+              ),
+              label: const Text(
+                'Join Room',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
                 ),
-
-                const SizedBox(width: 7),
-
-                _RoomBottomAction(
-                  icon: Icons.mic_rounded,
-                  onTap: () {},
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: PartyColors.purple,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
                 ),
-
-                _RoomBottomAction(
-                  icon: Icons.music_note_rounded,
-                  onTap: () {},
-                ),
-
-                _RoomBottomAction(
-                  icon: Icons.card_giftcard_rounded,
-                  onTap: () {},
-                ),
-
-                _RoomBottomAction(
-                  icon: Icons.sports_esports_rounded,
-                  onTap: () {},
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -3139,151 +3064,120 @@ class _RoomListCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMicRow(
-    int start,
-    int end,
-    int micCapacity,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(
-        end - start,
-        (index) {
-          final micNumber = start + index + 1;
-          final active = micNumber <= micCapacity;
-
-          return SizedBox(
-            width: 68,
-            height: 78,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 68,
-                  height: 68,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF100C18),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: active
-                          ? PartyColors.purple
-                          : Colors.white12,
-                      width: 2,
-                    ),
-                  ),
-                  child: Center(
-                    child: active
-                        ? const Icon(
-                            Icons.add_rounded,
-                            color: PartyColors.purple,
-                            size: 32,
-                          )
-                        : const Icon(
-                            Icons.mic_none_rounded,
-                            color: Colors.white24,
-                            size: 21,
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  active ? 'Join' : 'Locked',
-                  style: TextStyle(
-                    color: active
-                        ? Colors.white
-                        : Colors.white30,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
   Future<void> _joinRoom(
-  BuildContext context,
-  String title,
-) async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
+    BuildContext context,
+    String title,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-  final description = data['description']?.toString() ?? '';
-  final capacity =
-      (data['userCapacity'] as num?)?.toInt() ?? 100;
-  final roomRef =
-      FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    final description =
+        data['description']?.toString() ?? '';
 
-  try {
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final snapshot = await transaction.get(roomRef);
+    final capacity =
+        (data['userCapacity'] as num?)?.toInt() ?? 100;
 
-      if (!snapshot.exists) {
-        throw Exception('Room no longer exists.');
-      }
+    final roomRef =
+        FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(roomId);
 
-      final current =
-          snapshot.data() ?? <String, dynamic>{};
+    try {
+      await FirebaseFirestore.instance.runTransaction(
+        (transaction) async {
+          final snapshot =
+              await transaction.get(roomRef);
 
-      final status =
-          current['status']?.toString().toLowerCase();
+          if (!snapshot.exists) {
+            throw Exception(
+              'Room no longer exists.',
+            );
+          }
 
-      if (status != null &&
-          status.isNotEmpty &&
-          status != 'open') {
-        throw Exception('This room is closed.');
-      }
+          final current =
+              snapshot.data() ??
+                  <String, dynamic>{};
 
-      final currentCount =
-          (current['memberCount'] as num?)?.toInt() ?? 0;
+          final status =
+              current['status']
+                  ?.toString()
+                  .toLowerCase();
 
-      if (currentCount >= capacity) {
-        throw Exception('This room is full.');
-      }
+          if (status != null &&
+              status.isNotEmpty &&
+              status != 'open') {
+            throw Exception(
+              'This room is closed.',
+            );
+          }
 
-      final memberRef =
-          roomRef.collection('members').doc(user.uid);
+          final currentCount =
+              (current['memberCount'] as num?)
+                      ?.toInt() ??
+                  0;
 
-      final memberSnapshot =
-          await transaction.get(memberRef);
+          if (currentCount >= capacity) {
+            throw Exception(
+              'This room is full.',
+            );
+          }
 
-      if (!memberSnapshot.exists) {
-        transaction.set(memberRef, {
-          'uid': user.uid,
-          'joinedAt': FieldValue.serverTimestamp(),
-        });
+          final memberRef =
+              roomRef
+                  .collection('members')
+                  .doc(user.uid);
 
-        transaction.update(roomRef, {
-          'memberCount': currentCount + 1,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      }
-    });
+          final memberSnapshot =
+              await transaction.get(memberRef);
 
-    if (!context.mounted) return;
+          if (!memberSnapshot.exists) {
+            transaction.set(
+              memberRef,
+              {
+                'uid': user.uid,
+                'joinedAt':
+                    FieldValue.serverTimestamp(),
+              },
+            );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PartyRoomPage(
-          roomId: roomId,
-          title: title,
-          description: description,
+            transaction.update(
+              roomRef,
+              {
+                'memberCount':
+                    currentCount + 1,
+                'updatedAt':
+                    FieldValue.serverTimestamp(),
+              },
+            );
+          }
+        },
+      );
+
+      if (!context.mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PartyRoomPage(
+            roomId: roomId,
+            title: title,
+            description: description,
+          ),
         ),
-      ),
-    );
-  } catch (e) {
-    if (!context.mounted) return;
+      );
+    } catch (e) {
+      if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          e.toString().replaceFirst('Exception: ', ''),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst(
+              'Exception: ',
+              '',
+            ),
+          ),
         ),
-      ),
-    );
+      );
     }
   }
 }
@@ -3360,8 +3254,8 @@ class _RoomBottomAction extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 9,
-          vertical: 7,
+          horizontal: 8,
+          vertical: 6,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -3558,132 +3452,149 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     required int capacity,
     required String ownerUid,
   }) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.fromLTRB(
-        12,
         10,
-        12,
-        12,
+        10,
+        10,
+        4,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xDD0D0915),
-        border: Border(
-          bottom: BorderSide(
-            color: PartyColors.purple,
-            width: 0.8,
-          ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(
+          12,
+          12,
+          10,
+          12,
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: const Color(0xFF171126),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
+        decoration: BoxDecoration(
+          color: const Color(0xDD0D0915),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: PartyColors.purple,
+            width: 1.1,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x332D0B55),
+              blurRadius: 14,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: const Color(0xFF171126),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: PartyColors.gold,
+                  width: 1.2,
+                ),
+              ),
+              child: const Icon(
+                Icons.image_outlined,
                 color: PartyColors.gold,
+                size: 29,
               ),
             ),
-            child: const Icon(
-              Icons.image_outlined,
-              color: PartyColors.gold,
-              size: 25,
-            ),
-          ),
 
-          const SizedBox(width: 9),
+            const SizedBox(width: 10),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-
-                const SizedBox(height: 3),
-
-                if (ownerUid.isEmpty)
-                  const Text(
-                    'ID: ------',
-                    style: TextStyle(
-                      color: PartyColors.gold,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
                     ),
-                  )
-                else
-                  StreamBuilder<
-                      DocumentSnapshot<
-                          Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(ownerUid)
-                        .snapshots(),
-                    builder: (
-                      context,
-                      snapshot,
-                    ) {
-                      final userData =
-                          snapshot.data?.data();
-
-                      final userId =
-                          userData?['userId']
-                                  ?.toString() ??
-                              '------';
-
-                      return Text(
-                        'ID: $userId',
-                        style: const TextStyle(
-                          color: PartyColors.gold,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      );
-                    },
                   ),
-              ],
+
+                  const SizedBox(height: 4),
+
+                  if (ownerUid.isEmpty)
+                    const Text(
+                      'ID: ------',
+                      style: TextStyle(
+                        color: PartyColors.gold,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                  else
+                    StreamBuilder<
+                        DocumentSnapshot<
+                            Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(ownerUid)
+                          .snapshots(),
+                      builder: (
+                        context,
+                        snapshot,
+                      ) {
+                        final userData =
+                            snapshot.data?.data();
+
+                        final userId =
+                            userData?['userId']
+                                    ?.toString() ??
+                                '------';
+
+                        return Text(
+                          'ID: $userId',
+                          style: const TextStyle(
+                            color: PartyColors.gold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
             ),
-          ),
 
-          _PartyRoomTopAction(
-            icon: Icons.person_add_alt_1_rounded,
-            label: 'Join',
-            onTap: () {},
-          ),
+            const SizedBox(width: 8),
 
-          const SizedBox(width: 4),
+            _PartyRoomTopAction(
+              icon: Icons.person_add_alt_1_rounded,
+              label: 'Join',
+              onTap: () {},
+            ),
 
-          _PartyRoomTopAction(
-            icon: Icons.people_alt_outlined,
-            label: '$members',
-            onTap: () {},
-          ),
+            const SizedBox(width: 5),
 
-          const SizedBox(width: 4),
+            _PartyRoomTopAction(
+              icon: Icons.people_alt_outlined,
+              label: '$members',
+              onTap: () {},
+            ),
 
-          _PartyRoomTopAction(
-            icon: Icons.more_vert_rounded,
-            onTap: () {},
-          ),
+            const SizedBox(width: 5),
 
-          const SizedBox(width: 4),
+            _PartyRoomTopAction(
+              icon: Icons.more_vert_rounded,
+              onTap: () {},
+            ),
 
-          _PartyRoomTopAction(
-            icon: Icons.close_rounded,
-            onTap: leaving ? null : _leaveRoom,
-          ),
-        ],
+            const SizedBox(width: 5),
+
+            _PartyRoomTopAction(
+              icon: Icons.close_rounded,
+              onTap: leaving ? null : _leaveRoom,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -3698,16 +3609,16 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         10,
-        12,
+        10,
         10,
         4,
       ),
       child: Column(
         children: [
           _buildMicRow(1, 5, totalMics),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           _buildMicRow(6, 10, totalMics),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           _buildMicRow(11, 15, totalMics),
         ],
       ),
@@ -3720,6 +3631,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     int micCapacity,
   ) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(
         end - start + 1,
         (index) {
@@ -3729,49 +3641,47 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           final enabled =
               micNumber <= micCapacity;
 
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: index == 4 ? 0 : 5,
-              ),
-              child: Container(
-                height: 58,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF100C18),
-                  borderRadius:
-                      BorderRadius.circular(13),
-                  border: Border.all(
+          return SizedBox(
+            width: 64,
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF100C18),
+                    border: Border.all(
+                      color: enabled
+                          ? PartyColors.purple
+                          : Colors.white12,
+                      width: 1.6,
+                    ),
+                  ),
+                  child: Icon(
+                    enabled
+                        ? Icons.add_rounded
+                        : Icons.lock_outline_rounded,
                     color: enabled
                         ? PartyColors.purple
-                        : Colors.white12,
+                        : Colors.white24,
+                    size: 30,
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.mic_none_rounded,
-                      color: enabled
-                          ? PartyColors.gold
-                          : Colors.white24,
-                      size: 20,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Mic $micNumber',
-                      style: TextStyle(
-                        color: enabled
-                            ? Colors.white70
-                            : Colors.white24,
-                        fontSize: 8,
-                        fontWeight:
-                            FontWeight.w700,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 4),
+                Text(
+                  enabled ? 'Join' : 'Locked',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: enabled
+                        ? Colors.white
+                        : Colors.white24,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
+              ],
             ),
           );
         },
@@ -3869,7 +3779,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   const Icon(
                     Icons.send_rounded,
                     color: PartyColors.gold,
-                    size: 21,
+                    size: 19,
                   ),
                 ],
               ),
