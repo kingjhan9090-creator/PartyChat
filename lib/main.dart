@@ -2401,7 +2401,7 @@ class _PartyLoadingState extends State<PartyLoading>
        ROOMS PAGE
        ============================================================ */
 
-         class RoomsTab extends StatefulWidget {
+class RoomsTab extends StatefulWidget {
   const RoomsTab({super.key});
 
   @override
@@ -2410,19 +2410,12 @@ class _PartyLoadingState extends State<PartyLoading>
 
 class _RoomsTabState extends State<RoomsTab> {
   int selectedTab = 0;
-  final TextEditingController searchController = TextEditingController();
 
   static const List<String> tabs = [
     'All Room',
     'Popular Room',
     'My Room',
   ];
-
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -2438,7 +2431,6 @@ class _RoomsTabState extends State<RoomsTab> {
             ),
           ),
           const SizedBox(height: 16),
-
           GestureDetector(
             onTap: () {
               Navigator.push(
@@ -2461,14 +2453,11 @@ class _RoomsTabState extends State<RoomsTab> {
               ),
               child: const Row(
                 children: [
-                  Icon(
-                    Icons.search_rounded,
-                    color: PartyColors.gold,
-                  ),
+                  Icon(Icons.search_rounded, color: PartyColors.gold),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Search UID / Name / Room',
+                      'Search UID / Name / Room Name',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 15,
@@ -2479,13 +2468,9 @@ class _RoomsTabState extends State<RoomsTab> {
               ),
             ),
           ),
-
           const SizedBox(height: 18),
-
           _buildTabs(),
-
           const SizedBox(height: 22),
-
           _buildRooms(),
         ],
       ),
@@ -2494,86 +2479,62 @@ class _RoomsTabState extends State<RoomsTab> {
 
   Widget _buildTabs() {
     return Row(
-      children: List.generate(
-        tabs.length,
-        (index) {
-          final selected = selectedTab == index;
-
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: index == tabs.length - 1 ? 0 : 7,
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedTab = index;
-                  });
-                },
-                child: Container(
-                  height: 46,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: selected
-                        ? const LinearGradient(
-                            colors: [
-                              PartyColors.purple,
-                              PartyColors.gold,
-                            ],
-                          )
-                        : null,
-                    color: selected
-                        ? null
-                        : const Color(0xFF171125),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: selected
-                          ? PartyColors.gold
-                          : PartyColors.purple,
-                    ),
+      children: List.generate(tabs.length, (index) {
+        final selected = selectedTab == index;
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: index == tabs.length - 1 ? 0 : 7,
+            ),
+            child: GestureDetector(
+              onTap: () => setState(() => selectedTab = index),
+              child: Container(
+                height: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: selected
+                      ? const LinearGradient(
+                          colors: [PartyColors.purple, PartyColors.gold],
+                        )
+                      : null,
+                  color: selected ? null : const Color(0xFF171125),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: selected ? PartyColors.gold : PartyColors.purple,
                   ),
-                  child: Text(
-                    tabs[index],
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      color: selected
-                          ? Colors.white
-                          : Colors.white70,
-                    ),
+                ),
+                child: Text(
+                  tabs[index],
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    color: selected ? Colors.white : Colors.white70,
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
   }
 
   Widget _buildRooms() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-
     if (uid == null) {
       return const Padding(
         padding: EdgeInsets.only(top: 80),
         child: Center(
           child: Text(
             'Please login first.',
-            style: TextStyle(
-              color: Colors.white54,
-            ),
+            style: TextStyle(color: Colors.white54),
           ),
         ),
       );
     }
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('rooms')
-          .where('status', isEqualTo: 'open')
-          .snapshots(),
+      stream: FirebaseFirestore.instance.collection('rooms').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Padding(
@@ -2581,9 +2542,7 @@ class _RoomsTabState extends State<RoomsTab> {
             child: Center(
               child: Text(
                 'Could not load rooms.',
-                style: TextStyle(
-                  color: Colors.white54,
-                ),
+                style: TextStyle(color: Colors.white54),
               ),
             ),
           );
@@ -2596,38 +2555,35 @@ class _RoomsTabState extends State<RoomsTab> {
           );
         }
 
-        List<QueryDocumentSnapshot<Map<String, dynamic>>> rooms =
-            List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(
+        var rooms = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(
           snapshot.data!.docs,
         );
 
+        rooms = rooms.where((room) {
+          final data = room.data();
+          final status = data['status']?.toString().toLowerCase();
+          return status == null || status.isEmpty || status == 'open';
+        }).toList();
+
         if (selectedTab == 2) {
           rooms = rooms
-              .where(
-                (room) =>
-                    room.data()['ownerUid']?.toString() == uid,
-              )
+              .where((room) => room.data()['ownerUid']?.toString() == uid)
               .toList();
         }
 
         if (selectedTab == 1) {
           rooms.sort((a, b) {
-            final aCount =
-                (a.data()['memberCount'] as num?)?.toInt() ?? 0;
-            final bCount =
-                (b.data()['memberCount'] as num?)?.toInt() ?? 0;
-
+            final aCount = (a.data()['memberCount'] as num?)?.toInt() ?? 0;
+            final bCount = (b.data()['memberCount'] as num?)?.toInt() ?? 0;
             return bCount.compareTo(aCount);
           });
         } else {
           rooms.sort((a, b) {
             final aTime = a.data()['updatedAt'];
             final bTime = b.data()['updatedAt'];
-
             if (aTime is Timestamp && bTime is Timestamp) {
               return bTime.compareTo(aTime);
             }
-
             return 0;
           });
         }
@@ -2641,23 +2597,19 @@ class _RoomsTabState extends State<RoomsTab> {
                     ? 'You have not created any rooms yet.'
                     : 'No active rooms yet.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white54,
-                ),
+                style: const TextStyle(color: Colors.white54),
               ),
             ),
           );
         }
 
         return Column(
-          children: rooms
-              .map<Widget>(
-                (room) => _RoomListCard(
-                  roomId: room.id,
-                  data: room.data(),
-                ),
-              )
-              .toList(),
+          children: rooms.map((room) {
+            return _RoomListCard(
+              roomId: room.id,
+              data: room.data(),
+            );
+          }).toList(),
         );
       },
     );
@@ -2673,40 +2625,91 @@ class _RoomListCard extends StatelessWidget {
     required this.data,
   });
 
+  Future<void> _joinRoom(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final title = _roomTitle;
+    final description = data['description']?.toString() ?? '';
+    final capacity = (data['userCapacity'] as num?)?.toInt() ?? 100;
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
+
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(roomRef);
+        if (!snapshot.exists) {
+          throw Exception('Room no longer exists.');
+        }
+
+        final current = snapshot.data() ?? <String, dynamic>{};
+        final status = current['status']?.toString().toLowerCase();
+        if (status != null && status.isNotEmpty && status != 'open') {
+          throw Exception('This room is closed.');
+        }
+
+        final currentCount = (current['memberCount'] as num?)?.toInt() ?? 0;
+        if (currentCount >= capacity) {
+          throw Exception('This room is full.');
+        }
+
+        final memberRef = roomRef.collection('members').doc(user.uid);
+        final memberSnapshot = await transaction.get(memberRef);
+
+        if (!memberSnapshot.exists) {
+          transaction.set(memberRef, {
+            'uid': user.uid,
+            'joinedAt': FieldValue.serverTimestamp(),
+          });
+          transaction.update(roomRef, {
+            'memberCount': currentCount + 1,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      });
+
+      if (!context.mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PartyRoomPage(
+            roomId: roomId,
+            title: title,
+            description: description,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
+  }
+
+  String get _roomTitle {
+    return data['roomName']?.toString() ??
+        data['title']?.toString() ??
+        data['name']?.toString() ??
+        'PartyChat Room';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final title =
-        data['title']?.toString() ?? 'PartyChat Room';
-
-    final description =
-        data['description']?.toString() ?? '';
-
-    final members =
-        (data['memberCount'] as num?)?.toInt() ?? 0;
-
-    final capacity =
-        (data['userCapacity'] as num?)?.toInt() ?? 100;
+    final description = data['description']?.toString() ?? '';
+    final members = (data['memberCount'] as num?)?.toInt() ?? 0;
+    final capacity = (data['userCapacity'] as num?)?.toInt() ?? 100;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF171126),
-            Color(0xFF0D0917),
-          ],
+          colors: [Color(0xFF171126), Color(0xFF0D0917)],
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: PartyColors.purple,
-          width: 1,
-        ),
+        border: Border.all(color: PartyColors.purple),
         boxShadow: const [
-          BoxShadow(
-            color: Color(0x331C00FF),
-            blurRadius: 12,
-          ),
+          BoxShadow(color: Color(0x331C00FF), blurRadius: 12),
         ],
       ),
       child: Row(
@@ -2717,7 +2720,7 @@ class _RoomListCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  _roomTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -2725,26 +2728,18 @@ class _RoomListCard extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Text(
                   'ID: $roomId',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: PartyColors.gold,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 Text(
-                  description.isEmpty
-                      ? 'Chat • Friends • Fun'
-                      : description,
+                  description.isEmpty ? 'Chat • Friends • Fun' : description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -2752,9 +2747,7 @@ class _RoomListCard extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-
                 const SizedBox(height: 7),
-
                 Text(
                   '$members / $capacity users',
                   style: const TextStyle(
@@ -2766,57 +2759,256 @@ class _RoomListCard extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(width: 10),
-
           _NeonAction(
             label: 'Join',
-            onPressed: () async {
-              final uid =
-                  FirebaseAuth.instance.currentUser?.uid;
-
-              if (uid == null) return;
-
-              try {
-                await PartyChatData.joinRoom(
-                  roomId: roomId,
-                  uid: uid,
-                );
-
-                if (!context.mounted) return;
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RoomPage(
-                      roomId: roomId,
-                      title: title,
-                    ),
-                  ),
-                );
-              } catch (e) {
-                if (!context.mounted) return;
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      e.toString(),
-                    ),
-                  ),
-                );
-              }
-            },
+            onPressed: () => _joinRoom(context),
           ),
         ],
       ),
     );
   }
-}           
-                    
+}
 
+class PartyRoomPage extends StatefulWidget {
+  final String roomId;
+  final String title;
+  final String description;
 
+  const PartyRoomPage({
+    super.key,
+    required this.roomId,
+    required this.title,
+    required this.description,
+  });
 
-    /* ============================================================
+  @override
+  State<PartyRoomPage> createState() => _PartyRoomPageState();
+}
+
+class _PartyRoomPageState extends State<PartyRoomPage> {
+  bool leaving = false;
+
+  Future<void> _leaveRoom() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || leaving) return;
+    setState(() => leaving = true);
+
+    try {
+      final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+      final memberRef = roomRef.collection('members').doc(user.uid);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final roomSnapshot = await transaction.get(roomRef);
+        final memberSnapshot = await transaction.get(memberRef);
+        if (!memberSnapshot.exists) return;
+
+        final current = roomSnapshot.data() ?? <String, dynamic>{};
+        final currentCount = (current['memberCount'] as num?)?.toInt() ?? 0;
+        transaction.delete(memberRef);
+        transaction.update(roomRef, {
+          'memberCount': currentCount > 0 ? currentCount - 1 : 0,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      });
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => leaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+
+    return Scaffold(
+      backgroundColor: PartyColors.black,
+      body: _NeonBackground(
+        child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: roomRef.snapshots(),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.data() ?? <String, dynamic>{};
+            final title = data['roomName']?.toString() ??
+                data['title']?.toString() ??
+                widget.title;
+            final description = data['description']?.toString() ?? widget.description;
+            final members = (data['memberCount'] as num?)?.toInt() ?? 0;
+            final capacity = (data['userCapacity'] as num?)?.toInt() ?? 100;
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: leaving ? null : _leaveRoom,
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Text(
+                              'ID: ${widget.roomId} • $members / $capacity',
+                              style: const TextStyle(
+                                color: PartyColors.gold,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: leaving ? null : _leaveRoom,
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 30),
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF1C1230), Color(0xFF0D0917)],
+                          ),
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: PartyColors.purple),
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.forum_rounded,
+                              color: PartyColors.gold,
+                              size: 54,
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              description.isEmpty
+                                  ? 'Chat • Friends • Fun'
+                                  : description,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              '$members people in this room',
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Room Members',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                        stream: roomRef.collection('members').snapshots(),
+                        builder: (context, membersSnapshot) {
+                          if (membersSnapshot.hasError) {
+                            return const Text(
+                              'Could not load members.',
+                              style: TextStyle(color: Colors.white54),
+                            );
+                          }
+                          if (!membersSnapshot.hasData) {
+                            return const SizedBox(
+                              height: 100,
+                              child: PartyLoading(),
+                            );
+                          }
+                          if (membersSnapshot.data!.docs.isEmpty) {
+                            return const Text(
+                              'No members yet.',
+                              style: TextStyle(color: Colors.white54),
+                            );
+                          }
+                          return Column(
+                            children: membersSnapshot.data!.docs.map((member) {
+                              final uid = member.id;
+                              return FutureBuilder<Map<String, dynamic>?>(
+                                future: PartyChatData.userData(uid),
+                                builder: (context, userSnapshot) {
+                                  final userData = userSnapshot.data ?? <String, dynamic>{};
+                                  final name = userData['name']?.toString() ?? 'Party User';
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF0D0A12),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: const Color(0x443B2A55)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        _NetworkOrAvatar(
+                                          photoUrl: userData['photoURL'] as String?,
+                                          photoBase64: userData['photoBase64'] as String?,
+                                          avatar: userData['avatar'] as String?,
+                                          radius: 21,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(fontWeight: FontWeight.w800),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/* ============================================================
        MAIN PAGE
        ============================================================ */
 
@@ -2831,7 +3023,7 @@ class _RoomListCard extends StatelessWidget {
       int selected = 0;
       final pages = const [
   HomeTab(),
-  NewPartyRoomPage(),
+  RoomsTab(),
   GamesTab(),
   WalletTab(),
   ProfileTab(),
@@ -3182,27 +3374,6 @@ class _RoomListCard extends StatelessWidget {
       }
     }
 
-    // ============================================================
-    // POPULAR ROOMS PAGE
-    // ============================================================
-    // ============================================================
-    // NEW ROOMS PAGE
-    // ============================================================
-    // ============================================================
-    // YOUR ROOM PAGE
-    // ============================================================
-    // ============================================================
-    // MY ROOM
-    // ============================================================
-    // ============================================================
-    // RECENTLY JOINED
-    // ============================================================
-    // ============================================================
-    // JOINED ROOMS
-    // ============================================================
-    // ============================================================
-    // WITH FRIENDS
-    // ============================================================
     /* ============================================================
        PREMIUM ROOM UI
        ============================================================ */
@@ -7069,315 +7240,3 @@ class AdminSupportPanelPage extends StatelessWidget {
         );
       }
     }
-
-
-
-/* ============================================================
-   NEW PARTY ROOM - STEP 1
-   ============================================================ */
-
-class NewPartyRoomPage extends StatelessWidget {
-  const NewPartyRoomPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF050307),
-      body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment.topCenter,
-              radius: 1.2,
-              colors: [
-                Color(0xFF241044),
-                Color(0xFF0C0615),
-                Color(0xFF050307),
-              ],
-            ),
-          ),
-          child: Column(
-            children: [
-              const _NewRoomHeader(),
-              const Expanded(
-                child: Center(
-                  child: Text(
-                    'Room',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   NEW PARTY ROOM - STEP 1
-   ============================================================ */
-
-
-class _NewRoomHeader extends StatelessWidget {
-  const _NewRoomHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xCC08050D),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0x66FFC928),
-          width: 1,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x331000FF),
-            blurRadius: 25,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFFFC928),
-                  Color(0xFFB65CFF),
-                ],
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x66FFC928),
-                  blurRadius: 18,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(3),
-            child: ClipOval(
-              child: Container(
-                color: const Color(0xFF120A20),
-                child: const Icon(
-                  Icons.workspace_premium_rounded,
-                  color: Color(0xFFFFC928),
-                  size: 42,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Party Vibes Room 👑',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                SizedBox(height: 7),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.people_alt_rounded,
-                      color: Colors.white70,
-                      size: 18,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      '37 / 100',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    _RoomLeaderBadge(),
-                  ],
-                ),
-                SizedBox(height: 7),
-                Text(
-                  'Good Vibes • Make Friends • Have Fun',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 6),
-          _RoomHeaderButton(
-            icon: Icons.groups_rounded,
-            label: 'Members',
-            badge: '3',
-          ),
-          const SizedBox(width: 5),
-          _RoomHeaderButton(
-            icon: Icons.settings_rounded,
-            label: 'Manage',
-          ),
-          const SizedBox(width: 5),
-          _RoomHeaderButton(
-            icon: Icons.close_rounded,
-            label: 'Leave',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RoomLeaderBadge extends StatelessWidget {
-  const _RoomLeaderBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0x33222200),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFFFC928),
-        ),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.workspace_premium_rounded,
-            color: Color(0xFFFFC928),
-            size: 15,
-          ),
-          SizedBox(width: 4),
-          Text(
-            'Leader',
-            style: TextStyle(
-              color: Color(0xFFFFD95A),
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RoomHeaderButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String? badge;
-
-  const _RoomHeaderButton({
-    required this.icon,
-    required this.label,
-    this.badge,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0x22100020),
-                border: Border.all(
-                  color: const Color(0xFF8D3DFF),
-                  width: 1.3,
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x441000FF),
-                    blurRadius: 12,
-                  ),
-                ],
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-            if (badge != null)
-              Positioned(
-                right: -3,
-                top: -5,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 4,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFF3158),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    badge!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 5),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
