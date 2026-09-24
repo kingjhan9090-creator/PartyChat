@@ -2476,7 +2476,7 @@ class _RoomsTabState extends State<RoomsTab> {
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Search UID / Name / Room',
+                      'Search UID / Name / Room Name',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 15,
@@ -3287,9 +3287,6 @@ class _RoomListCard extends StatelessWidget {
   }
 }
 
-}
-
-
 
 class _RoomTopAction extends StatelessWidget {
   final IconData icon;
@@ -3658,7 +3655,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             ),
           ),
 
-          _RoomTopAction(
+          _PartyRoomTopAction(
             icon: Icons.person_add_alt_1_rounded,
             label: 'Join',
             onTap: () {},
@@ -3666,7 +3663,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
           const SizedBox(width: 4),
 
-          _RoomTopAction(
+          _PartyRoomTopAction(
             icon: Icons.people_alt_outlined,
             label: '$members',
             onTap: () {},
@@ -3674,14 +3671,14 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
           const SizedBox(width: 4),
 
-          _RoomTopAction(
+          _PartyRoomTopAction(
             icon: Icons.more_vert_rounded,
             onTap: () {},
           ),
 
           const SizedBox(width: 4),
 
-          _RoomTopAction(
+          _PartyRoomTopAction(
             icon: Icons.close_rounded,
             onTap: leaving ? null : _leaveRoom,
           ),
@@ -3905,7 +3902,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 }
 
-class _PartyRoomTopAction extends StatelessWidget
+class _PartyRoomTopAction extends StatelessWidget {
   final IconData icon;
   final String? label;
   final VoidCallback? onTap;
