@@ -2401,334 +2401,344 @@ class _PartyLoadingState extends State<PartyLoading>
        ROOMS PAGE
        ============================================================ */
 
-class RoomsTab extends StatelessWidget {
+class RoomsTab extends StatefulWidget {
   const RoomsTab({super.key});
 
-  void _openRoom(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const NewPartyRoomPage(),
-      ),
-    );
-  }
+  @override
+  State<RoomsTab> createState() => _RoomsTabState();
+}
 
-  Widget _roomCard(
-    BuildContext context, {
-    required String roomName,
-    required String roomId,
-    required String hostName,
-    required int members,
-    required int level,
-    required IconData icon,
-  }) {
-    return GestureDetector(
-      onTap: () => _openRoom(context),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF21152E),
-              Color(0xFF0F0A15),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(
-            color: const Color(0xFF8D3DFF),
-            width: 1,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x338D3DFF),
-              blurRadius: 12,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Room image / frame
-            Container(
-              width: 82,
-              height: 82,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(17),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFFFD45C),
-                    Color(0xFF8D3DFF),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x558D3DFF),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: Container(
-                margin: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: const Color(0xFF120A1D),
-                ),
-                child: Icon(
-                  icon,
-                  color: const Color(0xFFFFD45C),
-                  size: 38,
-                ),
-              ),
-            ),
+class _RoomsTabState extends State<RoomsTab> {
+  int selectedMainTab = 0;
+  int selectedMyRoomTab = 0;
 
-            const SizedBox(width: 12),
+  static const mainTabs = [
+    'All Room',
+    'Popular Room',
+    'New Room',
+    'My Room',
+  ];
 
-            // Room information
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    roomName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.flag_rounded,
-                        color: Color(0xFF4CAF50),
-                        size: 17,
-                      ),
-                      const SizedBox(width: 5),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0x3348A9FF),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '$level',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          'Room ID: $roomId',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF6EDFFF),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 7),
-
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.person_rounded,
-                        color: Color(0xFFFFD45C),
-                        size: 15,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          hostName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.people_alt_rounded,
-                        color: Color(0xFFC7A7FF),
-                        size: 15,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$members',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 5),
-
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: Color(0xFFB77CFF),
-              size: 17,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  static const myRoomTabs = [
+    'Recently Joined',
+    'Joined',
+    'With Friend',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFF12091D),
-            Color(0xFF07050B),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Rooms title
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
-              child: Row(
+    return _NeonBackground(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 110),
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Rooms',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PartyChatSearchPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.search_rounded,
+                  color: Color(0xFFFFC83D),
+                  size: 28,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PartyChatSearchPage(),
+                ),
+              );
+            },
+            child: Container(
+              height: 52,
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D0A12),
+                borderRadius: BorderRadius.circular(17),
+                border: Border.all(
+                  color: const Color(0xFF7B3FF2),
+                ),
+              ),
+              child: const Row(
                 children: [
-                  const Expanded(
+                  Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFFFFC83D),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
                     child: Text(
-                      'Rooms',
+                      'Search UID, name or room name',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 27,
-                        fontWeight: FontWeight.w900,
+                        color: Colors.white54,
+                        fontSize: 14,
                       ),
-                    ),
-                  ),
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFF1A1025),
-                      border: Border.all(
-                        color: const Color(0xFF8D3DFF),
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.search_rounded,
-                      color: Colors.white,
-                      size: 23,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
 
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(14, 4, 14, 110),
-                children: [
-                  _roomCard(
-                    context,
-                    roomName: 'Party Vibes Room 👑',
-                    roomId: '910870',
-                    hostName: 'Hamza',
-                    members: 37,
-                    level: 5,
-                    icon: Icons.workspace_premium_rounded,
-                  ),
+          const SizedBox(height: 14),
 
-                  _roomCard(
-                    context,
-                    roomName: 'Royal World 🌙',
-                    roomId: '316472',
-                    hostName: 'Ayesha',
-                    members: 42,
-                    level: 3,
-                    icon: Icons.favorite_rounded,
-                  ),
+          SizedBox(
+            height: 46,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: mainTabs.length,
+              separatorBuilder: (_, __) =>
+                  const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final selected = selectedMainTab == index;
 
-                  _roomCard(
-                    context,
-                    roomName: 'Attack Family 👨‍👩‍👧',
-                    roomId: '828515',
-                    hostName: 'Zain',
-                    members: 68,
-                    level: 4,
-                    icon: Icons.groups_rounded,
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedMainTab = index;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                    ),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      gradient: selected
+                          ? const LinearGradient(
+                              colors: [
+                                Color(0xFF7B3FF2),
+                                Color(0xFFD6A84F),
+                              ],
+                            )
+                          : null,
+                      color: selected
+                          ? null
+                          : const Color(0xFF15101E),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: const Color(0xFF7B3FF2),
+                      ),
+                    ),
+                    child: Text(
+                      mainTabs[index],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
+                );
+              },
+            ),
+          ),
 
-                  _roomCard(
-                    context,
-                    roomName: 'Lovely Time 💕',
-                    roomId: '466939',
-                    hostName: 'Sara',
-                    members: 31,
-                    level: 3,
-                    icon: Icons.auto_awesome_rounded,
-                  ),
+          if (selectedMainTab == 3) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 42,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: myRoomTabs.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final selected = selectedMyRoomTab == index;
 
-                  _roomCard(
-                    context,
-                    roomName: 'Music & Friends 🎵',
-                    roomId: '652378',
-                    hostName: 'Noor',
-                    members: 52,
-                    level: 11,
-                    icon: Icons.music_note_rounded,
-                  ),
-
-                  _roomCard(
-                    context,
-                    roomName: 'Chill Vibes ✨',
-                    roomId: '583214',
-                    hostName: 'Ali',
-                    members: 24,
-                    level: 6,
-                    icon: Icons.nightlife_rounded,
-                  ),
-                ],
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedMyRoomTab = index;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 13,
+                      ),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? const Color(0xFF2B1940)
+                            : const Color(0xFF110C18),
+                        borderRadius: BorderRadius.circular(13),
+                        border: Border.all(
+                          color: selected
+                              ? const Color(0xFFD6A84F)
+                              : const Color(0xFF3B2553),
+                        ),
+                      ),
+                      child: Text(
+                        myRoomTabs[index],
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
-        ),
+
+          const SizedBox(height: 18),
+
+          _buildRealRooms(),
+        ],
       ),
     );
   }
+
+  Widget _buildRealRooms() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (selectedMainTab == 3 && uid == null) {
+      return const _RoomEmptyState(
+        text: 'Please login first.',
+      );
+    }
+
+    if (selectedMainTab == 3) {
+      return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('joinedRooms')
+            .where('active', isEqualTo: true)
+            .snapshots(),
+        builder: (context, joinedSnapshot) {
+          if (joinedSnapshot.hasError) {
+            return const _RoomEmptyState(
+              text: 'Could not load your rooms.',
+            );
+          }
+
+          if (!joinedSnapshot.hasData) {
+            return const SizedBox(
+              height: 180,
+              child: PartyLoading(),
+            );
+          }
+
+          final ids = joinedSnapshot.data!.docs
+              .map((doc) => doc.id)
+              .toList();
+
+          if (ids.isEmpty) {
+            return const _RoomEmptyState(
+              text: 'You have not joined any rooms yet.',
+            );
+          }
+
+          return Column(
+            children: ids.map((roomId) {
+              return StreamBuilder<
+                  DocumentSnapshot<Map<String, dynamic>>>(
+                stream: PartyChatData.roomStream(roomId),
+                builder: (context, roomSnapshot) {
+                  final room = roomSnapshot.data?.data();
+
+                  if (room == null ||
+                      room['status'] != 'open') {
+                    return const SizedBox.shrink();
+                  }
+
+                  return LiveRoomTile(
+                    data: room,
+                    roomId: roomId,
+                  );
+                },
+              );
+            }).toList(),
+          );
+        },
+      );
+    }
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: PartyChatData.roomsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const _RoomEmptyState(
+            text: 'Could not load rooms.',
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 180,
+            child: PartyLoading(),
+          );
+        }
+
+        var docs = snapshot.data!.docs;
+
+        if (selectedMainTab == 1) {
+          docs = docs.where((doc) {
+            final members =
+                (doc.data()['memberCount'] as num?)?.toInt() ?? 0;
+            return members >= 10;
+          }).toList();
+        }
+
+        if (selectedMainTab == 2) {
+          docs = docs.where((doc) {
+            final created = doc.data()['createdAt'];
+
+            if (created is! Timestamp) {
+              return false;
+            }
+
+            return DateTime.now()
+                    .difference(created.toDate())
+                    .inHours <
+                48;
+          }).toList();
+        }
+
+        if (docs.isEmpty) {
+          return const _RoomEmptyState(
+            text: 'No live rooms yet.',
+          );
+        }
+
+        return Column(
+          children: docs.map((doc) {
+            return LiveRoomTile(
+              data: doc.data(),
+              roomId: doc.id,
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
 }
-                
+                      
                             
                     
 
