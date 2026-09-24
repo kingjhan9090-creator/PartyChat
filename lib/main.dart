@@ -3341,25 +3341,45 @@ class _RoomTopAction extends StatelessWidget {
 
 class _RoomBottomAction extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
+  final String? label;
+  final VoidCallback? onTap;
 
   const _RoomBottomAction({
     required this.icon,
     required this.onTap,
+    this.label,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 5,
+          horizontal: 8,
+          vertical: 6,
         ),
-        child: Icon(
-          icon,
-          color: PartyColors.gold,
-          size: 23,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: PartyColors.gold,
+              size: 20,
+            ),
+            if (label != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                label!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
