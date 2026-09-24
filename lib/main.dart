@@ -3283,8 +3283,13 @@ class _RoomListCard extends StatelessWidget {
         ),
       ),
     );
+    }
   }
 }
+
+}
+
+
 
 class _RoomTopAction extends StatelessWidget {
   final IconData icon;
