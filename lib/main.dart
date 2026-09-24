@@ -2410,12 +2410,27 @@ class RoomsTab extends StatefulWidget {
 
 class _RoomsTabState extends State<RoomsTab> {
   int selectedTab = 0;
+  int selectedMyRoomTab = 0;
+
+  final TextEditingController searchController = TextEditingController();
 
   static const List<String> tabs = [
     'All Room',
     'Popular Room',
     'My Room',
   ];
+
+  static const List<String> myRoomTabs = [
+    'Recently Joined',
+    'Joined',
+    'With Friend',
+  ];
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2431,6 +2446,7 @@ class _RoomsTabState extends State<RoomsTab> {
             ),
           ),
           const SizedBox(height: 16),
+
           GestureDetector(
             onTap: () {
               Navigator.push(
@@ -2453,11 +2469,14 @@ class _RoomsTabState extends State<RoomsTab> {
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.search_rounded, color: PartyColors.gold),
+                  Icon(
+                    Icons.search_rounded,
+                    color: PartyColors.gold,
+                  ),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Search UID / Name / Room Name',
+                      'Search UID / Name / Room',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 15,
@@ -2468,10 +2487,25 @@ class _RoomsTabState extends State<RoomsTab> {
               ),
             ),
           ),
+
           const SizedBox(height: 18),
+
           _buildTabs(),
-          const SizedBox(height: 22),
-          _buildRooms(),
+
+          const SizedBox(height: 18),
+
+          if (selectedTab == 2) ...[
+            _buildCreateRoomButton(),
+
+            const SizedBox(height: 22),
+
+            _buildMyRoomTabs(),
+
+            const SizedBox(height: 22),
+
+            _buildMyRoomContent(),
+          ] else
+            _buildRooms(),
         ],
       ),
     );
@@ -2479,62 +2513,249 @@ class _RoomsTabState extends State<RoomsTab> {
 
   Widget _buildTabs() {
     return Row(
-      children: List.generate(tabs.length, (index) {
-        final selected = selectedTab == index;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: index == tabs.length - 1 ? 0 : 7,
-            ),
-            child: GestureDetector(
-              onTap: () => setState(() => selectedTab = index),
-              child: Container(
-                height: 46,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: selected
-                      ? const LinearGradient(
-                          colors: [PartyColors.purple, PartyColors.gold],
-                        )
-                      : null,
-                  color: selected ? null : const Color(0xFF171125),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: selected ? PartyColors.gold : PartyColors.purple,
+      children: List.generate(
+        tabs.length,
+        (index) {
+          final selected = selectedTab == index;
+
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: index == tabs.length - 1 ? 0 : 7,
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedTab = index;
+                  });
+                },
+                child: Container(
+                  height: 46,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: selected
+                        ? const LinearGradient(
+                            colors: [
+                              PartyColors.purple,
+                              PartyColors.gold,
+                            ],
+                          )
+                        : null,
+                    color: selected
+                        ? null
+                        : const Color(0xFF171125),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: selected
+                          ? PartyColors.gold
+                          : PartyColors.purple,
+                    ),
                   ),
-                ),
-                child: Text(
-                  tabs[index],
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    color: selected ? Colors.white : Colors.white70,
+                  child: Text(
+                    tabs[index],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: selected
+                          ? Colors.white
+                          : Colors.white70,
+                    ),
                   ),
                 ),
               ),
             ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCreateRoomButton() {
+    return GestureDetector(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Create Room will be connected next.'),
           ),
         );
-      }),
+      },
+      child: Container(
+        height: 145,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D0A12),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: PartyColors.purple,
+            width: 1.4,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x332D0B55),
+              blurRadius: 18,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Text(
+            'Create Room',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 21,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMyRoomTabs() {
+    return Row(
+      children: List.generate(
+        myRoomTabs.length,
+        (index) {
+          final selected = selectedMyRoomTab == index;
+
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: index == myRoomTabs.length - 1 ? 0 : 6,
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedMyRoomTab = index;
+                  });
+                },
+                child: Container(
+                  height: 42,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: selected
+                        ? const LinearGradient(
+                            colors: [
+                              PartyColors.purple,
+                              PartyColors.gold,
+                            ],
+                          )
+                        : null,
+                    color: selected
+                        ? null
+                        : const Color(0xFF171125),
+                    borderRadius: BorderRadius.circular(13),
+                    border: Border.all(
+                      color: selected
+                          ? PartyColors.gold
+                          : PartyColors.purple,
+                    ),
+                  ),
+                  child: Text(
+                    myRoomTabs[index],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      color: selected
+                          ? Colors.white
+                          : Colors.white70,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMyRoomContent() {
+    if (selectedMyRoomTab == 0) {
+      return _buildMyRoomPlaceholder(
+        'Recently Joined',
+        'No recently joined rooms yet.',
+      );
+    }
+
+    if (selectedMyRoomTab == 1) {
+      return _buildMyRoomPlaceholder(
+        'Joined',
+        'No joined rooms yet.',
+      );
+    }
+
+    return _buildMyRoomPlaceholder(
+      'With Friend',
+      'No rooms with friends yet.',
+    );
+  }
+
+  Widget _buildMyRoomPlaceholder(
+    String title,
+    String message,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 34,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D0A12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: PartyColors.purple,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: PartyColors.gold,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildRooms() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+
     if (uid == null) {
       return const Padding(
         padding: EdgeInsets.only(top: 80),
         child: Center(
           child: Text(
             'Please login first.',
-            style: TextStyle(color: Colors.white54),
+            style: TextStyle(
+              color: Colors.white54,
+            ),
           ),
         ),
       );
     }
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('rooms').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('rooms')
+          .where('status', isEqualTo: 'open')
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Padding(
@@ -2542,7 +2763,9 @@ class _RoomsTabState extends State<RoomsTab> {
             child: Center(
               child: Text(
                 'Could not load rooms.',
-                style: TextStyle(color: Colors.white54),
+                style: TextStyle(
+                  color: Colors.white54,
+                ),
               ),
             ),
           );
@@ -2555,66 +2778,67 @@ class _RoomsTabState extends State<RoomsTab> {
           );
         }
 
-        var rooms = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(
+        List<QueryDocumentSnapshot<Map<String, dynamic>>> rooms =
+            List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(
           snapshot.data!.docs,
         );
 
-        rooms = rooms.where((room) {
-          final data = room.data();
-          final status = data['status']?.toString().toLowerCase();
-          return status == null || status.isEmpty || status == 'open';
-        }).toList();
-
-        if (selectedTab == 2) {
-          rooms = rooms
-              .where((room) => room.data()['ownerUid']?.toString() == uid)
-              .toList();
-        }
-
         if (selectedTab == 1) {
           rooms.sort((a, b) {
-            final aCount = (a.data()['memberCount'] as num?)?.toInt() ?? 0;
-            final bCount = (b.data()['memberCount'] as num?)?.toInt() ?? 0;
+            final aCount =
+                (a.data()['memberCount'] as num?)?.toInt() ?? 0;
+            final bCount =
+                (b.data()['memberCount'] as num?)?.toInt() ?? 0;
+
             return bCount.compareTo(aCount);
           });
         } else {
           rooms.sort((a, b) {
             final aTime = a.data()['updatedAt'];
             final bTime = b.data()['updatedAt'];
+
             if (aTime is Timestamp && bTime is Timestamp) {
               return bTime.compareTo(aTime);
             }
+
             return 0;
           });
         }
 
         if (rooms.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 80),
+          return const Padding(
+            padding: EdgeInsets.only(top: 80),
             child: Center(
               child: Text(
-                selectedTab == 2
-                    ? 'You have not created any rooms yet.'
-                    : 'No active rooms yet.',
+                'No active rooms yet.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white54),
+                style: TextStyle(
+                  color: Colors.white54,
+                ),
               ),
             ),
           );
         }
 
         return Column(
-          children: rooms.map((room) {
-            return _RoomListCard(
-              roomId: room.id,
-              data: room.data(),
-            );
-          }).toList(),
+          children: rooms
+              .map<Widget>(
+                (room) => _RoomListCard(
+                  roomId: room.id,
+                  data: room.data(),
+                ),
+              )
+              .toList(),
         );
       },
     );
   }
 }
+
+
+/* ============================================================
+       ROOM LIST CARD
+       ============================================================ */
 
 class _RoomListCard extends StatelessWidget {
   final String roomId;
@@ -2625,150 +2849,484 @@ class _RoomListCard extends StatelessWidget {
     required this.data,
   });
 
-  Future<void> _joinRoom(BuildContext context) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final title = _roomTitle;
-    final description = data['description']?.toString() ?? '';
-    final capacity = (data['userCapacity'] as num?)?.toInt() ?? 100;
-    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
-
-    try {
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final snapshot = await transaction.get(roomRef);
-        if (!snapshot.exists) {
-          throw Exception('Room no longer exists.');
-        }
-
-        final current = snapshot.data() ?? <String, dynamic>{};
-        final status = current['status']?.toString().toLowerCase();
-        if (status != null && status.isNotEmpty && status != 'open') {
-          throw Exception('This room is closed.');
-        }
-
-        final currentCount = (current['memberCount'] as num?)?.toInt() ?? 0;
-        if (currentCount >= capacity) {
-          throw Exception('This room is full.');
-        }
-
-        final memberRef = roomRef.collection('members').doc(user.uid);
-        final memberSnapshot = await transaction.get(memberRef);
-
-        if (!memberSnapshot.exists) {
-          transaction.set(memberRef, {
-            'uid': user.uid,
-            'joinedAt': FieldValue.serverTimestamp(),
-          });
-          transaction.update(roomRef, {
-            'memberCount': currentCount + 1,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        }
-      });
-
-      if (!context.mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PartyRoomPage(
-            roomId: roomId,
-            title: title,
-            description: description,
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
-      );
-    }
-  }
-
-  String get _roomTitle {
-    return data['roomName']?.toString() ??
-        data['title']?.toString() ??
-        data['name']?.toString() ??
-        'PartyChat Room';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final description = data['description']?.toString() ?? '';
-    final members = (data['memberCount'] as num?)?.toInt() ?? 0;
-    final capacity = (data['userCapacity'] as num?)?.toInt() ?? 100;
+    final title =
+        data['title']?.toString() ?? 'PartyChat Room';
+
+    final ownerUid =
+        data['ownerUid']?.toString() ?? '';
+
+    final members =
+        (data['memberCount'] as num?)?.toInt() ?? 0;
+
+    final capacity =
+        (data['userCapacity'] as num?)?.toInt() ?? 100;
+
+    final micCapacity =
+        (data['micCapacity'] as num?)?.toInt() ?? 15;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF171126), Color(0xFF0D0917)],
+          colors: [
+            Color(0xFF171126),
+            Color(0xFF0A0710),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: PartyColors.purple),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: PartyColors.purple,
+          width: 1.2,
+        ),
         boxShadow: const [
-          BoxShadow(color: Color(0x331C00FF), blurRadius: 12),
+          BoxShadow(
+            color: Color(0x332D0B55),
+            blurRadius: 18,
+            spreadRadius: 1,
+          ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              14,
+              13,
+              10,
+              10,
+            ),
+            child: Row(
               children: [
-                Text(
-                  _roomTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0D0A12),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: PartyColors.gold,
+                      width: 1,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'ID: $roomId',
-                  style: const TextStyle(
+                  child: const Icon(
+                    Icons.image_outlined,
                     color: PartyColors.gold,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    size: 25,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  description.isEmpty ? 'Chat • Friends • Fun' : description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white60,
-                    fontSize: 12,
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      if (ownerUid.isEmpty)
+                        const Text(
+                          'ID: ------',
+                          style: TextStyle(
+                            color: PartyColors.gold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      else
+                        StreamBuilder<
+                            DocumentSnapshot<
+                                Map<String, dynamic>>>(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(ownerUid)
+                              .snapshots(),
+                          builder: (
+                            context,
+                            snapshot,
+                          ) {
+                            final ownerData =
+                                snapshot.data?.data();
+
+                            final ownerUserId =
+                                ownerData?['userId']
+                                        ?.toString() ??
+                                    '------';
+
+                            return Text(
+                              'ID: $ownerUserId',
+                              style: const TextStyle(
+                                color: PartyColors.gold,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            );
+                          },
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 7),
-                Text(
-                  '$members / $capacity users',
-                  style: const TextStyle(
-                    color: Color(0xFF43F5B0),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+
+                _RoomTopAction(
+                  icon: Icons.person_add_alt_1_rounded,
+                  onTap: () async {
+                    await _joinRoom(
+                      context,
+                      title,
+                    );
+                  },
+                ),
+
+                const SizedBox(width: 4),
+
+                _RoomTopAction(
+                  icon: Icons.people_alt_outlined,
+                  label: '$members',
+                  onTap: () {},
+                ),
+
+                const SizedBox(width: 4),
+
+                _RoomTopAction(
+                  icon: Icons.more_vert_rounded,
+                  onTap: () {},
+                ),
+
+                const SizedBox(width: 4),
+
+                _RoomTopAction(
+                  icon: Icons.close_rounded,
+                  onTap: () {},
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          _NeonAction(
-            label: 'Join',
-            onPressed: () => _joinRoom(context),
+
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            color: PartyColors.purple.withOpacity(0.45),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              12,
+              14,
+              12,
+              14,
+            ),
+            child: Column(
+              children: [
+                _buildMicRow(0, 5, micCapacity),
+                const SizedBox(height: 12),
+                _buildMicRow(5, 10, micCapacity),
+                const SizedBox(height: 12),
+                _buildMicRow(10, 15, micCapacity),
+              ],
+            ),
+          ),
+
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            color: PartyColors.purple.withOpacity(0.45),
+          ),
+
+          Container(
+            height: 145,
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            alignment: Alignment.topLeft,
+            child: const Text(
+              'User messages will appear here',
+              style: TextStyle(
+                color: Colors.white38,
+                fontSize: 12,
+              ),
+            ),
+          ),
+
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            color: PartyColors.purple.withOpacity(0.45),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              10,
+              10,
+              10,
+              12,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D0A12),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: PartyColors.purple,
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'SMS',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.send_rounded,
+                          color: PartyColors.gold,
+                          size: 21,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 7),
+
+                _RoomBottomAction(
+                  icon: Icons.mic_rounded,
+                  onTap: () {},
+                ),
+
+                _RoomBottomAction(
+                  icon: Icons.music_note_rounded,
+                  onTap: () {},
+                ),
+
+                _RoomBottomAction(
+                  icon: Icons.card_giftcard_rounded,
+                  onTap: () {},
+                ),
+
+                _RoomBottomAction(
+                  icon: Icons.sports_esports_rounded,
+                  onTap: () {},
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildMicRow(
+    int start,
+    int end,
+    int micCapacity,
+  ) {
+    return Row(
+      children: List.generate(
+        end - start,
+        (index) {
+          final micNumber = start + index + 1;
+
+          final active = micNumber <= micCapacity;
+
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: index == 4 ? 0 : 5,
+              ),
+              child: Container(
+                height: 58,
+                decoration: BoxDecoration(
+                  color: active
+                      ? const Color(0xFF100C18)
+                      : const Color(0xFF0A080D),
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(
+                    color: active
+                        ? PartyColors.purple
+                        : Colors.white12,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.mic_none_rounded,
+                      color: active
+                          ? PartyColors.gold
+                          : Colors.white24,
+                      size: 19,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Mic $micNumber',
+                      style: TextStyle(
+                        color: active
+                            ? Colors.white70
+                            : Colors.white24,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _joinRoom(
+    BuildContext context,
+    String title,
+  ) async {
+    final uid =
+        FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) return;
+
+    try {
+      await PartyChatData.joinRoom(
+        roomId: roomId,
+        uid: uid,
+      );
+
+      if (!context.mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RoomPage(
+            roomId: roomId,
+            title: title,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+          ),
+        ),
+      );
+    }
+  }
 }
+
+class _RoomTopAction extends StatelessWidget {
+  final IconData icon;
+  final String? label;
+  final VoidCallback onTap;
+
+  const _RoomTopAction({
+    required this.icon,
+    required this.onTap,
+    this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 7,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D0A12),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(
+            color: PartyColors.purple,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: PartyColors.gold,
+              size: 16,
+            ),
+            if (label != null) ...[
+              const SizedBox(width: 3),
+              Text(
+                label!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RoomBottomAction extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _RoomBottomAction({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 5,
+        ),
+        child: Icon(
+          icon,
+          color: PartyColors.gold,
+          size: 23,
+        ),
+      ),
+    );
+  }
+}
+
+
+  
+/* ============================================================
+   PARTY ROOM PAGE
+   ============================================================ */
 
 class PartyRoomPage extends StatefulWidget {
   final String roomId;
@@ -2788,225 +3346,584 @@ class PartyRoomPage extends StatefulWidget {
 
 class _PartyRoomPageState extends State<PartyRoomPage> {
   bool leaving = false;
+  final TextEditingController messageController =
+      TextEditingController();
 
   Future<void> _leaveRoom() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || leaving) return;
+
     setState(() => leaving = true);
 
     try {
-      final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
-      final memberRef = roomRef.collection('members').doc(user.uid);
+      final roomRef = FirebaseFirestore.instance
+          .collection('rooms')
+          .doc(widget.roomId);
 
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final roomSnapshot = await transaction.get(roomRef);
-        final memberSnapshot = await transaction.get(memberRef);
-        if (!memberSnapshot.exists) return;
+      final memberRef =
+          roomRef.collection('members').doc(user.uid);
 
-        final current = roomSnapshot.data() ?? <String, dynamic>{};
-        final currentCount = (current['memberCount'] as num?)?.toInt() ?? 0;
-        transaction.delete(memberRef);
-        transaction.update(roomRef, {
-          'memberCount': currentCount > 0 ? currentCount - 1 : 0,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      });
+      await FirebaseFirestore.instance.runTransaction(
+        (transaction) async {
+          final roomSnapshot =
+              await transaction.get(roomRef);
+
+          final memberSnapshot =
+              await transaction.get(memberRef);
+
+          if (!memberSnapshot.exists) return;
+
+          final current =
+              roomSnapshot.data() ??
+                  <String, dynamic>{};
+
+          final currentCount =
+              (current['memberCount'] as num?)?.toInt() ?? 0;
+
+          transaction.delete(memberRef);
+
+          transaction.update(roomRef, {
+            'memberCount':
+                currentCount > 0 ? currentCount - 1 : 0,
+            'updatedAt':
+                FieldValue.serverTimestamp(),
+          });
+        },
+      );
 
       if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
+
       setState(() => leaving = false);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst(
+              'Exception: ',
+              '',
+            ),
+          ),
+        ),
       );
     }
   }
 
   @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+    final roomRef = FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.roomId);
 
     return Scaffold(
       backgroundColor: PartyColors.black,
       body: _NeonBackground(
-        child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        child: StreamBuilder<
+            DocumentSnapshot<Map<String, dynamic>>>(
           stream: roomRef.snapshots(),
           builder: (context, snapshot) {
-            final data = snapshot.data?.data() ?? <String, dynamic>{};
-            final title = data['roomName']?.toString() ??
-                data['title']?.toString() ??
-                widget.title;
-            final description = data['description']?.toString() ?? widget.description;
-            final members = (data['memberCount'] as num?)?.toInt() ?? 0;
-            final capacity = (data['userCapacity'] as num?)?.toInt() ?? 100;
+            final data =
+                snapshot.data?.data() ??
+                    <String, dynamic>{};
 
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: leaving ? null : _leaveRoom,
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            Text(
-                              'ID: ${widget.roomId} • $members / $capacity',
-                              style: const TextStyle(
-                                color: PartyColors.gold,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: leaving ? null : _leaveRoom,
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ],
+            final title =
+                data['roomName']?.toString() ??
+                    data['title']?.toString() ??
+                    widget.title;
+
+            final members =
+                (data['memberCount'] as num?)?.toInt() ?? 0;
+
+            final capacity =
+                (data['userCapacity'] as num?)?.toInt() ??
+                    100;
+
+            final ownerUid =
+                data['ownerUid']?.toString() ?? '';
+
+            return SafeArea(
+              child: Column(
+                children: [
+                  _buildRoomHeader(
+                    title: title,
+                    members: members,
+                    capacity: capacity,
+                    ownerUid: ownerUid,
                   ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 30),
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF1C1230), Color(0xFF0D0917)],
-                          ),
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: PartyColors.purple),
+
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _buildMicArea(
+                          data['micCapacity'],
                         ),
-                        child: Column(
-                          children: [
-                            const Icon(
-                              Icons.forum_rounded,
-                              color: PartyColors.gold,
-                              size: 54,
-                            ),
-                            const SizedBox(height: 14),
-                            Text(
-                              description.isEmpty
-                                  ? 'Chat • Friends • Fun'
-                                  : description,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              '$members people in this room',
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+
+                        const SizedBox(height: 8),
+
+                        Expanded(
+                          child: _buildMessagesArea(),
                         ),
-                      ),
-                      const SizedBox(height: 18),
-                      const Text(
-                        'Room Members',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: roomRef.collection('members').snapshots(),
-                        builder: (context, membersSnapshot) {
-                          if (membersSnapshot.hasError) {
-                            return const Text(
-                              'Could not load members.',
-                              style: TextStyle(color: Colors.white54),
-                            );
-                          }
-                          if (!membersSnapshot.hasData) {
-                            return const SizedBox(
-                              height: 100,
-                              child: PartyLoading(),
-                            );
-                          }
-                          if (membersSnapshot.data!.docs.isEmpty) {
-                            return const Text(
-                              'No members yet.',
-                              style: TextStyle(color: Colors.white54),
-                            );
-                          }
-                          return Column(
-                            children: membersSnapshot.data!.docs.map((member) {
-                              final uid = member.id;
-                              return FutureBuilder<Map<String, dynamic>?>(
-                                future: PartyChatData.userData(uid),
-                                builder: (context, userSnapshot) {
-                                  final userData = userSnapshot.data ?? <String, dynamic>{};
-                                  final name = userData['name']?.toString() ?? 'Party User';
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF0D0A12),
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(color: const Color(0x443B2A55)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        _NetworkOrAvatar(
-                                          photoUrl: userData['photoURL'] as String?,
-                                          photoBase64: userData['photoBase64'] as String?,
-                                          avatar: userData['avatar'] as String?,
-                                          radius: 21,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            name,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(fontWeight: FontWeight.w800),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            }).toList(),
-                          );
-                        },
-                      ),
-                    ],
+
+                        _buildBottomBar(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
       ),
     );
   }
+
+  Widget _buildRoomHeader({
+    required String title,
+    required int members,
+    required int capacity,
+    required String ownerUid,
+  }) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        10,
+        8,
+        10,
+        10,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xDD0D0915),
+        border: Border(
+          bottom: BorderSide(
+            color: PartyColors.purple,
+            width: 0.8,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFF171126),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: PartyColors.gold,
+              ),
+            ),
+            child: const Icon(
+              Icons.image_outlined,
+              color: PartyColors.gold,
+              size: 25,
+            ),
+          ),
+
+          const SizedBox(width: 9),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+
+                const SizedBox(height: 3),
+
+                if (ownerUid.isEmpty)
+                  const Text(
+                    'ID: ------',
+                    style: TextStyle(
+                      color: PartyColors.gold,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  )
+                else
+                  StreamBuilder<
+                      DocumentSnapshot<
+                          Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(ownerUid)
+                        .snapshots(),
+                    builder: (
+                      context,
+                      snapshot,
+                    ) {
+                      final userData =
+                          snapshot.data?.data();
+
+                      final userId =
+                          userData?['userId']
+                                  ?.toString() ??
+                              '------';
+
+                      return Text(
+                        'ID: $userId',
+                        style: const TextStyle(
+                          color: PartyColors.gold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+
+          _RoomTopAction(
+            icon: Icons.person_add_alt_1_rounded,
+            label: 'Join',
+            onTap: () {},
+          ),
+
+          const SizedBox(width: 4),
+
+          _RoomTopAction(
+            icon: Icons.people_alt_outlined,
+            label: '$members',
+            onTap: () {},
+          ),
+
+          const SizedBox(width: 4),
+
+          _RoomTopAction(
+            icon: Icons.more_vert_rounded,
+            onTap: () {},
+          ),
+
+          const SizedBox(width: 4),
+
+          _RoomTopAction(
+            icon: Icons.close_rounded,
+            onTap: leaving ? null : _leaveRoom,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMicArea(dynamic value) {
+    final micCapacity =
+        (value as num?)?.toInt() ?? 15;
+
+    final totalMics =
+        micCapacity > 15 ? 15 : micCapacity;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        10,
+        12,
+        10,
+        4,
+      ),
+      child: Column(
+        children: [
+          _buildMicRow(1, 5, totalMics),
+          const SizedBox(height: 8),
+          _buildMicRow(6, 10, totalMics),
+          const SizedBox(height: 8),
+          _buildMicRow(11, 15, totalMics),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMicRow(
+    int start,
+    int end,
+    int micCapacity,
+  ) {
+    return Row(
+      children: List.generate(
+        end - start + 1,
+        (index) {
+          final micNumber =
+              start + index;
+
+          final enabled =
+              micNumber <= micCapacity;
+
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: index == 4 ? 0 : 5,
+              ),
+              child: Container(
+                height: 58,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF100C18),
+                  borderRadius:
+                      BorderRadius.circular(13),
+                  border: Border.all(
+                    color: enabled
+                        ? PartyColors.purple
+                        : Colors.white12,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.mic_none_rounded,
+                      color: enabled
+                          ? PartyColors.gold
+                          : Colors.white24,
+                      size: 20,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Mic $micNumber',
+                      style: TextStyle(
+                        color: enabled
+                            ? Colors.white70
+                            : Colors.white24,
+                        fontSize: 8,
+                        fontWeight:
+                            FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMessagesArea() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(
+        10,
+        4,
+        10,
+        8,
+      ),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0x660D0A12),
+        borderRadius:
+            BorderRadius.circular(16),
+        border: Border.all(
+          color: PartyColors.purple
+              .withOpacity(0.55),
+        ),
+      ),
+      child: const Align(
+        alignment: Alignment.topLeft,
+        child: Text(
+          'User messages will appear here',
+          style: TextStyle(
+            color: Colors.white38,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        10,
+        8,
+        10,
+        10,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xEE0D0915),
+        border: Border(
+          top: BorderSide(
+            color: PartyColors.purple,
+            width: 0.8,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 44,
+              padding:
+                  const EdgeInsets.symmetric(
+                horizontal: 13,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFF08070F),
+                borderRadius:
+                    BorderRadius.circular(15),
+                border: Border.all(
+                  color: PartyColors.purple,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller:
+                          messageController,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
+                      decoration:
+                          const InputDecoration(
+                        hintText: 'SMS',
+                        hintStyle: TextStyle(
+                          color: Colors.white38,
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.send_rounded,
+                    color: PartyColors.gold,
+                    size: 21,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 7),
+
+          _RoomBottomAction(
+            icon: Icons.mic_rounded,
+            onTap: () {},
+          ),
+
+          _RoomBottomAction(
+            icon: Icons.music_note_rounded,
+            onTap: () {},
+          ),
+
+          _RoomBottomAction(
+            icon: Icons.card_giftcard_rounded,
+            onTap: () {},
+          ),
+
+          _RoomBottomAction(
+            icon: Icons.sports_esports_rounded,
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+class _RoomTopAction extends StatelessWidget {
+  final IconData icon;
+  final String? label;
+  final VoidCallback? onTap;
+
+  const _RoomTopAction({
+    required this.icon,
+    required this.onTap,
+    this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 31,
+        padding:
+            const EdgeInsets.symmetric(
+          horizontal: 6,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D0A12),
+          borderRadius:
+              BorderRadius.circular(9),
+          border: Border.all(
+            color: PartyColors.purple,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: PartyColors.gold,
+              size: 15,
+            ),
+            if (label != null) ...[
+              const SizedBox(width: 3),
+              Text(
+                label!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RoomBottomAction extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _RoomBottomAction({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding:
+            const EdgeInsets.symmetric(
+          horizontal: 5,
+        ),
+        child: Icon(
+          icon,
+          color: PartyColors.gold,
+          size: 23,
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
 
 /* ============================================================
        MAIN PAGE
