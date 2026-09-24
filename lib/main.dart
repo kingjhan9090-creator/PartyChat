@@ -2395,22 +2395,274 @@ class _PartyLoadingState extends State<PartyLoading>
       }
     }
 
+
+
+/* ============================================================
+       ROOMS PAGE
+       ============================================================ */
+
+
+    class RoomsTab extends StatelessWidget {
+  const RoomsTab({super.key});
+
+  void _openRoom(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const NewPartyRoomPage(),
+      ),
+    );
+  }
+
+  Widget _roomCard(
+    BuildContext context, {
+    required String roomName,
+    required String description,
+    required int members,
+    required String hostName,
+    required IconData icon,
+  }) {
+    return GestureDetector(
+      onTap: () => _openRoom(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF211034),
+              Color(0xFF100A19),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+            color: const Color(0xFF8D3DFF),
+            width: 1.2,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x558D3DFF),
+              blurRadius: 14,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 68,
+              height: 68,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFFFFC83D),
+                    Color(0xFF8D3DFF),
+                  ],
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x668D3DFF),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Container(
+                margin: const EdgeInsets.all(3),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF120A1D),
+                ),
+                child: Icon(
+                  icon,
+                  color: Color(0xFFFFD45C),
+                  size: 30,
+                ),
+              ),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          roomName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        '👑',
+                        style: TextStyle(fontSize: 17),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.people_alt_rounded,
+                        color: Color(0xFFC7A7FF),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '$members / 100',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Icon(
+                        Icons.person_rounded,
+                        color: Color(0xFFFFD45C),
+                        size: 15,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          hostName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFFFFD45C),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Color(0xFFB77CFF),
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF12091D),
+            Color(0xFF07050B),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 18, 18, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Rooms',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.search_rounded,
+                    color: Colors.white70,
+                    size: 27,
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
+                children: [
+                  _roomCard(
+                    context,
+                    roomName: 'Party Vibes Room',
+                    description: 'Good Vibes • Make Friends • Have Fun',
+                    members: 37,
+                    hostName: 'Hamza',
+                    icon: Icons.workspace_premium_rounded,
+                  ),
+                  _roomCard(
+                    context,
+                    roomName: 'Music Lovers',
+                    description: 'Music • Chat • Fun Together',
+                    members: 64,
+                    hostName: 'Ayesha',
+                    icon: Icons.music_note_rounded,
+                  ),
+                  _roomCard(
+                    context,
+                    roomName: 'Chill & Chat',
+                    description: 'Relax • Talk • Meet New Friends',
+                    members: 28,
+                    hostName: 'Zain',
+                    icon: Icons.forum_rounded,
+                  ),
+                  _roomCard(
+                    context,
+                    roomName: 'Friends Zone',
+                    description: 'Friends • Games • Good Times',
+                    members: 52,
+                    hostName: 'Sara',
+                    icon: Icons.groups_rounded,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
     /* ============================================================
        MAIN PAGE
        ============================================================ */
 
-    class EmptyRoomsTab extends StatelessWidget {
-      const EmptyRoomsTab({super.key});
-
-      @override
-      Widget build(BuildContext context) {
-        return const _NeonBackground(
-          child: Center(
-            child: Text('Rooms', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
-          ),
-        );
-      }
-    }
 
     class MainPage extends StatefulWidget {
       const MainPage({super.key});
