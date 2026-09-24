@@ -2420,8 +2420,13 @@ class _PartyLoadingState extends State<PartyLoading>
 
     class _MainPageState extends State<MainPage> {
       int selected = 0;
-      final pages = const [HomeTab(), EmptyRoomsTab(), GamesTab(), WalletTab(), ProfileTab()];
-
+      final pages = const [
+  HomeTab(),
+  NewPartyRoomPage(),
+  GamesTab(),
+  WalletTab(),
+  ProfileTab(),
+];
       void _selectTab(int value) {
         if (value == selected || !mounted) return;
         setState(() => selected = value);
