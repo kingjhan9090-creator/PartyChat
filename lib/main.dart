@@ -2852,7 +2852,9 @@ class _RoomListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title =
-        data['title']?.toString() ?? 'PartyChat Room';
+        data['roomName']?.toString() ??
+        data['title']?.toString() ??
+        'PartyChat Room';
 
     final ownerUid =
         data['ownerUid']?.toString() ?? '';
@@ -2863,11 +2865,13 @@ class _RoomListCard extends StatelessWidget {
     final capacity =
         (data['userCapacity'] as num?)?.toInt() ?? 100;
 
-    final micCapacity =
-        (data['micCapacity'] as num?)?.toInt() ?? 15;
+    final description =
+        data['description']?.toString() ??
+        'Chat • Friends • Fun';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -2891,247 +2895,115 @@ class _RoomListCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              14,
-              13,
-              10,
-              10,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0D0A12),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: PartyColors.gold,
-                      width: 1,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.image_outlined,
-                    color: PartyColors.gold,
-                    size: 25,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      if (ownerUid.isEmpty)
-                        const Text(
-                          'ID: ------',
-                          style: TextStyle(
-                            color: PartyColors.gold,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                      else
-                        StreamBuilder<
-                            DocumentSnapshot<
-                                Map<String, dynamic>>>(
-                          stream: FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(ownerUid)
-                              .snapshots(),
-                          builder: (
-                            context,
-                            snapshot,
-                          ) {
-                            final ownerData =
-                                snapshot.data?.data();
-
-                            final ownerUserId =
-                                ownerData?['userId']
-                                        ?.toString() ??
-                                    '------';
-
-                            return Text(
-                              'ID: $ownerUserId',
-                              style: const TextStyle(
-                                color: PartyColors.gold,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            );
-                          },
-                        ),
-                    ],
-                  ),
-                ),
-
-                _RoomTopAction(
-                  icon: Icons.person_add_alt_1_rounded,
-                  onTap: () async {
-                    await _joinRoom(
-                      context,
-                      title,
-                    );
-                  },
-                ),
-
-                const SizedBox(width: 4),
-
-                _RoomTopAction(
-                  icon: Icons.people_alt_outlined,
-                  label: '$members',
-                  onTap: () {},
-                ),
-
-                const SizedBox(width: 4),
-
-                _RoomTopAction(
-                  icon: Icons.more_vert_rounded,
-                  onTap: () {},
-                ),
-
-                const SizedBox(width: 4),
-
-                _RoomTopAction(
-                  icon: Icons.close_rounded,
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: PartyColors.purple.withOpacity(0.45),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              12,
-              14,
-              12,
-              14,
-            ),
-            child: Column(
-              children: [
-                _buildMicRow(0, 5, micCapacity),
-                const SizedBox(height: 12),
-                _buildMicRow(5, 10, micCapacity),
-                const SizedBox(height: 12),
-                _buildMicRow(10, 15, micCapacity),
-              ],
-            ),
-          ),
-
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: PartyColors.purple.withOpacity(0.45),
-          ),
-
-          Container(
-            height: 145,
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            alignment: Alignment.topLeft,
-            child: const Text(
-              'User messages will appear here',
-              style: TextStyle(
-                color: Colors.white38,
-                fontSize: 12,
               ),
-            ),
-          ),
-
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: PartyColors.purple.withOpacity(0.45),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              10,
-              10,
-              10,
-              12,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 44,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D0A12),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: PartyColors.purple,
-                      ),
-                    ),
-                    child: const Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'SMS',
-                            style: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.send_rounded,
-                          color: PartyColors.gold,
-                          size: 21,
-                        ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () async {
+                  await _joinRoom(context, title);
+                },
+                child: Container(
+                  width: 82,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        PartyColors.gold,
+                        Color(0xFFFFE36A),
                       ],
                     ),
+                    borderRadius: BorderRadius.circular(17),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x66FFC928),
+                        blurRadius: 18,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'Join',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
+              ),
+            ],
+          ),
 
-                const SizedBox(width: 7),
+          const SizedBox(height: 7),
 
-                _RoomBottomAction(
-                  icon: Icons.mic_rounded,
-                  onTap: () {},
-                ),
+          if (ownerUid.isEmpty)
+            const Text(
+              'ID: ------',
+              style: TextStyle(
+                color: PartyColors.gold,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            )
+          else
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(ownerUid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                final ownerData = snapshot.data?.data();
+                final ownerUserId =
+                    ownerData?['userId']?.toString() ?? '------';
 
-                _RoomBottomAction(
-                  icon: Icons.music_note_rounded,
-                  onTap: () {},
-                ),
+                return Text(
+                  'ID: $ownerUserId',
+                  style: const TextStyle(
+                    color: PartyColors.gold,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                );
+              },
+            ),
 
-                _RoomBottomAction(
-                  icon: Icons.card_giftcard_rounded,
-                  onTap: () {},
-                ),
+          const SizedBox(height: 8),
 
-                _RoomBottomAction(
-                  icon: Icons.sports_esports_rounded,
-                  onTap: () {},
-                ),
-              ],
+          Text(
+            description.isEmpty ? 'Chat • Friends • Fun' : description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            '$members / $capacity users',
+            style: const TextStyle(
+              color: Color(0xFF39E6C1),
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -3139,207 +3011,91 @@ class _RoomListCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMicRow(
-    int start,
-    int end,
-    int micCapacity,
-  ) {
-    return Row(
-      children: List.generate(
-        end - start,
-        (index) {
-          final micNumber = start + index + 1;
-
-          final active = micNumber <= micCapacity;
-
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: index == 4 ? 0 : 5,
-              ),
-              child: Container(
-                height: 58,
-                decoration: BoxDecoration(
-                  color: active
-                      ? const Color(0xFF100C18)
-                      : const Color(0xFF0A080D),
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(
-                    color: active
-                        ? PartyColors.purple
-                        : Colors.white12,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.mic_none_rounded,
-                      color: active
-                          ? PartyColors.gold
-                          : Colors.white24,
-                      size: 19,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Mic $micNumber',
-                      style: TextStyle(
-                        color: active
-                            ? Colors.white70
-                            : Colors.white24,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Future<void> _joinRoom(
-  BuildContext context,
-  String title,
-) async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
+    BuildContext context,
+    String title,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-  final description = data['description']?.toString() ?? '';
-  final capacity =
-      (data['userCapacity'] as num?)?.toInt() ?? 100;
-  final roomRef =
-      FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    final description = data['description']?.toString() ?? '';
+    final capacity =
+        (data['userCapacity'] as num?)?.toInt() ?? 100;
+    final roomRef =
+        FirebaseFirestore.instance.collection('rooms').doc(roomId);
 
-  try {
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final snapshot = await transaction.get(roomRef);
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(roomRef);
 
-      if (!snapshot.exists) {
-        throw Exception('Room no longer exists.');
-      }
+        if (!snapshot.exists) {
+          throw Exception('Room no longer exists.');
+        }
 
-      final current =
-          snapshot.data() ?? <String, dynamic>{};
+        final current =
+            snapshot.data() ?? <String, dynamic>{};
 
-      final status =
-          current['status']?.toString().toLowerCase();
+        final status =
+            current['status']?.toString().toLowerCase();
 
-      if (status != null &&
-          status.isNotEmpty &&
-          status != 'open') {
-        throw Exception('This room is closed.');
-      }
+        if (status != null &&
+            status.isNotEmpty &&
+            status != 'open') {
+          throw Exception('This room is closed.');
+        }
 
-      final currentCount =
-          (current['memberCount'] as num?)?.toInt() ?? 0;
+        final currentCount =
+            (current['memberCount'] as num?)?.toInt() ?? 0;
 
-      if (currentCount >= capacity) {
-        throw Exception('This room is full.');
-      }
+        if (currentCount >= capacity) {
+          throw Exception('This room is full.');
+        }
 
-      final memberRef =
-          roomRef.collection('members').doc(user.uid);
+        final memberRef =
+            roomRef.collection('members').doc(user.uid);
 
-      final memberSnapshot =
-          await transaction.get(memberRef);
+        final memberSnapshot =
+            await transaction.get(memberRef);
 
-      if (!memberSnapshot.exists) {
-        transaction.set(memberRef, {
-          'uid': user.uid,
-          'joinedAt': FieldValue.serverTimestamp(),
-        });
+        if (!memberSnapshot.exists) {
+          transaction.set(memberRef, {
+            'uid': user.uid,
+            'joinedAt': FieldValue.serverTimestamp(),
+          });
 
-        transaction.update(roomRef, {
-          'memberCount': currentCount + 1,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      }
-    });
+          transaction.update(roomRef, {
+            'memberCount': currentCount + 1,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      });
 
-    if (!context.mounted) return;
+      if (!context.mounted) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PartyRoomPage(
-          roomId: roomId,
-          title: title,
-          description: description,
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PartyRoomPage(
+            roomId: roomId,
+            title: title,
+            description: description,
+          ),
         ),
-      ),
-    );
-  } catch (e) {
-    if (!context.mounted) return;
+      );
+    } catch (e) {
+      if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          e.toString().replaceFirst('Exception: ', ''),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst('Exception: ', ''),
+          ),
         ),
-      ),
-    );
+      );
     }
   }
 }
 
-
-class _RoomTopAction extends StatelessWidget {
-  final IconData icon;
-  final String? label;
-  final VoidCallback onTap;
-
-  const _RoomTopAction({
-    required this.icon,
-    required this.onTap,
-    this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 32,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 7,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D0A12),
-          borderRadius: BorderRadius.circular(9),
-          border: Border.all(
-            color: PartyColors.purple,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: PartyColors.gold,
-              size: 16,
-            ),
-            if (label != null) ...[
-              const SizedBox(width: 3),
-              Text(
-                label!,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _RoomBottomAction extends StatelessWidget {
   final IconData icon;
