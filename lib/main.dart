@@ -2574,9 +2574,10 @@ class _RoomsTabState extends State<RoomsTab> {
   Widget _buildCreateRoomButton() {
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Create Room will be connected next.'),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const CreateRoomPage(),
           ),
         );
       },
@@ -2837,6 +2838,491 @@ class _RoomsTabState extends State<RoomsTab> {
 
 
 /* ============================================================
+       CREATE ROOM PAGE
+       ============================================================ */
+
+class CreateRoomPage extends StatefulWidget {
+  const CreateRoomPage({super.key});
+
+  @override
+  State<CreateRoomPage> createState() => _CreateRoomPageState();
+}
+
+class _CreateRoomPageState extends State<CreateRoomPage> {
+  final TextEditingController roomNameController =
+      TextEditingController();
+  final TextEditingController descriptionController =
+      TextEditingController();
+
+  XFile? roomImage;
+  int memberLimit = 100;
+  int micSeats = 15;
+  bool isPrivate = false;
+
+  Future<void> _pickRoomImage() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1200,
+      );
+
+      if (!mounted || picked == null) return;
+
+      setState(() {
+        roomImage = picked;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not select room picture.'),
+        ),
+      );
+    }
+  }
+
+  void _createRoomPreview() {
+    final name = roomNameController.text.trim();
+
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a room name.'),
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Room creation will be connected to Firebase next.'),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    roomNameController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: PartyColors.black,
+      appBar: AppBar(
+        backgroundColor: PartyColors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Create New Room',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 40),
+          children: [
+            _buildRoomPicture(),
+            const SizedBox(height: 22),
+            _buildTextField(
+              controller: roomNameController,
+              label: 'Room Name',
+              hint: 'Enter room name',
+              icon: Icons.meeting_room_outlined,
+              maxLength: 30,
+            ),
+            const SizedBox(height: 14),
+            _buildTextField(
+              controller: descriptionController,
+              label: 'Description',
+              hint: 'Tell people about your room',
+              icon: Icons.description_outlined,
+              maxLines: 3,
+              maxLength: 150,
+            ),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Members Limit'),
+            const SizedBox(height: 10),
+            _buildChoiceRow(
+              values: const [50, 100, 200],
+              selected: memberLimit,
+              onSelected: (value) {
+                setState(() => memberLimit = value);
+              },
+              suffix: ' Members',
+            ),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Mic Seats'),
+            const SizedBox(height: 10),
+            _buildChoiceRow(
+              values: const [5, 10, 15],
+              selected: micSeats,
+              onSelected: (value) {
+                setState(() => micSeats = value);
+              },
+              suffix: ' Seats',
+            ),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Room Privacy'),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildPrivacyChoice(
+                    title: 'Public',
+                    icon: Icons.public_rounded,
+                    selected: !isPrivate,
+                    onTap: () {
+                      setState(() => isPrivate = false);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildPrivacyChoice(
+                    title: 'Private',
+                    icon: Icons.lock_outline_rounded,
+                    selected: isPrivate,
+                    onTap: () {
+                      setState(() => isPrivate = true);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildRoomLevelCard(),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _createRoomPreview,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PartyColors.purple,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  side: const BorderSide(
+                    color: PartyColors.gold,
+                    width: 1,
+                  ),
+                ),
+                child: const Text(
+                  'Create Room',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoomPicture() {
+    return Center(
+      child: GestureDetector(
+        onTap: _pickRoomImage,
+        child: Container(
+          width: 124,
+          height: 124,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [
+                PartyColors.gold,
+                PartyColors.purpleBright,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x553D1470),
+                blurRadius: 22,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(4),
+          child: ClipOval(
+            child: roomImage == null
+                ? Container(
+                    color: const Color(0xFF0D0A12),
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_a_photo_outlined,
+                          color: PartyColors.gold,
+                          size: 34,
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Room Picture',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Image.file(
+                    File(roomImage!.path),
+                    fit: BoxFit.cover,
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+    int? maxLength,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(label),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          maxLength: maxLength,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.white38),
+            prefixIcon: Icon(
+              icon,
+              color: PartyColors.gold,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF0D0A12),
+            counterStyle: const TextStyle(color: Colors.white38),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: PartyColors.purple,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: PartyColors.purple,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: PartyColors.gold,
+                width: 1.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        color: PartyColors.gold,
+        fontSize: 15,
+        fontWeight: FontWeight.w900,
+      ),
+    );
+  }
+
+  Widget _buildChoiceRow({
+    required List<int> values,
+    required int selected,
+    required ValueChanged<int> onSelected,
+    required String suffix,
+  }) {
+    return Row(
+      children: values.map((value) {
+        final selectedValue = selected == value;
+
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: value == values.last ? 0 : 8,
+            ),
+            child: GestureDetector(
+              onTap: () => onSelected(value),
+              child: Container(
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: selectedValue
+                      ? const LinearGradient(
+                          colors: [
+                            PartyColors.purple,
+                            PartyColors.goldDark,
+                          ],
+                        )
+                      : null,
+                  color: selectedValue
+                      ? null
+                      : const Color(0xFF171125),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: selectedValue
+                        ? PartyColors.gold
+                        : PartyColors.purple,
+                  ),
+                ),
+                child: Text(
+                  '$value$suffix',
+                  style: TextStyle(
+                    color: selectedValue
+                        ? Colors.white
+                        : Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildPrivacyChoice({
+    required String title,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 58,
+        decoration: BoxDecoration(
+          gradient: selected
+              ? const LinearGradient(
+                  colors: [
+                    PartyColors.purple,
+                    PartyColors.goldDark,
+                  ],
+                )
+              : null,
+          color: selected
+              ? null
+              : const Color(0xFF171125),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected
+                ? PartyColors.gold
+                : PartyColors.purple,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: selected
+                  ? Colors.white
+                  : PartyColors.gold,
+              size: 21,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: selected
+                    ? Colors.white
+                    : Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoomLevelCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D0A12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: PartyColors.purple,
+        ),
+      ),
+      child: const Row(
+        children: [
+          Icon(
+            Icons.workspace_premium_rounded,
+            color: PartyColors.gold,
+            size: 30,
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Room Level',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Level 1 • Max Level 100 • Activity XP',
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            'LV 1',
+            style: TextStyle(
+              color: PartyColors.gold,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/* ============================================================
        ROOM LIST CARD
        ============================================================ */
 
@@ -2949,7 +3435,6 @@ class _RoomListCard extends StatelessWidget {
                               Map<String, dynamic>>>(
                         stream: FirebaseFirestore.instance
                             .collection('users')
-                            .doc(ownerUid)
                             .snapshots(),
                         builder: (
                           context,
@@ -4670,6 +5155,7 @@ class _PartyRoomTopAction extends StatelessWidget {
                           ),
                           child: Text(
                             title,
+                            .doc(ownerUid)
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
