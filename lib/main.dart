@@ -2855,7 +2855,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       TextEditingController();
 
   XFile? roomImage;
-  int memberLimit = 100;
+  int memberLimit = 500;
   int micSeats = 15;
   bool isPrivate = false;
   bool creatingRoom = false;
@@ -2916,16 +2916,13 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       final ownerData = ownerSnapshot.data() ?? <String, dynamic>{};
       final ownerUserId = ownerData['userId']?.toString() ?? '';
 
-      String? roomPhotoUrl;
+      String? roomImageBase64;
       if (roomImage != null) {
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('rooms')
-            .child(roomRef.id)
-            .child('room.jpg');
-
-        await storageRef.putFile(File(roomImage!.path));
-        roomPhotoUrl = await storageRef.getDownloadURL();
+        final imageBytes = await roomImage!.readAsBytes();
+        if (imageBytes.length > 600000) {
+          throw Exception('Room picture is too large. Please choose a smaller image.');
+        }
+        roomImageBase64 = base64Encode(imageBytes);
       }
 
       final now = FieldValue.serverTimestamp();
@@ -2936,7 +2933,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
           'roomId': roomRef.id,
           'title': name,
           'description': description,
-          'roomPhotoUrl': roomPhotoUrl,
+          'roomImageBase64': roomImageBase64,
           'ownerUid': user.uid,
           'ownerUserId': ownerUserId,
           'userCapacity': memberLimit,
@@ -3033,7 +3030,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
             _buildSectionTitle('Members Limit'),
             const SizedBox(height: 10),
             _buildChoiceRow(
-              values: const [50, 100, 200],
+              values: const [500, 1000, 1500],
               selected: memberLimit,
               onSelected: (value) {
                 setState(() => memberLimit = value);
@@ -3996,6 +3993,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                     members: members,
                     capacity: capacity,
                     ownerUid: ownerUid,
+                    roomImageBase64: data['roomImageBase64']?.toString(),
                   ),
 
                   Expanded(
@@ -4008,10 +4006,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                         const SizedBox(height: 8),
 
                         Expanded(
-                          child: _buildMessagesArea(
-                            data['description']?.toString() ??
-                                widget.description,
-                          ),
+                          child: _buildMessagesArea(data['description']?.toString() ?? ''),
                         ),
 
                         _buildBottomBar(),
@@ -4032,6 +4027,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     required int members,
     required int capacity,
     required String ownerUid,
+    required String? roomImageBase64,
   }) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -4075,11 +4071,25 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   width: 1.2,
                 ),
               ),
-              child: const Icon(
-                Icons.image_outlined,
-                color: PartyColors.gold,
-                size: 29,
-              ),
+              child: roomImageBase64 != null && roomImageBase64.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Image.memory(
+                        base64Decode(roomImageBase64),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.image_outlined,
+                          color: PartyColors.gold,
+                          size: 29,
+                        ),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.image_outlined,
+                      color: PartyColors.gold,
+                      size: 29,
+                    ),
             ),
 
             const SizedBox(width: 10),
@@ -4273,20 +4283,13 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   Widget _buildMessagesArea(String description) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(
-        10,
-        4,
-        10,
-        8,
-      ),
+      margin: const EdgeInsets.fromLTRB(10, 4, 10, 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0x660D0A12),
-        borderRadius:
-            BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: PartyColors.purple
-              .withOpacity(0.55),
+          color: PartyColors.purple.withOpacity(0.55),
         ),
       ),
       child: Column(
@@ -4297,7 +4300,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               'Description',
               style: TextStyle(
                 color: PartyColors.gold,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -4306,11 +4309,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               description,
               style: const TextStyle(
                 color: Colors.white70,
-                fontSize: 13,
+                fontSize: 12,
                 height: 1.35,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
           ],
           const Text(
             'User messages will appear here',
