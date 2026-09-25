@@ -2495,7 +2495,7 @@ class _RoomsTabState extends State<RoomsTab> {
           const SizedBox(height: 18),
 
           if (selectedTab == 2) ...[
-            _buildCreateRoomButton(),
+            _buildMyRoomOwnerSection(),
 
             const SizedBox(height: 22),
 
@@ -2568,6 +2568,51 @@ class _RoomsTabState extends State<RoomsTab> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildMyRoomOwnerSection() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return _buildCreateRoomButton();
+    }
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('rooms')
+          .where('ownerUid', isEqualTo: uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _buildCreateRoomButton();
+        }
+
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 145,
+            child: Center(child: PartyLoading()),
+          );
+        }
+
+        final rooms = snapshot.data!.docs;
+
+        if (rooms.isEmpty) {
+          return _buildCreateRoomButton();
+        }
+
+        return Column(
+          children: rooms
+              .map<Widget>(
+                (room) => _RoomListCard(
+                  roomId: room.id,
+                  data: room.data(),
+                  isOwnerRoom: true,
+                ),
+              )
+              .toList(),
+        );
+      },
     );
   }
 
@@ -3418,10 +3463,12 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
 class _RoomListCard extends StatelessWidget {
   final String roomId;
   final Map<String, dynamic> data;
+  final bool isOwnerRoom;
 
   const _RoomListCard({
     required this.roomId,
     required this.data,
+    this.isOwnerRoom = false,
   });
 
   @override
@@ -3482,11 +3529,7 @@ class _RoomListCard extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: const Icon(
-                  Icons.image_outlined,
-                  color: PartyColors.gold,
-                  size: 28,
-                ),
+                child: _buildRoomCardImage(data['roomImageBase64']?.toString()),
               ),
 
               const SizedBox(width: 11),
@@ -3608,18 +3651,33 @@ class _RoomListCard extends StatelessWidget {
             height: 42,
             child: ElevatedButton.icon(
               onPressed: () async {
-                await _joinRoom(
-                  context,
-                  title,
-                );
+                if (isOwnerRoom) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PartyRoomPage(
+                        roomId: roomId,
+                        title: title,
+                        description: description,
+                      ),
+                    ),
+                  );
+                } else {
+                  await _joinRoom(
+                    context,
+                    title,
+                  );
+                }
               },
-              icon: const Icon(
-                Icons.login_rounded,
+              icon: Icon(
+                isOwnerRoom
+                    ? Icons.meeting_room_rounded
+                    : Icons.login_rounded,
                 size: 19,
               ),
-              label: const Text(
-                'Join Room',
-                style: TextStyle(
+              label: Text(
+                isOwnerRoom ? 'Open My Room' : 'Join Room',
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
                 ),
@@ -3637,6 +3695,34 @@ class _RoomListCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildRoomCardImage(String? encoded) {
+    if (encoded == null || encoded.isEmpty) {
+      return const Icon(
+        Icons.image_outlined,
+        color: PartyColors.gold,
+        size: 28,
+      );
+    }
+
+    try {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.memory(
+          base64Decode(encoded),
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+      );
+    } catch (_) {
+      return const Icon(
+        Icons.image_outlined,
+        color: PartyColors.gold,
+        size: 28,
+      );
+    }
   }
 
   Future<void> _joinRoom(
