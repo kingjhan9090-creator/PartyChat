@@ -1,6 +1,7 @@
     import 'dart:async';
     import 'dart:convert';
 import 'dart:io';
+import 'dart:convert';
     import 'dart:math' as math;
 
     import 'package:flutter/material.dart';
@@ -2855,7 +2856,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       TextEditingController();
 
   XFile? roomImage;
-  int memberLimit = 100;
+  int memberLimit = 500;
   int micSeats = 15;
   bool isPrivate = false;
   bool creatingRoom = false;
@@ -2864,8 +2865,9 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
     try {
       final picked = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        imageQuality: 85,
-        maxWidth: 1200,
+        imageQuality: 70,
+        maxWidth: 700,
+        maxHeight: 700,
       );
 
       if (!mounted || picked == null) return;
@@ -2916,16 +2918,13 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       final ownerData = ownerSnapshot.data() ?? <String, dynamic>{};
       final ownerUserId = ownerData['userId']?.toString() ?? '';
 
-      String? roomPhotoUrl;
+      String? roomImageBase64;
       if (roomImage != null) {
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('rooms')
-            .child(roomRef.id)
-            .child('room.jpg');
-
-        await storageRef.putFile(File(roomImage!.path));
-        roomPhotoUrl = await storageRef.getDownloadURL();
+        final imageBytes = await roomImage!.readAsBytes();
+        if (imageBytes.length > 600000) {
+          throw Exception('Room picture is too large. Please choose a smaller image.');
+        }
+        roomImageBase64 = base64Encode(imageBytes);
       }
 
       final now = FieldValue.serverTimestamp();
@@ -2936,7 +2935,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
           'roomId': roomRef.id,
           'title': name,
           'description': description,
-          'roomPhotoUrl': roomPhotoUrl,
+          'roomImageBase64': roomImageBase64,
           'ownerUid': user.uid,
           'ownerUserId': ownerUserId,
           'userCapacity': memberLimit,
@@ -3033,7 +3032,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
             _buildSectionTitle('Members Limit'),
             const SizedBox(height: 10),
             _buildChoiceRow(
-              values: const [50, 100, 200],
+              values: const [500, 1000, 1500],
               selected: memberLimit,
               onSelected: (value) {
                 setState(() => memberLimit = value);
@@ -3864,6 +3863,468 @@ class _RoomBottomAction extends StatelessWidget {
 
   
 /* ============================================================
+       EDIT ROOM PAGE
+       ============================================================ */
+
+class EditRoomPage extends StatefulWidget {
+  final String roomId;
+  final Map<String, dynamic> data;
+
+  const EditRoomPage({
+    super.key,
+    required this.roomId,
+    required this.data,
+  });
+
+  @override
+  State<EditRoomPage> createState() => _EditRoomPageState();
+}
+
+class _EditRoomPageState extends State<EditRoomPage> {
+  late final TextEditingController roomNameController;
+  late final TextEditingController descriptionController;
+  late int memberLimit;
+  late int micSeats;
+  late bool isPrivate;
+  String? roomImageBase64;
+  XFile? selectedImage;
+  bool saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    roomNameController = TextEditingController(
+      text: widget.data['title']?.toString() ??
+          widget.data['roomName']?.toString() ??
+          '',
+    );
+    descriptionController = TextEditingController(
+      text: widget.data['description']?.toString() ?? '',
+    );
+    final storedLimit =
+        (widget.data['userCapacity'] as num?)?.toInt() ?? 500;
+    memberLimit = const [500, 1000, 1500].contains(storedLimit)
+        ? storedLimit
+        : 500;
+    final storedMics =
+        (widget.data['micCapacity'] as num?)?.toInt() ?? 15;
+    micSeats = const [5, 10, 15].contains(storedMics)
+        ? storedMics
+        : 15;
+    isPrivate = widget.data['isPrivate'] == true ||
+        widget.data['privacy']?.toString() == 'private';
+    roomImageBase64 = widget.data['roomImageBase64']?.toString();
+  }
+
+  Future<void> _pickRoomImage() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+        maxWidth: 700,
+        maxHeight: 700,
+      );
+      if (!mounted || picked == null) return;
+
+      final bytes = await picked.readAsBytes();
+      if (bytes.length > 600000) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Room picture is too large. Please choose a smaller image.'),
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        selectedImage = picked;
+        roomImageBase64 = base64Encode(bytes);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not select room picture.')),
+      );
+    }
+  }
+
+  Future<void> _saveChanges() async {
+    if (saving) return;
+    final user = FirebaseAuth.instance.currentUser;
+    final name = roomNameController.text.trim();
+    final description = descriptionController.text.trim();
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login first.')),
+      );
+      return;
+    }
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a room name.')),
+      );
+      return;
+    }
+    if (widget.data['ownerUid']?.toString() != user.uid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Only the room owner can edit this room.')),
+      );
+      return;
+    }
+
+    setState(() => saving = true);
+    try {
+      await FirebaseFirestore.instance
+          .collection('rooms')
+          .doc(widget.roomId)
+          .update({
+        'title': name,
+        'roomName': name,
+        'description': description,
+        'userCapacity': memberLimit,
+        'micCapacity': micSeats,
+        'privacy': isPrivate ? 'private' : 'public',
+        'isPrivate': isPrivate,
+        'roomImageBase64': roomImageBase64,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Room updated successfully.')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not update room: ${e.toString().replaceFirst('Exception: ', '')}',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    roomNameController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: PartyColors.black,
+      appBar: AppBar(
+        backgroundColor: PartyColors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Room Settings',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+      ),
+      body: _NeonBackground(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 40),
+          children: [
+            Center(
+              child: GestureDetector(
+                onTap: _pickRoomImage,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [PartyColors.gold, PartyColors.purpleBright],
+                    ),
+                  ),
+                  child: ClipOval(
+                    child: roomImageBase64 != null &&
+                            roomImageBase64!.isNotEmpty
+                        ? Image.memory(
+                            base64Decode(roomImageBase64!),
+                            fit: BoxFit.cover,
+                          )
+                        : const ColoredBox(
+                            color: Color(0xFF0D0A12),
+                            child: Icon(
+                              Icons.add_a_photo_outlined,
+                              color: PartyColors.gold,
+                              size: 30,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 22),
+            _buildTextField(
+              controller: roomNameController,
+              label: 'Room Name',
+              hint: 'Enter room name',
+              icon: Icons.meeting_room_outlined,
+              maxLength: 30,
+            ),
+            const SizedBox(height: 14),
+            _buildTextField(
+              controller: descriptionController,
+              label: 'Description',
+              hint: 'Tell people about your room',
+              icon: Icons.description_outlined,
+              maxLines: 3,
+              maxLength: 150,
+            ),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Members Limit'),
+            const SizedBox(height: 10),
+            _buildChoiceRow(
+              values: const [500, 1000, 1500],
+              selected: memberLimit,
+              suffix: ' Members',
+              onSelected: (value) => setState(() => memberLimit = value),
+            ),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Mic Seats'),
+            const SizedBox(height: 10),
+            _buildChoiceRow(
+              values: const [5, 10, 15],
+              selected: micSeats,
+              suffix: ' Seats',
+              onSelected: (value) => setState(() => micSeats = value),
+            ),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Room Privacy'),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildPrivacyChoice(
+                    title: 'Public',
+                    icon: Icons.public_rounded,
+                    selected: !isPrivate,
+                    onTap: () => setState(() => isPrivate = false),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildPrivacyChoice(
+                    title: 'Private',
+                    icon: Icons.lock_outline_rounded,
+                    selected: isPrivate,
+                    onTap: () => setState(() => isPrivate = true),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 56,
+              child: ElevatedButton(
+                onPressed: saving ? null : _saveChanges,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PartyColors.purple,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  side: const BorderSide(
+                    color: PartyColors.gold,
+                    width: 1,
+                  ),
+                ),
+                child: saving
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+    int? maxLength,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: PartyColors.gold,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          maxLength: maxLength,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.white38),
+            prefixIcon: Icon(icon, color: PartyColors.gold),
+            filled: true,
+            fillColor: const Color(0xFF0D0A12),
+            counterStyle: const TextStyle(color: Colors.white38),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: PartyColors.purple),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: PartyColors.purple),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: PartyColors.gold,
+                width: 1.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        color: PartyColors.gold,
+        fontSize: 15,
+        fontWeight: FontWeight.w900,
+      ),
+    );
+  }
+
+  Widget _buildChoiceRow({
+    required List<int> values,
+    required int selected,
+    required ValueChanged<int> onSelected,
+    required String suffix,
+  }) {
+    return Row(
+      children: values.map((value) {
+        final selectedValue = selected == value;
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: value == values.last ? 0 : 8,
+            ),
+            child: GestureDetector(
+              onTap: () => onSelected(value),
+              child: Container(
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: selectedValue
+                      ? const LinearGradient(
+                          colors: [PartyColors.purple, PartyColors.goldDark],
+                        )
+                      : null,
+                  color: selectedValue ? null : const Color(0xFF171125),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: selectedValue
+                        ? PartyColors.gold
+                        : PartyColors.purple,
+                  ),
+                ),
+                child: Text(
+                  '$value$suffix',
+                  style: TextStyle(
+                    color: selectedValue ? Colors.white : Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildPrivacyChoice({
+    required String title,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 58,
+        decoration: BoxDecoration(
+          gradient: selected
+              ? const LinearGradient(
+                  colors: [PartyColors.purple, PartyColors.goldDark],
+                )
+              : null,
+          color: selected ? null : const Color(0xFF171125),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? PartyColors.gold : PartyColors.purple,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: selected ? Colors.white : PartyColors.gold,
+              size: 21,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+/* ============================================================
    PARTY ROOM PAGE
    ============================================================ */
 
@@ -3992,6 +4453,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               child: Column(
                 children: [
                   _buildRoomHeader(
+                    data: data,
                     title: title,
                     members: members,
                     capacity: capacity,
@@ -4025,6 +4487,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 
   Widget _buildRoomHeader({
+    required Map<String, dynamic> data,
     required String title,
     required int members,
     required int capacity,
@@ -4072,10 +4535,10 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   width: 1.2,
                 ),
               ),
-              child: const Icon(
-                Icons.image_outlined,
-                color: PartyColors.gold,
-                size: 29,
+              clipBehavior: Clip.antiAlias,
+              child: _RoomImage(
+                base64: data['roomImageBase64']?.toString(),
+                size: 58,
               ),
             ),
 
@@ -4162,7 +4625,27 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
             _PartyRoomTopAction(
               icon: Icons.more_vert_rounded,
-              onTap: () {},
+              onTap: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user?.uid != ownerUid) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Only the room owner can edit this room.'),
+                    ),
+                  );
+                  return;
+                }
+
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditRoomPage(
+                      roomId: widget.roomId,
+                      data: data,
+                    ),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(width: 5),
@@ -4386,6 +4869,38 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             onTap: () {},
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RoomImage extends StatelessWidget {
+  final String? base64;
+  final double size;
+
+  const _RoomImage({
+    required this.base64,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (base64 != null && base64!.isNotEmpty) {
+      try {
+        return Image.memory(
+          base64Decode(base64!),
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        );
+      } catch (_) {}
+    }
+
+    return Center(
+      child: Icon(
+        Icons.image_outlined,
+        color: PartyColors.gold,
+        size: size * 0.5,
       ),
     );
   }
