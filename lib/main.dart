@@ -2707,56 +2707,140 @@ class _RoomsTabState extends State<RoomsTab> {
   }
 
   Widget _buildMyRoomContent() {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      return _buildMyRoomPlaceholder('My Room', 'Please login first.');
-    }
+  final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    if (selectedMyRoomTab != 0) {
-      return _buildMyRoomPlaceholder(
-        myRoomTabs[selectedMyRoomTab],
-        selectedMyRoomTab == 1
-            ? 'No joined rooms yet.'
-            : 'No rooms with friends yet.',
-      );
-    }
+  if (uid == null) {
+    return _buildMyRoomPlaceholder(
+      'My Room',
+      'Please login first.',
+    );
+  }
 
+  if (selectedMyRoomTab == 1) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
-          .collection('rooms')
-          .where('ownerUid', isEqualTo: uid)
+          .collection('users')
+          .doc(uid)
+          .collection('joinedRooms')
+          .orderBy('joinedAt', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(height: 160, child: PartyLoading());
+          return const SizedBox(
+            height: 160,
+            child: PartyLoading(),
+          );
         }
+
         if (snapshot.hasError) {
           return _buildMyRoomPlaceholder(
-            'Recently Joined',
-            'Could not load your room.',
+            'Joined',
+            'Could not load joined rooms.',
           );
         }
-        final rooms = snapshot.data?.docs ?? [];
-        if (rooms.isEmpty) {
+
+        final joinedRooms = snapshot.data?.docs ?? [];
+
+        if (joinedRooms.isEmpty) {
           return _buildMyRoomPlaceholder(
-            'Recently Joined',
-            'No room created yet.',
+            'Joined',
+            'No joined rooms yet.',
           );
         }
+
         return Column(
-          children: rooms.map((doc) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _RoomListCard(
-                roomId: doc.id,
-                data: doc.data(),
-              ),
+          children: joinedRooms.map((joinedDoc) {
+            final joinedData = joinedDoc.data();
+
+            final joinedRoomId =
+                joinedData['roomId']?.toString() ??
+                    joinedDoc.id;
+
+            return StreamBuilder<
+                DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('rooms')
+                  .doc(joinedRoomId)
+                  .snapshots(),
+              builder: (context, roomSnapshot) {
+                if (!roomSnapshot.hasData ||
+                    !roomSnapshot.data!.exists) {
+                  return const SizedBox.shrink();
+                }
+
+                final roomData =
+                    roomSnapshot.data!.data() ??
+                        <String, dynamic>{};
+
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 12,
+                  ),
+                  child: _RoomListCard(
+                    roomId: roomSnapshot.data!.id,
+                    data: roomData,
+                  ),
+                );
+              },
             );
           }).toList(),
         );
       },
     );
   }
+
+  if (selectedMyRoomTab == 2) {
+    return _buildMyRoomPlaceholder(
+      'With Friend',
+      'No rooms with friends yet.',
+    );
+  }
+
+  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('rooms')
+        .where('ownerUid', isEqualTo: uid)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const SizedBox(
+          height: 160,
+          child: PartyLoading(),
+        );
+      }
+
+      if (snapshot.hasError) {
+        return _buildMyRoomPlaceholder(
+          'Recently Joined',
+          'Could not load your room.',
+        );
+      }
+
+      final rooms = snapshot.data?.docs ?? [];
+
+      if (rooms.isEmpty) {
+        return _buildMyRoomPlaceholder(
+          'Recently Joined',
+          'No room created yet.',
+        );
+      }
+
+      return Column(
+        children: rooms.map((doc) {
+          return Padding(
+            padding: const EdgeInsets.only(
+              bottom: 12,
+            ),
+            child: _RoomListCard(
+              roomId: doc.id,
+              data: doc.data(),
+            ),
+          );
+        }).toList(),
+      );
+    },
+  );
+}
 
   Widget _buildMyRoomPlaceholder(
     String title,
@@ -3715,120 +3799,137 @@ class _RoomListCard extends StatelessWidget {
   }
 
   Future<void> _joinRoom(
-    BuildContext context,
-    String title,
-  ) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+  BuildContext context,
+  String title,
+) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
 
-    final description =
-        data['description']?.toString() ?? '';
+  final description =
+      data['description']?.toString() ?? '';
 
-    final capacity =
-        (data['userCapacity'] as num?)?.toInt() ?? 100;
+  final capacity =
+      (data['userCapacity'] as num?)?.toInt() ?? 100;
 
-    final roomRef =
-        FirebaseFirestore.instance
-            .collection('rooms')
-            .doc(roomId);
+  final roomRef =
+      FirebaseFirestore.instance
+          .collection('rooms')
+          .doc(roomId);
 
-    try {
-      await FirebaseFirestore.instance.runTransaction(
-        (transaction) async {
-          final snapshot =
-              await transaction.get(roomRef);
+  final joinedRoomRef =
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('joinedRooms')
+          .doc(roomId);
 
-          if (!snapshot.exists) {
-            throw Exception(
-              'Room no longer exists.',
-            );
-          }
+  try {
+    await FirebaseFirestore.instance.runTransaction(
+      (transaction) async {
+        final snapshot =
+            await transaction.get(roomRef);
 
-          final current =
-              snapshot.data() ??
-                  <String, dynamic>{};
+        if (!snapshot.exists) {
+          throw Exception(
+            'Room no longer exists.',
+          );
+        }
 
-          final status =
-              current['status']
-                  ?.toString()
-                  .toLowerCase();
+        final current =
+            snapshot.data() ??
+                <String, dynamic>{};
 
-          if (status != null &&
-              status.isNotEmpty &&
-              status != 'open') {
-            throw Exception(
-              'This room is closed.',
-            );
-          }
+        final status =
+            current['status']
+                ?.toString()
+                .toLowerCase();
 
-          final currentCount =
-              (current['memberCount'] as num?)
-                      ?.toInt() ??
-                  0;
+        if (status != null &&
+            status.isNotEmpty &&
+            status != 'open') {
+          throw Exception(
+            'This room is closed.',
+          );
+        }
 
-          if (currentCount >= capacity) {
-            throw Exception(
-              'This room is full.',
-            );
-          }
+        final currentCount =
+            (current['memberCount'] as num?)
+                    ?.toInt() ??
+                0;
 
-          final memberRef =
-              roomRef
-                  .collection('members')
-                  .doc(user.uid);
+        if (currentCount >= capacity) {
+          throw Exception(
+            'This room is full.',
+          );
+        }
 
-          final memberSnapshot =
-              await transaction.get(memberRef);
+        final memberRef =
+            roomRef
+                .collection('members')
+                .doc(user.uid);
 
-          if (!memberSnapshot.exists) {
-            transaction.set(
-              memberRef,
-              {
-                'uid': user.uid,
-                'joinedAt':
-                    FieldValue.serverTimestamp(),
-              },
-            );
+        final memberSnapshot =
+            await transaction.get(memberRef);
 
-            transaction.update(
-              roomRef,
-              {
-                'memberCount':
-                    currentCount + 1,
-                'updatedAt':
-                    FieldValue.serverTimestamp(),
-              },
-            );
-          }
-        },
-      );
+        if (!memberSnapshot.exists) {
+          transaction.set(
+            memberRef,
+            {
+              'uid': user.uid,
+              'joinedAt':
+                  FieldValue.serverTimestamp(),
+            },
+          );
 
-      if (!context.mounted) return;
+          transaction.update(
+            roomRef,
+            {
+              'memberCount':
+                  currentCount + 1,
+              'updatedAt':
+                  FieldValue.serverTimestamp(),
+            },
+          );
+        }
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PartyRoomPage(
-            roomId: roomId,
-            title: title,
-            description: description,
+        transaction.set(
+          joinedRoomRef,
+          {
+            'roomId': roomId,
+            'title': title,
+            'joinedAt':
+                FieldValue.serverTimestamp(),
+          },
+          SetOptions(merge: true),
+        );
+      },
+    );
+
+    if (!context.mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PartyRoomPage(
+          roomId: roomId,
+          title: title,
+          description: description,
+        ),
+      ),
+    );
+  } catch (e) {
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          e.toString().replaceFirst(
+            'Exception: ',
+            '',
           ),
         ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString().replaceFirst(
-              'Exception: ',
-              '',
-            ),
-          ),
-        ),
-      );
-    }
+      ),
+    );
   }
 }
 
