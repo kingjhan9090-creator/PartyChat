@@ -1735,6 +1735,108 @@ class _PartyLoadingState extends State<PartyLoading>
                 ),
                 appBarTheme: const AppBarTheme(
                   backgroundColor: PartyColors.black,
+                  elevation: 0,
+                  centerTitle: false,
+                  foregroundColor: PartyColors.text,
+                  titleTextStyle: TextStyle(color: PartyColors.text, fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: PartyColors.black2,
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: Colors.white54),
+                  prefixIconColor: PartyColors.gold,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(18)),
+                    borderSide: BorderSide(color: PartyColors.purpleDark),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(18)),
+                    borderSide: BorderSide(color: Color(0xFF46345D)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(18)),
+                    borderSide: BorderSide(color: PartyColors.gold, width: 1.6),
+                  ),
+                ),
+                filledButtonTheme: FilledButtonThemeData(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: PartyColors.gold,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ),
+                useMaterial3: true,
+              ),
+              home: const SplashPage(),
+            );
+          },
+        );
+      }
+    }
+
+    class _NeonBackground extends StatelessWidget {
+      final Widget child;
+      final bool scrollable;
+      const _NeonBackground({required this.child, this.scrollable = false});
+
+      @override
+      Widget build(BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [PartyColors.black, Color(0xFF090512), PartyColors.black],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(top: -100, left: -110, child: _GlowOrb(size: 300, color: PartyColors.purple)),
+              Positioned(top: 40, right: -150, child: _GlowOrb(size: 340, color: PartyColors.gold)),
+              Positioned(bottom: -170, left: -80, child: _GlowOrb(size: 330, color: PartyColors.purpleBright)),
+              Positioned(bottom: -130, right: -120, child: _GlowOrb(size: 280, color: PartyColors.goldDark)),
+              child,
+            ],
+          ),
+        );
+      }
+    }
+
+    class _GlowOrb extends StatelessWidget {
+      final double size;
+      final Color color;
+      const _GlowOrb({required this.size, required this.color});
+
+      @override
+      Widget build(BuildContext context) {
+        return IgnorePointer(
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(.035),
+              boxShadow: [BoxShadow(color: color.withOpacity(.16), blurRadius: 115, spreadRadius: 25)],
+            ),
+          ),
+        );
+      }
+    }
+
+    class _NeonPanel extends StatelessWidget {
+      final Widget child;
+      final EdgeInsetsGeometry padding;
+      final double radius;
+      const _NeonPanel({required this.child, this.padding = const EdgeInsets.all(16), this.radius = 20});
+
+      @override
+      Widget build(BuildContext context) {
+        return Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [PartyColors.panel2, PartyColors.black2],
@@ -1748,7 +1850,6 @@ class _PartyLoadingState extends State<PartyLoading>
       }
     }
 
-    }
     class _NeonAction extends StatelessWidget {
       final String label;
       final VoidCallback onPressed;
@@ -2754,7 +2855,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       TextEditingController();
 
   XFile? roomImage;
-  int memberLimit = 500;
+  int memberLimit = 100;
   int micSeats = 15;
   bool isPrivate = false;
   bool creatingRoom = false;
@@ -2763,9 +2864,8 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
     try {
       final picked = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        imageQuality: 70,
-        maxWidth: 700,
-        maxHeight: 700,
+        imageQuality: 85,
+        maxWidth: 1200,
       );
 
       if (!mounted || picked == null) return;
@@ -2816,13 +2916,16 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       final ownerData = ownerSnapshot.data() ?? <String, dynamic>{};
       final ownerUserId = ownerData['userId']?.toString() ?? '';
 
-      String? roomImageBase64;
+      String? roomPhotoUrl;
       if (roomImage != null) {
-        final imageBytes = await roomImage!.readAsBytes();
-        if (imageBytes.length > 600000) {
-          throw Exception('Room picture is too large. Please choose a smaller image.');
-        }
-        roomImageBase64 = base64Encode(imageBytes);
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('rooms')
+            .child(roomRef.id)
+            .child('room.jpg');
+
+        await storageRef.putFile(File(roomImage!.path));
+        roomPhotoUrl = await storageRef.getDownloadURL();
       }
 
       final now = FieldValue.serverTimestamp();
@@ -2833,7 +2936,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
           'roomId': roomRef.id,
           'title': name,
           'description': description,
-          'roomImageBase64': roomImageBase64,
+          'roomPhotoUrl': roomPhotoUrl,
           'ownerUid': user.uid,
           'ownerUserId': ownerUserId,
           'userCapacity': memberLimit,
@@ -2930,7 +3033,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
             _buildSectionTitle('Members Limit'),
             const SizedBox(height: 10),
             _buildChoiceRow(
-              values: const [500, 1000, 1500],
+              values: const [50, 100, 200],
               selected: memberLimit,
               onSelected: (value) {
                 setState(() => memberLimit = value);
@@ -3761,652 +3864,6 @@ class _RoomBottomAction extends StatelessWidget {
 
   
 /* ============================================================
-       EDIT ROOM PAGE
-       ============================================================ */
-
-class EditRoomPage extends StatefulWidget {
-  final String roomId;
-  final Map<String, dynamic> data;
-
-  const EditRoomPage({
-    super.key,
-    required this.roomId,
-    required this.data,
-  });
-
-  @override
-  State<EditRoomPage> createState() => _EditRoomPageState();
-}
-
-class _EditRoomPageState extends State<EditRoomPage> {
-  late final TextEditingController roomNameController;
-  late final TextEditingController descriptionController;
-  late int memberLimit;
-  late int micSeats;
-  late bool isPrivate;
-  String? roomImageBase64;
-  XFile? selectedImage;
-  bool saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    roomNameController = TextEditingController(
-      text: widget.data['title']?.toString() ??
-          widget.data['roomName']?.toString() ??
-          '',
-    );
-    descriptionController = TextEditingController(
-      text: widget.data['description']?.toString() ?? '',
-    );
-    final storedLimit =
-        (widget.data['userCapacity'] as num?)?.toInt() ?? 500;
-    memberLimit = const [500, 1000, 1500].contains(storedLimit)
-        ? storedLimit
-        : 500;
-    final storedMics =
-        (widget.data['micCapacity'] as num?)?.toInt() ?? 15;
-    micSeats = const [5, 10, 15].contains(storedMics)
-        ? storedMics
-        : 15;
-    isPrivate = widget.data['isPrivate'] == true ||
-        widget.data['privacy']?.toString() == 'private';
-    roomImageBase64 = widget.data['roomImageBase64']?.toString();
-  }
-
-  Future<void> _pickRoomImage() async {
-    try {
-      final picked = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 70,
-        maxWidth: 700,
-        maxHeight: 700,
-      );
-      if (!mounted || picked == null) return;
-
-      final bytes = await picked.readAsBytes();
-      if (bytes.length > 600000) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Room picture is too large. Please choose a smaller image.'),
-          ),
-        );
-        return;
-      }
-
-      setState(() {
-        selectedImage = picked;
-        roomImageBase64 = base64Encode(bytes);
-      });
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not select room picture.')),
-      );
-    }
-  }
-
-  Future<void> _saveChanges() async {
-    if (saving) return;
-    final user = FirebaseAuth.instance.currentUser;
-    final name = roomNameController.text.trim();
-    final description = descriptionController.text.trim();
-
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login first.')),
-      );
-      return;
-    }
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a room name.')),
-      );
-      return;
-    }
-    if (widget.data['ownerUid']?.toString() != user.uid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Only the room owner can edit this room.')),
-      );
-      return;
-    }
-
-    setState(() => saving = true);
-    try {
-      await FirebaseFirestore.instance
-          .collection('rooms')
-          .doc(widget.roomId)
-          .update({
-        'title': name,
-        'roomName': name,
-        'description': description,
-        'userCapacity': memberLimit,
-        'micCapacity': micSeats,
-        'privacy': isPrivate ? 'private' : 'public',
-        'isPrivate': isPrivate,
-        'roomImageBase64': roomImageBase64,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room updated successfully.')),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Could not update room: ${e.toString().replaceFirst('Exception: ', '')}',
-          ),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => saving = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    roomNameController.dispose();
-    descriptionController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: PartyColors.black,
-      appBar: AppBar(
-        backgroundColor: PartyColors.black,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Room Settings',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
-      ),
-      body: _NeonBackground(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 40),
-          children: [
-            Center(
-              child: GestureDetector(
-                onTap: _pickRoomImage,
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [PartyColors.gold, PartyColors.purpleBright],
-                    ),
-                  ),
-                  child: ClipOval(
-                    child: roomImageBase64 != null &&
-                            roomImageBase64!.isNotEmpty
-                        ? Image.memory(
-                            base64Decode(roomImageBase64!),
-                            fit: BoxFit.cover,
-                          )
-                        : const ColoredBox(
-                            color: Color(0xFF0D0A12),
-                            child: Icon(
-                              Icons.add_a_photo_outlined,
-                              color: PartyColors.gold,
-                              size: 30,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 22),
-            _buildTextField(
-              controller: roomNameController,
-              label: 'Room Name',
-              hint: 'Enter room name',
-              icon: Icons.meeting_room_outlined,
-              maxLength: 30,
-            ),
-            const SizedBox(height: 14),
-            _buildTextField(
-              controller: descriptionController,
-              label: 'Description',
-              hint: 'Tell people about your room',
-              icon: Icons.description_outlined,
-              maxLines: 3,
-              maxLength: 150,
-            ),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Members Limit'),
-            const SizedBox(height: 10),
-            _buildChoiceRow(
-              values: const [500, 1000, 1500],
-              selected: memberLimit,
-              suffix: ' Members',
-              onSelected: (value) => setState(() => memberLimit = value),
-            ),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Mic Seats'),
-            const SizedBox(height: 10),
-            _buildChoiceRow(
-              values: const [5, 10, 15],
-              selected: micSeats,
-              suffix: ' Seats',
-              onSelected: (value) => setState(() => micSeats = value),
-            ),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Room Privacy'),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildPrivacyChoice(
-                    title: 'Public',
-                    icon: Icons.public_rounded,
-                    selected: !isPrivate,
-                    onTap: () => setState(() => isPrivate = false),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildPrivacyChoice(
-                    title: 'Private',
-                    icon: Icons.lock_outline_rounded,
-                    selected: isPrivate,
-                    onTap: () => setState(() => isPrivate = true),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              height: 56,
-              child: ElevatedButton(
-                onPressed: saving ? null : _saveChanges,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PartyColors.purple,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  side: const BorderSide(
-                    color: PartyColors.gold,
-                    width: 1,
-                  ),
-                ),
-                child: saving
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Save Changes',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const DeleteTestRoomsPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.delete_sweep_outlined),
-              label: const Text(
-                'Delete Test Rooms',
-                style: TextStyle(fontWeight: FontWeight.w900),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.redAccent,
-                side: const BorderSide(color: Colors.redAccent),
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    int maxLines = 1,
-    int? maxLength,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: PartyColors.gold,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          maxLength: maxLength,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Colors.white38),
-            prefixIcon: Icon(icon, color: PartyColors.gold),
-            filled: true,
-            fillColor: const Color(0xFF0D0A12),
-            counterStyle: const TextStyle(color: Colors.white38),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: PartyColors.purple),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: PartyColors.purple),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(
-                color: PartyColors.gold,
-                width: 1.4,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: PartyColors.gold,
-        fontSize: 15,
-        fontWeight: FontWeight.w900,
-      ),
-    );
-  }
-
-  Widget _buildChoiceRow({
-    required List<int> values,
-    required int selected,
-    required ValueChanged<int> onSelected,
-    required String suffix,
-  }) {
-    return Row(
-      children: values.map((value) {
-        final selectedValue = selected == value;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: value == values.last ? 0 : 8,
-            ),
-            child: GestureDetector(
-              onTap: () => onSelected(value),
-              child: Container(
-                height: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: selectedValue
-                      ? const LinearGradient(
-                          colors: [PartyColors.purple, PartyColors.goldDark],
-                        )
-                      : null,
-                  color: selectedValue ? null : const Color(0xFF171125),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: selectedValue
-                        ? PartyColors.gold
-                        : PartyColors.purple,
-                  ),
-                ),
-                child: Text(
-                  '$value$suffix',
-                  style: TextStyle(
-                    color: selectedValue ? Colors.white : Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildPrivacyChoice({
-    required String title,
-    required IconData icon,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 58,
-        decoration: BoxDecoration(
-          gradient: selected
-              ? const LinearGradient(
-                  colors: [PartyColors.purple, PartyColors.goldDark],
-                )
-              : null,
-          color: selected ? null : const Color(0xFF171125),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? PartyColors.gold : PartyColors.purple,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: selected ? Colors.white : PartyColors.gold,
-              size: 21,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                color: selected ? Colors.white : Colors.white70,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-/* ============================================================
-   DELETE TEST ROOMS PAGE
-   ============================================================ */
-
-class DeleteTestRoomsPage extends StatelessWidget {
-  const DeleteTestRoomsPage({super.key});
-
-  Future<void> _deleteRoom(
-    BuildContext context,
-    String roomId,
-    String title,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Room'),
-        content: Text(
-          'Delete "$title" permanently? This removes the room and its members.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-            ),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !context.mounted) return;
-
-    try {
-      final roomRef = FirebaseFirestore.instance
-          .collection('rooms')
-          .doc(roomId);
-      final members = await roomRef.collection('members').get();
-
-      final batch = FirebaseFirestore.instance.batch();
-      for (final member in members.docs) {
-        batch.delete(member.reference);
-      }
-      batch.delete(roomRef);
-      await batch.commit();
-
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room deleted successfully.')),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete room: $e')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Please login first.')),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: PartyColors.black,
-      appBar: AppBar(
-        backgroundColor: PartyColors.black,
-        foregroundColor: Colors.white,
-        title: const Text(
-          'Delete Test Rooms',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
-      ),
-      body: _NeonBackground(
-        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: FirebaseFirestore.instance
-              .collection('rooms')
-              .where('ownerUid', isEqualTo: user.uid)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: PartyLoading());
-            }
-
-            final rooms = snapshot.data?.docs ?? [];
-
-            if (rooms.isEmpty) {
-              return const Center(
-                child: Text(
-                  'No rooms found.',
-                  style: TextStyle(color: Colors.white54),
-                ),
-              );
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 40),
-              itemCount: rooms.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final doc = rooms[index];
-                final data = doc.data();
-                final title = data['title']?.toString() ??
-                    data['roomName']?.toString() ??
-                    'Untitled Room';
-                final roomId = doc.id;
-
-                return Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0D0A12),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: PartyColors.purple),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      IconButton(
-                        tooltip: 'Delete room',
-                        color: Colors.redAccent,
-                        onPressed: () => _deleteRoom(
-                          context,
-                          roomId,
-                          title,
-                        ),
-                        icon: const Icon(Icons.delete_outline_rounded),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-
-/* ============================================================
    PARTY ROOM PAGE
    ============================================================ */
 
@@ -4535,7 +3992,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               child: Column(
                 children: [
                   _buildRoomHeader(
-                    data: data,
                     title: title,
                     members: members,
                     capacity: capacity,
@@ -4569,7 +4025,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 
   Widget _buildRoomHeader({
-    required Map<String, dynamic> data,
     required String title,
     required int members,
     required int capacity,
@@ -4617,10 +4072,10 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   width: 1.2,
                 ),
               ),
-              clipBehavior: Clip.antiAlias,
-              child: _RoomImage(
-                base64: data['roomImageBase64']?.toString(),
-                size: 58,
+              child: const Icon(
+                Icons.image_outlined,
+                color: PartyColors.gold,
+                size: 29,
               ),
             ),
 
@@ -4707,27 +4162,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
             _PartyRoomTopAction(
               icon: Icons.more_vert_rounded,
-              onTap: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user?.uid != ownerUid) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Only the room owner can edit this room.'),
-                    ),
-                  );
-                  return;
-                }
-
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditRoomPage(
-                      roomId: widget.roomId,
-                      data: data,
-                    ),
-                  ),
-                );
-              },
+              onTap: () {},
             ),
 
             const SizedBox(width: 5),
@@ -4951,38 +4386,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             onTap: () {},
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _RoomImage extends StatelessWidget {
-  final String? base64;
-  final double size;
-
-  const _RoomImage({
-    required this.base64,
-    required this.size,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (base64 != null && base64!.isNotEmpty) {
-      try {
-        return Image.memory(
-          base64Decode(base64!),
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-        );
-      } catch (_) {}
-    }
-
-    return Center(
-      child: Icon(
-        Icons.image_outlined,
-        color: PartyColors.gold,
-        size: size * 0.5,
       ),
     );
   }
@@ -5601,7 +5004,580 @@ class _PartyRoomTopAction extends StatelessWidget {
         final isLeader = role == 'leader';
         final isDeputy = role == 'deputy';
         final label = isLeader ? '👑 Leader' : isDeputy ? '🛡 Deputy' : '★ Admin';
-urn;
+        final color = isLeader
+            ? const Color(0xFFFFC928)
+            : isDeputy
+                ? const Color(0xFFA238FF)
+                : const Color(0xFF168CFF);
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          decoration: BoxDecoration(
+            color: color.withOpacity(.18),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(.9)),
+          ),
+          child: Text(label, style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w900)),
+        );
+      }
+    }
+    class _PremiumMusicCard extends StatelessWidget {
+      final Map<String, dynamic> room;
+      const _PremiumMusicCard({required this.room});
+
+      @override
+      Widget build(BuildContext context) {
+        final url = room['musicUrl']?.toString() ?? '';
+        final name = room['musicName']?.toString() ?? '';
+        if (url.isEmpty) return const SizedBox.shrink();
+        return Container(
+          width: 142,
+          height: 118,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xE50A0614),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF7138FF)),
+            boxShadow: const [BoxShadow(color: Color(0x667A2CFF), blurRadius: 22)],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.music_note_rounded, color: Color(0xFFE65CFF), size: 40),
+              const Text('Music Playing', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12)),
+              const SizedBox(height: 2),
+              Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFFB8AEC6), fontSize: 9)),
+              const SizedBox(height: 5),
+              GestureDetector(
+                onTap: () async {
+                  await ZegoUIKitPrebuiltLiveAudioRoomController().media.play(filePathOrURL: url, enableRepeat: true);
+                },
+                child: const Icon(Icons.graphic_eq_rounded, color: Color(0xFF8D3DFF), size: 27),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    class _ZegoFirebaseAvatar extends StatelessWidget {
+      final String userId;
+      final Size size;
+      const _ZegoFirebaseAvatar({required this.userId, required this.size});
+      @override
+      Widget build(BuildContext context) {
+        if (userId.isEmpty) {
+          return Container(
+            width: size.width,
+            height: size.height,
+            padding: const EdgeInsets.all(2.5),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(colors: [PartyColors.gold, PartyColors.purpleBright]),
+            ),
+            child: const CircleAvatar(
+              backgroundColor: PartyColors.panel,
+              child: Icon(Icons.person_rounded, color: PartyColors.gold),
+            ),
+          );
+        }
+        return FutureBuilder<Map<String, dynamic>?>(
+            
+          future: PartyChatData.userData(userId),
+          builder: (context, snapshot) {
+            final data = snapshot.data ?? <String, dynamic>{};
+            final b64 = data['photoBase64']?.toString();
+            final url = data['photoURL']?.toString();
+            ImageProvider<Object>? image;
+            if (b64 != null && b64.isNotEmpty) { try { image = MemoryImage(base64Decode(b64)); } catch (_) {} }
+            if (image == null && url != null && url.isNotEmpty) image = NetworkImage(url);
+            return Container(
+              width: size.width,
+              height: size.height,
+              padding: const EdgeInsets.all(2.5),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(colors: [PartyColors.gold, PartyColors.purpleBright]),
+                boxShadow: [BoxShadow(color: Color(0x554F00FF), blurRadius: 12, spreadRadius: 1)],
+              ),
+              child: CircleAvatar(
+                backgroundColor: PartyColors.panel,
+                backgroundImage: image,
+                child: image == null ? const Icon(Icons.person_rounded, color: PartyColors.gold) : null,
+              ),
+            );
+          },
+        );
+      }
+    }
+    /* ============================================================
+       GAMES
+       ============================================================ */
+    // Game thumbnails currently use Wikimedia Commons files through Special:FilePath URLs.
+    // For a production/offline Play Store build, these images should later be bundled locally
+    // in assets/ with the required license/attribution information.
+
+
+    class GamesTab extends StatelessWidget {
+      const GamesTab({super.key});
+
+      static const List<Map<String, String>> games = [
+        {
+          'title': 'Ludo',
+          'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Ludo_board_game.jpg',
+        },
+        {
+          'title': 'Carrom',
+          'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Carrom_board.jpg',
+        },
+        {
+          'title': '8 Ball Pool',
+          'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/8ballpool.jpg',
+        },
+        {
+          'title': 'Quiz',
+          'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Quiz_competition_image.jpg',
+        },
+        {
+          'title': 'Bubble Shooter',
+          'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Bubbles_game.JPG',
+        },
+        {
+          'title': 'Chess',
+          'image': 'https://commons.wikimedia.org/wiki/Special:FilePath/Chess_board.png',
+        },
+      ];
+
+      @override
+      Widget build(BuildContext context) {
+        return _NeonBackground(
+          child: GridView.builder(
+            padding: const EdgeInsets.fromLTRB(18, 22, 18, 100),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: .88,
+            ),
+            itemCount: games.length,
+            itemBuilder: (context, index) {
+              final game = games[index];
+              return GameCard(
+                title: game['title']!,
+                imageUrl: game['image']!,
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    class GameCard extends StatelessWidget {
+      final String title;
+      final String imageUrl;
+
+      const GameCard({
+        super.key,
+        required this.title,
+        required this.imageUrl,
+      });
+
+      @override
+      Widget build(BuildContext context) {
+        return _NeonPanel(
+          padding: EdgeInsets.zero,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFF7B3FF2),
+                                  Color(0xFFD6A84F),
+                                ],
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.sports_esports,
+                              size: 48,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFF21182F),
+                                  Color(0xFF120A20),
+                                ],
+                              ),
+                            ),
+                            child: const Center(
+                              child: PartyLoading(),
+                            ),
+                          );
+                        },
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(10, 24, 10, 10),
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Color(0xCC05030B),
+                              ],
+                            ),
+                          ),
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 9, 10, 11),
+                  child: Text(
+                    AppLanguage.text('play_now'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFFD8C2FF),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+
+    class WalletTab extends StatelessWidget {
+      const WalletTab({super.key});
+
+      @override
+      Widget build(BuildContext context) {
+        return _NeonBackground(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(18, 22, 18, 100),
+            children: [
+              const Text('My Wallet', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 16),
+              _NeonPanel(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('Coins', style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 3),
+                Row(children: [
+                  const Text('12,580', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Color(0xFFFFC107))),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.monetization_on, color: Color(0xFFFFC107), size: 28),
+                ]),
+                const SizedBox(height: 6),
+                const Row(children: [
+                  Text('2,450', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFFB78CFF))),
+                  SizedBox(width: 6),
+                  Text('Diamonds', style: TextStyle(fontSize: 17, color: Color(0xFFB78CFF))),
+                ]),
+              ])),
+              const SizedBox(height: 14),
+              SizedBox(width: double.infinity, child: _NeonAction(label: '＋  Recharge', onPressed: () {})),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), side: const BorderSide(color: Color(0xFFFFC83D))), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TransactionHistoryPage())), icon: const Icon(Icons.history), label: const Text('Transaction History', style: TextStyle(fontWeight: FontWeight.w800))),
+              const SizedBox(height: 18),
+              const Text('Quick Actions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 10),
+              Row(children: [
+                Expanded(child: _walletAction(Icons.add_card, 'Top Up')),
+                const SizedBox(width: 8),
+                Expanded(child: _walletAction(Icons.history, 'History')),
+              ]),
+            ],
+          ),
+        );
+      }
+
+      Widget _walletAction(IconData icon, String label) {
+        return _NeonPanel(padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6), child: Column(children: [Icon(icon, color: const Color(0xFFD8C2FF)), const SizedBox(height: 6), Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700))]));
+      }
+    }
+
+    /* ============================================================
+       PROFILE
+       ============================================================ */
+    class ProfileTab extends StatefulWidget {
+      const ProfileTab({super.key});
+
+      @override
+      State<ProfileTab> createState() => _ProfileTabState();
+    }
+
+    class _ProfileTabState extends State<ProfileTab> {
+      final avatarImages = const {
+        'avatar1': 'assets/avatar1_pakistan_female-2.png',
+        'avatar2': 'assets/avatar2_uae_male.png',
+        'avatar3': 'assets/avatar3_uk_male.png',
+        'avatar4': 'assets/avatar4_russia_female.png',
+        'avatar5': 'assets/avatar5_saudi_female.png',
+        'avatar6': 'assets/avatar6_turkey_male.png',
+        'avatar7': 'assets/avatar7_india_female.png',
+        'avatar8': 'assets/avatar8_usa_male.png',
+      };
+
+      @override
+    void initState() {
+      super.initState();
+
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        ProfileUnreadService.ensure(user.uid);
+        ensureUserId();
+      }
+    }
+
+    Future<void> ensureUserId() async {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final userDoc =
+          FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      final snapshot = await userDoc.get();
+      final data = snapshot.data();
+
+      if (data == null || data['userId'] != null) return;
+
+      final random = math.Random();
+      final newUserId =
+          (100000 + random.nextInt(900000)).toString();
+
+      await userDoc.set(
+        {'userId': newUserId},
+        SetOptions(merge: true),
+      );
+    }
+
+      
+      ImageProvider<Object>? _imageProvider(
+        Map<String, dynamic>? data,
+      ) {
+        final photoBase64 = data?['photoBase64'] as String?;
+        final photoURL = data?['photoURL'] as String?;
+        final avatar = data?['avatar'] as String?;
+
+        if (photoBase64 != null && photoBase64.isNotEmpty) {
+          try {
+            return MemoryImage(
+              base64Decode(photoBase64),
+            );
+          } catch (_) {}
+        }
+
+        if (photoURL != null && photoURL.isNotEmpty) {
+          return NetworkImage(photoURL);
+        }
+
+        if (avatar != null && avatarImages[avatar] != null) {
+          return AssetImage(avatarImages[avatar]!);
+        }
+
+        return null;
+      }
+
+      Future<void> _showPhotoZoom(
+        BuildContext context,
+        ImageProvider<Object> image,
+      ) async {
+        await showDialog(
+          context: context,
+          barrierColor: Colors.black.withOpacity(0.9),
+          builder: (_) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(10),
+              child: InteractiveViewer(
+                minScale: 1,
+                maxScale: 5,
+                child: Image(
+                  image: image,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            );
+          },
+        );
+      }
+
+      Future<void> _pickGallery(
+        BuildContext context,
+        DocumentReference<Map<String, dynamic>> userDoc,
+      ) async {
+        final picker = ImagePicker();
+
+        final image = await picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 20,
+          maxWidth: 256,
+          maxHeight: 256,
+        );
+
+        if (image == null) return;
+
+        final bytes = await image.readAsBytes();
+
+        if (bytes.length > 500000) {
+          if (!context.mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Photo is too large. Please select a smaller photo.',
+              ),
+            ),
+          );
+          return;
+        }
+
+        final encodedPhoto = base64Encode(bytes);
+
+        try {
+          await userDoc.set(
+            {
+              'photoBase64': encodedPhoto,
+              'photoURL': '',
+              'avatar': '',
+            },
+            SetOptions(merge: true),
+          );
+
+          if (!context.mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Profile photo saved successfully.',
+              ),
+            ),
+          );
+        } catch (e) {
+          if (!context.mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Photo could not be saved: $e',
+              ),
+            ),
+          );
+        }
+      }
+
+      Future<void> _chooseAvatar(
+     
+        BuildContext context,
+        DocumentReference<Map<String, dynamic>> userDoc,
+      ) async {
+        final avatars = avatarImages.keys.toList();
+
+        final selected = await showDialog<String>(
+          context: context,
+          builder: (dialogContext) {
+            String? tempSelected;
+
+            return StatefulBuilder(
+              builder: (
+                context,
+                setDialogState,
+              ) {
+                return AlertDialog(
+                  title: Text(
+                    AppLanguage.text('choose_avatar'),
+                  ),
+                  content: GridView.builder(
+                    shrinkWrap: true,
+                    itemCount: avatars.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemBuilder: (context, index) {
+                      final avatar = avatars[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          setDialogState(() {
+                            tempSelected = avatar;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: tempSelected == avatar
+                                  ? Colors.white
+                                  : Colors.grey,
+                              width:
+                                  tempSelected == avatar ? 3 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Image.asset(
+                            avatarImages[avatar]!,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: tempSelected == null
+                          ? null
+                          : () {
+                              Navigator.pop(
+                                dialogContext,
+                                tempSelected,
+                              );
+                            },
+                      child: Text(
+                        AppLanguage.text('save'),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+
+        if (selected == null) return;
 
         try {
           await userDoc.set(
@@ -8200,7 +8176,6 @@ class MySupportRequestsPage extends StatelessWidget {
     );
   }
 }
-
 
 
 
