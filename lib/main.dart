@@ -2858,6 +2858,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   int memberLimit = 100;
   int micSeats = 15;
   bool isPrivate = false;
+  bool creatingRoom = false;
 
   Future<void> _pickRoomImage() async {
     try {
@@ -2883,23 +2884,105 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
     }
   }
 
-  void _createRoomPreview() {
-    final name = roomNameController.text.trim();
+  Future<void> _createRoom() async {
+    if (creatingRoom) return;
 
-    if (name.isEmpty) {
+    final user = FirebaseAuth.instance.currentUser;
+    final name = roomNameController.text.trim();
+    final description = descriptionController.text.trim();
+
+    if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a room name.'),
-        ),
+        const SnackBar(content: Text('Please login first.')),
       );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Room creation will be connected to Firebase next.'),
-      ),
-    );
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a room name.')),
+      );
+      return;
+    }
+
+    setState(() => creatingRoom = true);
+
+    try {
+      final roomRef = FirebaseFirestore.instance.collection('rooms').doc();
+      final ownerSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final ownerData = ownerSnapshot.data() ?? <String, dynamic>{};
+      final ownerUserId = ownerData['userId']?.toString() ?? '';
+
+      String? roomPhotoUrl;
+      if (roomImage != null) {
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('rooms')
+            .child(roomRef.id)
+            .child('room.jpg');
+
+        await storageRef.putFile(File(roomImage!.path));
+        roomPhotoUrl = await storageRef.getDownloadURL();
+      }
+
+      final now = FieldValue.serverTimestamp();
+      final memberRef = roomRef.collection('members').doc(user.uid);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.set(roomRef, {
+          'roomId': roomRef.id,
+          'title': name,
+          'description': description,
+          'roomPhotoUrl': roomPhotoUrl,
+          'ownerUid': user.uid,
+          'ownerUserId': ownerUserId,
+          'userCapacity': memberLimit,
+          'micCapacity': micSeats,
+          'memberCount': 1,
+          'privacy': isPrivate ? 'private' : 'public',
+          'isPrivate': isPrivate,
+          'status': 'open',
+          'level': 1,
+          'xp': 0,
+          'maxLevel': 100,
+          'createdAt': now,
+          'updatedAt': now,
+        });
+
+        transaction.set(memberRef, {
+          'uid': user.uid,
+          'joinedAt': now,
+        });
+      });
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PartyRoomPage(
+            roomId: roomRef.id,
+            title: name,
+            description: description,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not create room: ${e.toString().replaceFirst('Exception: ', '')}',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => creatingRoom = false);
+    }
   }
 
   @override
@@ -3002,7 +3085,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
             SizedBox(
               height: 56,
               child: ElevatedButton(
-                onPressed: _createRoomPreview,
+                onPressed: creatingRoom ? null : _createRoom,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PartyColors.purple,
                   foregroundColor: Colors.white,
@@ -3014,13 +3097,22 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     width: 1,
                   ),
                 ),
-                child: const Text(
-                  'Create Room',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+                child: creatingRoom
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Create Room',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
               ),
             ),
           ],
