@@ -1748,6 +1748,7 @@ class _PartyLoadingState extends State<PartyLoading>
       }
     }
 
+    }
     class _NeonAction extends StatelessWidget {
       final String label;
       final VoidCallback onPressed;
@@ -8203,7 +8204,6 @@ class MySupportRequestsPage extends StatelessWidget {
 
 
 
-}
 
 /* ============================================================
        SUPPORT TICKET
