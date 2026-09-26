@@ -4607,14 +4607,14 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           final memberSnapshot =
               await transaction.get(memberRef);
 
+          final now = FieldValue.serverTimestamp();
+
           if (memberSnapshot.exists) {
             joined = true;
           } else {
             if (currentCount >= capacity) {
               throw Exception('This room is full.');
             }
-
-            final now = FieldValue.serverTimestamp();
 
             transaction.set(memberRef, {
               'uid': user.uid,
@@ -4625,20 +4625,20 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               'memberCount': currentCount + 1,
               'updatedAt': now,
             });
-
-            transaction.set(
-              joinedRoomRef,
-              {
-                'roomId': widget.roomId,
-                'title':
-                    current['roomName']?.toString() ??
-                        current['title']?.toString() ??
-                        widget.title,
-                'joinedAt': now,
-              },
-              SetOptions(merge: true),
-            );
           }
+
+          transaction.set(
+            joinedRoomRef,
+            {
+              'roomId': widget.roomId,
+              'title':
+                  current['roomName']?.toString() ??
+                      current['title']?.toString() ??
+                      widget.title,
+              'joinedAt': now,
+            },
+            SetOptions(merge: true),
+          );
         },
       );
 
@@ -5312,17 +5312,27 @@ class JoinedUsersPage extends StatelessWidget {
                   final userId =
                       userData['userId']?.toString() ?? '------';
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D0A12),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: PartyColors.purple,
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SimpleUserProfilePage(uid: uid),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0D0A12),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: PartyColors.purple,
+                        ),
                       ),
-                    ),
-                    child: Row(
+                      child: Row(
                       children: [
                         _NetworkOrAvatar(
                           photoUrl: userData['photoURL']?.toString(),
@@ -5359,6 +5369,7 @@ class JoinedUsersPage extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
                   );
                 },
               );
