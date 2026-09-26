@@ -4554,6 +4554,117 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   final TextEditingController messageController =
       TextEditingController();
 
+  Future<void> _joinCurrentRoom() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final roomRef = FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.roomId);
+
+    final memberRef =
+        roomRef.collection('members').doc(user.uid);
+
+    final joinedRoomRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('joinedRooms')
+        .doc(widget.roomId);
+
+    try {
+      var joined = false;
+
+      await FirebaseFirestore.instance.runTransaction(
+        (transaction) async {
+          final roomSnapshot =
+              await transaction.get(roomRef);
+
+          if (!roomSnapshot.exists) {
+            throw Exception('Room no longer exists.');
+          }
+
+          final current =
+              roomSnapshot.data() ??
+                  <String, dynamic>{};
+
+          final status =
+              current['status']?.toString().toLowerCase();
+
+          if (status != null &&
+              status.isNotEmpty &&
+              status != 'open') {
+            throw Exception('This room is closed.');
+          }
+
+          final capacity =
+              (current['userCapacity'] as num?)?.toInt() ??
+                  100;
+
+          final currentCount =
+              (current['memberCount'] as num?)?.toInt() ?? 0;
+
+          final memberSnapshot =
+              await transaction.get(memberRef);
+
+          if (memberSnapshot.exists) {
+            joined = true;
+          } else {
+            if (currentCount >= capacity) {
+              throw Exception('This room is full.');
+            }
+
+            final now = FieldValue.serverTimestamp();
+
+            transaction.set(memberRef, {
+              'uid': user.uid,
+              'joinedAt': now,
+            });
+
+            transaction.update(roomRef, {
+              'memberCount': currentCount + 1,
+              'updatedAt': now,
+            });
+
+            transaction.set(
+              joinedRoomRef,
+              {
+                'roomId': widget.roomId,
+                'title':
+                    current['roomName']?.toString() ??
+                        current['title']?.toString() ??
+                        widget.title,
+                'joinedAt': now,
+              },
+              SetOptions(merge: true),
+            );
+          }
+        },
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            joined
+                ? 'You are already in this room.'
+                : 'You joined the room successfully.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst('Exception: ', ''),
+          ),
+        ),
+      );
+    }
+  }
+
   Future<void> _leaveRoom() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || leaving) return;
@@ -4586,6 +4697,14 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               (current['memberCount'] as num?)?.toInt() ?? 0;
 
           transaction.delete(memberRef);
+
+          final joinedRoomRef = FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('joinedRooms')
+              .doc(widget.roomId);
+
+          transaction.delete(joinedRoomRef);
 
           transaction.update(roomRef, {
             'memberCount':
@@ -4823,7 +4942,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             _PartyRoomTopAction(
               icon: Icons.person_add_alt_1_rounded,
               label: 'Join',
-              onTap: () {},
+              onTap: _joinCurrentRoom,
             ),
 
             const SizedBox(width: 5),
@@ -4831,7 +4950,16 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             _PartyRoomTopAction(
               icon: Icons.people_alt_outlined,
               label: '$members',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => JoinedUsersPage(
+                      roomId: widget.roomId,
+                    ),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(width: 5),
@@ -5090,6 +5218,157 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     );
   }
 }
+
+class JoinedUsersPage extends StatelessWidget {
+  final String roomId;
+
+  const JoinedUsersPage({
+    super.key,
+    required this.roomId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final membersRef = FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(roomId)
+        .collection('members');
+
+    return Scaffold(
+      backgroundColor: PartyColors.black,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0D0915),
+        foregroundColor: Colors.white,
+        title: const Text(
+          'Joined Users',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: membersRef
+            .orderBy('joinedAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: PartyLoading(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                'Could not load joined users.',
+                style: TextStyle(
+                  color: Colors.white70,
+                ),
+              ),
+            );
+          }
+
+          final members = snapshot.data?.docs ?? [];
+
+          if (members.isEmpty) {
+            return const Center(
+              child: Text(
+                'No joined users yet.',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: members.length,
+            itemBuilder: (context, index) {
+              final memberData = members[index].data();
+              final uid =
+                  memberData['uid']?.toString() ??
+                      members[index].id;
+
+              return StreamBuilder<
+                  DocumentSnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(uid)
+                    .snapshots(),
+                builder: (context, userSnapshot) {
+                  final userData =
+                      userSnapshot.data?.data() ??
+                          <String, dynamic>{};
+
+                  final name =
+                      userData['name']?.toString().trim().isNotEmpty ==
+                              true
+                          ? userData['name'].toString()
+                          : 'Party User';
+
+                  final userId =
+                      userData['userId']?.toString() ?? '------';
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D0A12),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: PartyColors.purple,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        _NetworkOrAvatar(
+                          photoUrl: userData['photoURL']?.toString(),
+                          photoBase64: userData['photoBase64']?.toString(),
+                          avatar: userData['avatar']?.toString(),
+                          radius: 25,
+                        ),
+                        const SizedBox(width: 11),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'ID: $userId',
+                                style: const TextStyle(
+                                  color: PartyColors.gold,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
 
 class _PartyRoomTopAction extends StatelessWidget {
   final IconData icon;
