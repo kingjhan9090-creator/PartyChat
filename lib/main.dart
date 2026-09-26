@@ -3932,7 +3932,6 @@ class _RoomListCard extends StatelessWidget {
     );
   }
 }
-}
 
 
 class _RoomTopAction extends StatelessWidget {
@@ -4559,109 +4558,53 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final roomRef = FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId);
-
-    final memberRef =
-        roomRef.collection('members').doc(user.uid);
-
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+    final memberRef = roomRef.collection('members').doc(user.uid);
     final joinedRoomRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('joinedRooms')
-        .doc(widget.roomId);
+        .collection('users').doc(user.uid).collection('joinedRooms').doc(widget.roomId);
 
     try {
-      var joined = false;
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final roomSnapshot = await transaction.get(roomRef);
+        if (!roomSnapshot.exists) throw Exception('Room no longer exists.');
 
-      await FirebaseFirestore.instance.runTransaction(
-        (transaction) async {
-          final roomSnapshot =
-              await transaction.get(roomRef);
+        final current = roomSnapshot.data() ?? <String, dynamic>{};
+        final status = current['status']?.toString().toLowerCase();
+        if (status != null && status.isNotEmpty && status != 'open') {
+          throw Exception('This room is closed.');
+        }
 
-          if (!roomSnapshot.exists) {
-            throw Exception('Room no longer exists.');
-          }
+        final capacity = (current['userCapacity'] as num?)?.toInt() ?? 100;
+        final currentCount = (current['memberCount'] as num?)?.toInt() ?? 0;
+        final memberSnapshot = await transaction.get(memberRef);
 
-          final current =
-              roomSnapshot.data() ??
-                  <String, dynamic>{};
+        if (!memberSnapshot.exists) {
+          if (currentCount >= capacity) throw Exception('This room is full.');
+          transaction.set(memberRef, {
+            'uid': user.uid,
+            'joinedAt': FieldValue.serverTimestamp(),
+          });
+          transaction.update(roomRef, {
+            'memberCount': currentCount + 1,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
 
-          final status =
-              current['status']?.toString().toLowerCase();
-
-          if (status != null &&
-              status.isNotEmpty &&
-              status != 'open') {
-            throw Exception('This room is closed.');
-          }
-
-          final capacity =
-              (current['userCapacity'] as num?)?.toInt() ??
-                  100;
-
-          final currentCount =
-              (current['memberCount'] as num?)?.toInt() ?? 0;
-
-          final memberSnapshot =
-              await transaction.get(memberRef);
-
-          final now = FieldValue.serverTimestamp();
-
-          if (memberSnapshot.exists) {
-            joined = true;
-          } else {
-            if (currentCount >= capacity) {
-              throw Exception('This room is full.');
-            }
-
-            transaction.set(memberRef, {
-              'uid': user.uid,
-              'joinedAt': now,
-            });
-
-            transaction.update(roomRef, {
-              'memberCount': currentCount + 1,
-              'updatedAt': now,
-            });
-          }
-
-          transaction.set(
-            joinedRoomRef,
-            {
-              'roomId': widget.roomId,
-              'title':
-                  current['roomName']?.toString() ??
-                      current['title']?.toString() ??
-                      widget.title,
-              'joinedAt': now,
-            },
-            SetOptions(merge: true),
-          );
-        },
-      );
+        transaction.set(joinedRoomRef, {
+          'roomId': widget.roomId,
+          'title': widget.title,
+          'joinedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      });
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            joined
-                ? 'You are already in this room.'
-                : 'You joined the room successfully.',
-          ),
-        ),
+        const SnackBar(content: Text('You are now joined to this room.')),
       );
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString().replaceFirst('Exception: ', ''),
-          ),
-        ),
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     }
   }
@@ -4679,6 +4622,12 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
       final memberRef =
           roomRef.collection('members').doc(user.uid);
+
+      final joinedRoomRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('joinedRooms')
+          .doc(widget.roomId);
 
       await FirebaseFirestore.instance.runTransaction(
         (transaction) async {
@@ -4698,13 +4647,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               (current['memberCount'] as num?)?.toInt() ?? 0;
 
           transaction.delete(memberRef);
-
-          final joinedRoomRef = FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .collection('joinedRooms')
-              .doc(widget.roomId);
-
           transaction.delete(joinedRoomRef);
 
           transaction.update(roomRef, {
@@ -4955,9 +4897,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => JoinedUsersPage(
-                      roomId: widget.roomId,
-                    ),
+                    builder: (_) => JoinedUsersPage(roomId: widget.roomId),
                   ),
                 );
               },
@@ -5220,168 +5160,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 }
 
-class JoinedUsersPage extends StatelessWidget {
-  final String roomId;
-
-  const JoinedUsersPage({
-    super.key,
-    required this.roomId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final membersRef = FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(roomId)
-        .collection('members');
-
-    return Scaffold(
-      backgroundColor: PartyColors.black,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0D0915),
-        foregroundColor: Colors.white,
-        title: const Text(
-          'Joined Users',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: membersRef
-            .orderBy('joinedAt', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: PartyLoading(),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text(
-                'Could not load joined users.',
-                style: TextStyle(
-                  color: Colors.white70,
-                ),
-              ),
-            );
-          }
-
-          final members = snapshot.data?.docs ?? [];
-
-          if (members.isEmpty) {
-            return const Center(
-              child: Text(
-                'No joined users yet.',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: members.length,
-            itemBuilder: (context, index) {
-              final memberData = members[index].data();
-              final uid =
-                  memberData['uid']?.toString() ??
-                      members[index].id;
-
-              return StreamBuilder<
-                  DocumentSnapshot<Map<String, dynamic>>>(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(uid)
-                    .snapshots(),
-                builder: (context, userSnapshot) {
-                  final userData =
-                      userSnapshot.data?.data() ??
-                          <String, dynamic>{};
-
-                  final name =
-                      userData['name']?.toString().trim().isNotEmpty ==
-                              true
-                          ? userData['name'].toString()
-                          : 'Party User';
-
-                  final userId =
-                      userData['userId']?.toString() ?? '------';
-
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              SimpleUserProfilePage(uid: uid),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0D0A12),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: PartyColors.purple,
-                        ),
-                      ),
-                      child: Row(
-                      children: [
-                        _NetworkOrAvatar(
-                          photoUrl: userData['photoURL']?.toString(),
-                          photoBase64: userData['photoBase64']?.toString(),
-                          avatar: userData['avatar']?.toString(),
-                          radius: 25,
-                        ),
-                        const SizedBox(width: 11),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                'ID: $userId',
-                                style: const TextStyle(
-                                  color: PartyColors.gold,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-
 class _PartyRoomTopAction extends StatelessWidget {
   final IconData icon;
   final String? label;
@@ -5634,9 +5412,142 @@ class _PartyRoomTopAction extends StatelessWidget {
         );
       }
     }
-    class SimpleUserProfilePage extends StatelessWidget {
+    class JoinedUsersPage extends StatelessWidget {
+      final String roomId;
+
+      const JoinedUsersPage({super.key, required this.roomId});
+
+      @override
+      Widget build(BuildContext context) {
+        final membersRef = FirebaseFirestore.instance
+            .collection('rooms').doc(roomId).collection('members');
+
+        return Scaffold(
+          backgroundColor: PartyColors.black,
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF0D0915),
+            foregroundColor: Colors.white,
+            title: const Text('Joined Users', style: TextStyle(fontWeight: FontWeight.w900)),
+          ),
+          body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: membersRef.orderBy('joinedAt', descending: true).snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: PartyLoading());
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text('Could not load joined users.', style: TextStyle(color: Colors.white70)));
+              }
+              final members = snapshot.data?.docs ?? [];
+              if (members.isEmpty) {
+                return const Center(child: Text('No joined users yet.', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w700)));
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: members.length,
+                itemBuilder: (context, index) {
+                  final memberData = members[index].data();
+                  final uid = memberData['uid']?.toString() ?? members[index].id;
+                  return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+                    builder: (context, userSnapshot) {
+                      final userData = userSnapshot.data?.data() ?? <String, dynamic>{};
+                      final name = userData['name']?.toString().trim().isNotEmpty == true
+                          ? userData['name'].toString() : 'Party User';
+                      final userId = userData['userId']?.toString() ?? '------';
+                      return GestureDetector(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SimpleUserProfilePage(uid: uid))),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0D0A12),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: PartyColors.purple),
+                          ),
+                          child: Row(children: [
+                            _NetworkOrAvatar(
+                              photoUrl: userData['photoURL']?.toString(),
+                              photoBase64: userData['photoBase64']?.toString(),
+                              avatar: userData['avatar']?.toString(),
+                              radius: 25,
+                            ),
+                            const SizedBox(width: 11),
+                            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900)),
+                              const SizedBox(height: 3),
+                              Text('ID: $userId', style: const TextStyle(color: PartyColors.gold, fontSize: 11, fontWeight: FontWeight.w700)),
+                            ])),
+                            const Icon(Icons.chevron_right_rounded, color: Colors.white54),
+                          ]),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    class SimpleUserProfilePage extends StatefulWidget {
       final String uid;
       const SimpleUserProfilePage({super.key, required this.uid});
+
+      @override
+      State<SimpleUserProfilePage> createState() => _SimpleUserProfilePageState();
+    }
+
+    class _SimpleUserProfilePageState extends State<SimpleUserProfilePage> {
+      String status = 'Add Friend';
+      bool loading = true;
+
+      @override
+      void initState() {
+        super.initState();
+        _loadFriendStatus();
+      }
+
+      Future<void> _loadFriendStatus() async {
+        final me = FirebaseAuth.instance.currentUser;
+        if (me == null || me.uid == widget.uid) {
+          if (mounted) setState(() { status = 'This is You'; loading = false; });
+          return;
+        }
+        final friend = await PartyChatData.friends(me.uid).doc(widget.uid).get();
+        if (friend.exists) {
+          if (mounted) setState(() { status = 'Friends'; loading = false; });
+          return;
+        }
+        final outgoing = await PartyChatData.friendRequests(widget.uid).doc(me.uid).get();
+        if (outgoing.exists) {
+          if (mounted) setState(() { status = 'Request Sent'; loading = false; });
+          return;
+        }
+        final incoming = await PartyChatData.friendRequests(me.uid).doc(widget.uid).get();
+        if (mounted) {
+          setState(() { status = incoming.exists ? 'Request Received' : 'Add Friend'; loading = false; });
+        }
+      }
+
+      Future<void> _sendRequest() async {
+        final me = FirebaseAuth.instance.currentUser;
+        if (me == null || widget.uid == me.uid || status != 'Add Friend') return;
+        setState(() => loading = true);
+        try {
+          await PartyChatData.sendFriendRequest(fromUid: me.uid, toUid: widget.uid);
+          if (mounted) setState(() { status = 'Request Sent'; loading = false; });
+        } catch (e) {
+          if (mounted) {
+            setState(() => loading = false);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
+          }
+        }
+      }
+
       @override
       Widget build(BuildContext context) {
         return Scaffold(
@@ -5644,19 +5555,34 @@ class _PartyRoomTopAction extends StatelessWidget {
           appBar: AppBar(),
           body: _NeonBackground(
             child: FutureBuilder<Map<String, dynamic>?>(
-              future: PartyChatData.userData(uid),
+              future: PartyChatData.userData(widget.uid),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: SizedBox(height: 180, child: PartyLoading()));
                 final data = snapshot.data ?? <String, dynamic>{};
                 final name = data['name']?.toString() ?? 'Party User';
-                final publicId = data['userId']?.toString() ?? uid;
-                return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                final publicId = data['userId']?.toString() ?? widget.uid;
+                return Center(child: SingleChildScrollView(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
                   _NetworkOrAvatar(photoUrl: data['photoURL'] as String?, photoBase64: data['photoBase64'] as String?, avatar: data['avatar'] as String?, radius: 72),
                   const SizedBox(height: 20),
                   Text(name, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 8),
                   Text('UID: $publicId', style: const TextStyle(color: Colors.white60, fontSize: 15)),
-                ]));
+                  const SizedBox(height: 22),
+                  if (!loading) SizedBox(
+                    width: 190,
+                    child: ElevatedButton.icon(
+                      onPressed: status == 'Add Friend' ? _sendRequest : null,
+                      icon: Icon(status == 'Friends' ? Icons.check_rounded : Icons.person_add_alt_1_rounded),
+                      label: Text(status),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: PartyColors.purple,
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: PartyColors.gold),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                  ) else const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: PartyColors.gold)),
+                ])));
               },
             ),
           ),
