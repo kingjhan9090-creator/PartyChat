@@ -4464,6 +4464,28 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   bool _micOn = false;
 
   final Set<String> _speakingUsers = <String>{};
+  final Map<String, StreamSubscription<double>> _soundLevelSubscriptions =
+    <String, StreamSubscription<double>>{};
+
+void _listenToSoundLevel(String userId) {
+  if (_soundLevelSubscriptions.containsKey(userId)) return;
+
+  final subscription = ZegoUIKit().getSoundLevelStream(userId).listen((level) {
+    if (!mounted) return;
+
+    final speaking = level > 20;
+
+    setState(() {
+      if (speaking) {
+        _speakingUsers.add(userId);
+      } else {
+        _speakingUsers.remove(userId);
+      }
+    });
+  });
+
+  _soundLevelSubscriptions[userId] = subscription;
+}
   final TextEditingController messageController = TextEditingController();
 
     Future<void> _joinZegoRoom() async {
@@ -4845,6 +4867,7 @@ Future<void> _joinCurrentRoom() async {
           'joinedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
         await batch.commit();
+        await _setZegoMicrophone(true);
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not take mic: $e')));
@@ -4852,8 +4875,11 @@ Future<void> _joinCurrentRoom() async {
     } else if (choice == 'lock') {
       if (!isManager) return;
       await seatRef.set({'locked': !locked}, SetOptions(merge: true));
-    } else if (choice == 'leave') {
-      if (isManager || seatUid == user.uid) await seatRef.delete();
+} else if (choice == 'leave') {
+  if (isManager || seatUid == user.uid) {
+    await seatRef.delete();
+    await _setZegoMicrophone(false);
+  }
     } else if (choice == 'invite') {
       if (!isManager) return;
       await _inviteMember();
@@ -4916,12 +4942,18 @@ void initState() {
 
 
 
-    
-  @override
-  void dispose() {
-    messageController.dispose();
-    super.dispose();
+@override
+void dispose() {
+  for (final subscription in _soundLevelSubscriptions.values) {
+    subscription.cancel();
   }
+
+  _soundLevelSubscriptions.clear();
+  _speakingUsers.clear();
+
+  messageController.dispose();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -5049,49 +5081,93 @@ void initState() {
   }
 
   Widget _buildMicArea(dynamic value, Map<String, dynamic> roomData) {
-    final capacity = (value as num?)?.toInt() ?? 15;
-    final layout = _layoutForCapacity(capacity);
-    final seatsRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId).collection('micSeats');
+  final capacity = (value as num?)?.toInt() ?? 15;
+  final layout = _layoutForCapacity(capacity);
+  final seatsRef = FirebaseFirestore.instance
+      .collection('rooms')
+      .doc(widget.roomId)
+      .collection('micSeats');
 
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: seatsRef.snapshots(),
-      builder: (context, snapshot) {
-        final seats = <int, Map<String, dynamic>>{};
-        for (final doc in snapshot.data?.docs ?? []) {
-          final number = int.tryParse(doc.id);
-          if (number != null) seats[number] = doc.data();
+  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    stream: seatsRef.snapshots(),
+    builder: (context, snapshot) {
+      final seats = <int, Map<String, dynamic>>{};
+
+      for (final doc in snapshot.data?.docs ?? []) {
+        final number = int.tryParse(doc.id);
+        if (number != null) {
+          seats[number] = doc.data();
         }
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
-          child: Column(
-            children: _micLayoutRows(layout).map((row) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: row.map((number) {
-                    return Expanded(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3),
-                          child: _MicSeatWidget(
-                            number: number,
-                            seat: seats[number],
-                            onTap: () => _showMicSeatOptions(number, seats[number], roomData),
+      }
+
+      _syncSoundLevelListeners(seats);
+
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
+        child: Column(
+          children: _micLayoutRows(layout).map((row) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: row.map((number) {
+                  final seat = seats[number];
+                  final userId = seat?['uid']?.toString() ?? '';
+
+                  return Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: _MicSeatWidget(
+                          number: number,
+                          seat: seat,
+                          isSpeaking: userId.isNotEmpty &&
+                              _speakingUsers.contains(userId),
+                          onTap: () => _showMicSeatOptions(
+                            number,
+                            seat,
+                            roomData,
                           ),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    },
+  );
+}
+
+void _syncSoundLevelListeners(
+  Map<int, Map<String, dynamic>> seats,
+) {
+  final activeUserIds = <String>{};
+
+  for (final seat in seats.values) {
+    final userId = seat['uid']?.toString() ?? '';
+    if (userId.isNotEmpty) {
+      activeUserIds.add(userId);
+      _listenToSoundLevel(userId);
+    }
   }
 
+  final removedUserIds =
+      _soundLevelSubscriptions.keys
+          .where((userId) => !activeUserIds.contains(userId))
+          .toList();
+
+  for (final userId in removedUserIds) {
+    _soundLevelSubscriptions[userId]?.cancel();
+    _soundLevelSubscriptions.remove(userId);
+    _speakingUsers.remove(userId);
+  }
+}
+
+    
   List<List<int>> _micLayoutRows(int layout) {
     switch (layout) {
       case 1: return [List.generate(5, (i) => i + 1)];
@@ -5227,8 +5303,14 @@ class _MicSeatWidget extends StatelessWidget {
   final int number;
   final Map<String, dynamic>? seat;
   final VoidCallback onTap;
+    final bool isSpeaking;
 
-  const _MicSeatWidget({required this.number, required this.seat, required this.onTap});
+const _MicSeatWidget({
+  required this.number,
+  required this.seat,
+  required this.onTap,
+  this.isSpeaking = false,
+});
 
   ImageProvider<Object>? _image() {
     if (seat == null) return null;
@@ -5245,6 +5327,7 @@ class _MicSeatWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final occupied = seat != null;
     final locked = seat?['locked'] == true;
+    final speaking = occupied && isSpeaking;
     final image = _image();
     final name = seat?['name']?.toString() ?? 'Mic $number';
     return GestureDetector(
@@ -5261,7 +5344,20 @@ class _MicSeatWidget extends StatelessWidget {
               gradient: occupied
                   ? const LinearGradient(colors: [PartyColors.gold, PartyColors.purpleBright])
                   : const LinearGradient(colors: [Color(0xFF32175C), Color(0xFF7A2CFF)]),
-              boxShadow: const [BoxShadow(color: Color(0x447A2CFF), blurRadius: 12)],
+              boxShadow: speaking
+    ? const [
+        BoxShadow(
+          color: Colors.white,
+          blurRadius: 22,
+          spreadRadius: 7,
+        ),
+      ]
+    : const [
+        BoxShadow(
+          color: Color(0x447A2CFF),
+          blurRadius: 12,
+        ),
+      ],
             ),
             child: CircleAvatar(
               backgroundColor: const Color(0xFF100C18),
