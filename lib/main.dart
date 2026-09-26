@@ -3932,6 +3932,7 @@ class _RoomListCard extends StatelessWidget {
     );
   }
 }
+}
 
 
 class _RoomTopAction extends StatelessWidget {
