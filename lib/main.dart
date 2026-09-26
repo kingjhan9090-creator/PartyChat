@@ -4497,7 +4497,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   if (!_zegoJoined) return;
 
   try {
-    await ZegoUIKit().turnMicrophoneOn(enabled);
+    ZegoUIKit().turnMicrophoneOn(enabled);
     if (!mounted) return;
     setState(() => _micOn = enabled);
   } catch (_) {
