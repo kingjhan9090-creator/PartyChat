@@ -4459,12 +4459,57 @@ class PartyRoomPage extends StatefulWidget {
 
 class _PartyRoomPageState extends State<PartyRoomPage> {
   bool leaving = false;
+
+  bool _zegoJoined = false;
+  bool _micOn = false;
+
+  final Set<String> _speakingUsers = <String>{};
   final TextEditingController messageController = TextEditingController();
 
-  Future<void> _joinCurrentRoom() async {
+    Future<void> _joinZegoRoom() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null || _zegoJoined) return;
+
+  try {
+    await ZegoUIKit().init(
+      appID: zegoAppId,
+      appSign: zegoAppSign,
+    );
+
+    final result = await ZegoUIKit().joinRoom(widget.roomId);
+
+    if (!mounted) return;
+
+    if (result.errorCode == 0) {
+      setState(() {
+        _zegoJoined = true;
+      });
+    }
+  } catch (_) {
+    if (!mounted) return;
+    setState(() {
+      _zegoJoined = false;
+    });
+  }
+}
+
+    Future<void> _setZegoMicrophone(bool enabled) async {
+  if (!_zegoJoined) return;
+
+  try {
+    await ZegoUIKit().turnMicrophoneOn(enabled);
+    if (!mounted) return;
+    setState(() => _micOn = enabled);
+  } catch (_) {
+    if (!mounted) return;
+    setState(() => _micOn = false);
+  }
+}
+
+Future<void> _joinCurrentRoom() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
+    
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
     final memberRef = roomRef.collection('members').doc(user.uid);
     final joinedRoomRef = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('joinedRooms').doc(widget.roomId);
@@ -4863,6 +4908,15 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mic invitation sent.')));
   }
 
+@override
+void initState() {
+  super.initState();
+  _joinZegoRoom();
+}
+
+
+
+    
   @override
   void dispose() {
     messageController.dispose();
