@@ -3895,53 +3895,129 @@ class _RoomTopAction extends StatelessWidget {
   }
 }
 
-class _RoomBottomAction extends StatelessWidget {
+class _RoomBottomAction extends StatefulWidget {
   final IconData icon;
   final String? label;
   final VoidCallback? onTap;
+  final bool isGlowing;
 
   const _RoomBottomAction({
     required this.icon,
     required this.onTap,
     this.label,
+    this.isGlowing = false,
   });
+
+  @override
+  State<_RoomBottomAction> createState() => _RoomBottomActionState();
+}
+
+class _RoomBottomActionState extends State<_RoomBottomAction>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    if (widget.isGlowing) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant _RoomBottomAction oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isGlowing && !oldWidget.isGlowing) {
+      _controller.repeat();
+    } else if (!widget.isGlowing && oldWidget.isGlowing) {
+      _controller.stop();
+      _controller.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 8,
           vertical: 6,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: PartyColors.gold,
-              size: 27,
-            ),
-            if (label != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                label!,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                ),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return SizedBox(
+              width: 43,
+              height: 43,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (widget.isGlowing) ...[
+                    _glowLayer(0),
+                    _glowLayer(0.33),
+                    _glowLayer(0.66),
+                  ],
+                  Icon(
+                    widget.icon,
+                    color: PartyColors.gold,
+                    size: 27,
+                  ),
+                ],
               ),
-            ],
-          ],
+            );
+          },
         ),
       ),
     );
   }
-}
 
+  Widget _glowLayer(double offset) {
+    final progress =
+        (_controller.value + offset) % 1.0;
+
+    final size = 28.0 + (progress * 18.0);
+    final opacity = 0.45 * (1.0 - progress);
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withValues(
+            alpha: opacity,
+          ),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withValues(
+              alpha: opacity,
+            ),
+            blurRadius: 9,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+    );
+  }
+}
 
   
 /* ============================================================
@@ -4443,8 +4519,12 @@ class _EditRoomPageState extends State<EditRoomPage> {
 
 class PartyRoomPage extends StatefulWidget {
   final String roomId;
-  final String title;
-  final String description;
+final String title;
+final String description;
+
+String? _replyToMessageId;
+String? _replyToName;
+String? _replyToText;
 
   const PartyRoomPage({
     super.key,
@@ -4542,7 +4622,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   if (!_zegoJoined) return;
 
   try {
-    await ZegoUIKit().turnMicrophoneOn(enabled);
+    ZegoUIKit().turnMicrophoneOn(enabled);
 
     if (!mounted) return;
 
@@ -4555,6 +4635,92 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     setState(() {
       _micOn = false;
     });
+  }
+}
+
+Future<void> _sendRoomMessage() async {
+  final user =
+      FirebaseAuth.instance.currentUser;
+
+  final text =
+      messageController.text.trim();
+
+  if (user == null || text.isEmpty) {
+    return;
+  }
+
+  try {
+    final userSnapshot =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+    final userData =
+        userSnapshot.data() ?? {};
+
+    final senderName =
+        (userData['name'] ??
+                user.displayName ??
+                'User')
+            .toString()
+            .trim();
+
+    final senderPhotoURL =
+        (userData['photoURL'] ??
+                user.photoURL ??
+                '')
+            .toString()
+            .trim();
+
+    final messageData =
+        <String, dynamic>{
+      'senderId': user.uid,
+      'name': senderName.isEmpty
+          ? 'User'
+          : senderName,
+      'photoURL': senderPhotoURL,
+      'text': text,
+      'createdAt':
+          FieldValue.serverTimestamp(),
+    };
+
+    if (_replyToMessageId != null) {
+      messageData['replyToId'] =
+          _replyToMessageId;
+
+      messageData['replyToName'] =
+          _replyToName ?? 'User';
+
+      messageData['replyToText'] =
+          _replyToText ?? '';
+    }
+
+    await FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.roomId)
+        .collection('messages')
+        .add(messageData);
+
+    if (!mounted) return;
+
+    setState(() {
+      messageController.clear();
+      _replyToMessageId = null;
+      _replyToName = null;
+      _replyToText = null;
+    });
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Message could not be sent.',
+        ),
+      ),
+    );
   }
 }
 
@@ -5981,93 +6147,386 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       ),
     );
   }
+Widget _buildMessagesArea() {
+  final messagesRef = FirebaseFirestore.instance
+      .collection('rooms')
+      .doc(widget.roomId)
+      .collection('messages')
+      .orderBy('createdAt', descending: false);
 
-  Widget _buildMessagesArea() {
-    return Container(
-      width: double.infinity,
-      margin:
-          const EdgeInsets.fromLTRB(
-        10,
-        2,
-        10,
-        5,
+  return Container(
+    width: double.infinity,
+    margin:
+        const EdgeInsets.fromLTRB(
+      10,
+      2,
+      10,
+      5,
+    ),
+    padding:
+        const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color:
+          const Color(0x440D0A12),
+      borderRadius:
+          BorderRadius.circular(13),
+      border: Border.all(
+        color: PartyColors.purple
+            .withOpacity(0.4),
       ),
-      padding:
-          const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color:
-            const Color(0x440D0A12),
-        borderRadius:
-            BorderRadius.circular(13),
-        border: Border.all(
-          color: PartyColors.purple
-              .withOpacity(0.4),
-        ),
-      ),
-      child: const Align(
-        alignment: Alignment.topLeft,
-        child: Text(
-          'User messages will appear here',
-          style: TextStyle(
-            color: Colors.white30,
-            fontSize: 10,
+    ),
+    child:
+        StreamBuilder<
+            QuerySnapshot<
+                Map<String, dynamic>>>(
+      stream:
+          messagesRef.snapshots(),
+      builder:
+          (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Text(
+            'Unable to load messages.',
+            style: TextStyle(
+              color: Colors.white30,
+              fontSize: 10,
+            ),
+          );
+        }
+
+        if (!snapshot.hasData ||
+            snapshot.data!.docs.isEmpty) {
+          return const Align(
+            alignment:
+                Alignment.topLeft,
+            child: Text(
+              'No messages yet.',
+              style: TextStyle(
+                color: Colors.white30,
+                fontSize: 10,
+              ),
+            ),
+          );
+        }
+
+        final messages =
+            snapshot.data!.docs;
+
+        return ConstrainedBox(
+          constraints:
+              const BoxConstraints(
+            maxHeight: 180,
           ),
-        ),
-      ),
-    );
-  }
+          child:
+              ListView.builder(
+            shrinkWrap: true,
+            itemCount:
+                messages.length,
+            itemBuilder:
+                (context, index) {
+              final doc =
+                  messages[index];
+
+              final data =
+                  doc.data();
+
+              final name =
+                  (data['name'] ??
+                          'User')
+                      .toString();
+
+              final text =
+                  (data['text'] ??
+                          '')
+                      .toString();
+
+              final photoURL =
+                  (data['photoURL'] ??
+                          '')
+                      .toString();
+
+              final replyName =
+                  (data['replyToName'] ??
+                          '')
+                      .toString();
+
+              final replyText =
+                  (data['replyToText'] ??
+                          '')
+                      .toString();
+
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _replyToMessageId =
+                        doc.id;
+                    _replyToName =
+                        name;
+                    _replyToText =
+                        text;
+                  });
+                },
+                borderRadius:
+                    BorderRadius.circular(
+                  10,
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets
+                          .symmetric(
+                    vertical: 5,
+                  ),
+                  child: Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment
+                            .start,
+                    children: [
+                      CircleAvatar(
+                        radius: 17,
+                        backgroundColor:
+                            PartyColors
+                                .purple,
+                        backgroundImage:
+                            photoURL
+                                    .isNotEmpty
+                                ? NetworkImage(
+                                    photoURL,
+                                  )
+                                : null,
+                        child:
+                            photoURL.isEmpty
+                                ? const Icon(
+                                    Icons
+                                        .person,
+                                    color: Colors
+                                        .white70,
+                                    size: 18,
+                                  )
+                                : null,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment
+                                  .start,
+                          children: [
+                            Text(
+                              name,
+                              style:
+                                  const TextStyle(
+                                color:
+                                    PartyColors
+                                        .gold,
+                                fontSize: 10,
+                                fontWeight:
+                                    FontWeight
+                                        .w700,
+                              ),
+                            ),
+                            if (replyName
+                                    .isNotEmpty &&
+                                replyText
+                                    .isNotEmpty)
+                              Container(
+                                margin:
+                                    const EdgeInsets
+                                        .only(
+                                  top: 3,
+                                  bottom: 3,
+                                ),
+                                padding:
+                                    const EdgeInsets
+                                        .all(5),
+                                decoration:
+                                    BoxDecoration(
+                                  color:
+                                      const Color(
+                                    0x331B1425,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius
+                                          .circular(
+                                    6,
+                                  ),
+                                ),
+                                child: Text(
+                                  '$replyName: $replyText',
+                                  maxLines: 1,
+                                  overflow:
+                                      TextOverflow
+                                          .ellipsis,
+                                  style:
+                                      const TextStyle(
+                                    color:
+                                        Colors
+                                            .white38,
+                                    fontSize: 8,
+                                  ),
+                                ),
+                              ),
+                            Text(
+                              text,
+                              style:
+                                  const TextStyle(
+                                color:
+                                    Colors
+                                        .white70,
+                                fontSize: 11,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    ),
+  );
+}
 
   Widget _buildBottomBar() {
-    return Container(
-      padding:
-          const EdgeInsets.fromLTRB(
-        9,
-        6,
-        9,
-        8,
-      ),
-      decoration:
-          const BoxDecoration(
-        color: Color(0xEE0D0915),
-        border: Border(
-          top: BorderSide(
-            color: PartyColors.purple,
-            width: 0.8,
-          ),
+  final replyName = _replyToName;
+  final replyText = _replyToText;
+
+  return Container(
+    padding:
+        const EdgeInsets.fromLTRB(
+      9,
+      6,
+      9,
+      8,
+    ),
+    decoration:
+        const BoxDecoration(
+      color: Color(0xEE0D0915),
+      border: Border(
+        top: BorderSide(
+          color: PartyColors.purple,
+          width: 0.8,
         ),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 36,
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 11,
-              ),
-              decoration:
-                  BoxDecoration(
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 36,
+            padding:
+                const EdgeInsets.symmetric(
+              horizontal: 11,
+            ),
+            decoration:
+                BoxDecoration(
+              color:
+                  const Color(0xFF08070F),
+              borderRadius:
+                  BorderRadius.circular(13),
+              border: Border.all(
                 color:
-                    const Color(0xFF08070F),
-                borderRadius:
-                    BorderRadius.circular(13),
-                border: Border.all(
-                  color:
-                      PartyColors.purple,
-                ),
+                    PartyColors.purple,
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller:
-                          messageController,
-                      style:
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller:
+                        messageController,
+                    style:
+                        const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                    ),
+                    onSubmitted: (_) {
+                      _sendRoomMessage();
+                    },
+                    decoration:
+                        InputDecoration(
+                      hintText:
+                          replyName != null
+                              ? 'Reply to $replyName'
+                              : 'SMS',
+                      hintStyle:
                           const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
+                        color:
+                            Colors.white30,
+                        fontSize: 10,
                       ),
-                      decoration:
+                      border:
+                          InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed:
+                      _sendRoomMessage,
+                  padding:
+                      EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(
+                    minWidth: 24,
+                    minHeight: 24,
+                  ),
+                  icon:
+                      const Icon(
+                    Icons.send_rounded,
+                    color:
+                        PartyColors.gold,
+                    size: 17,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 5),
+        _RoomBottomAction(
+          icon: _micOn
+              ? Icons.mic_rounded
+              : Icons.mic_off_rounded,
+          isGlowing: _micOn &&
+              _speakingUsers.contains(
+                FirebaseAuth.instance
+                    .currentUser
+                    ?.uid,
+              ),
+          onTap: () async {
+            if (!_zegoJoined) {
+              await _joinZegoRoom();
+            }
+            await _setZegoMicrophone(
+              !_micOn,
+            );
+          },
+        ),
+        _RoomBottomAction(
+          icon:
+              Icons.music_note_rounded,
+          onTap: () {},
+        ),
+        _RoomBottomAction(
+          icon:
+              Icons.card_giftcard_rounded,
+          onTap: () {},
+        ),
+        _RoomBottomAction(
+          icon:
+              Icons.sports_esports_rounded,
+          onTap: () {},
+        ),
+      ],
+    ),
+  );
+}
                           const InputDecoration(
                         hintText: 'SMS',
                         hintStyle:
@@ -6093,8 +6552,12 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             ),
           ),
           const SizedBox(width: 5),
-          _RoomBottomAction(
+_RoomBottomAction(
   icon: _micOn ? Icons.mic_rounded : Icons.mic_off_rounded,
+  isGlowing: _micOn &&
+      _speakingUsers.contains(
+        FirebaseAuth.instance.currentUser?.uid,
+      ),
   onTap: () async {
     if (!_zegoJoined) {
       await _joinZegoRoom();
