@@ -4492,52 +4492,51 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 
   Future<void> _joinZegoRoom() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null || _zegoJoined) return;
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null || _zegoJoined) return;
 
-    try {
-      await ZegoUIKit().init(
-        appID: zegoAppId,
-        appSign: zegoAppSign,
-      );
+  try {
+    await ZegoUIKit().init(
+      appID: zegoAppId,
+      appSign: zegoAppSign,
+    );
 
-      final result = await ZegoUIKit().joinRoom(widget.roomId);
+    final userName = user.displayName?.trim().isNotEmpty == true
+        ? user.displayName!.trim()
+        : 'PartyChat User';
 
-      if (!mounted) return;
+    await ZegoUIKit().login(
+      user.uid,
+      userName,
+    );
 
-      if (result.errorCode == 0) {
-        setState(() {
-          _zegoJoined = true;
-        });
+    final result = await ZegoUIKit().joinRoom(widget.roomId);
 
-        ZegoUIKit().turnMicrophoneOn(false);
-      } else {
-        setState(() {
-          _zegoJoined = false;
-        });
+    if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Voice connection failed. ZEGO error: ${result.errorCode}',
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-
+    if (result.errorCode == 0) {
       setState(() {
-        _zegoJoined = false;
+        _zegoJoined = true;
       });
-
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Voice connection failed: $e'),
+          content: Text(
+            'Voice connection failed. ZEGO error: ${result.errorCode}',
+          ),
         ),
       );
     }
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Voice connection failed: $e'),
+      ),
+    );
   }
+}
 
   Future<void> _setZegoMicrophone(bool enabled) async {
     if (!_zegoJoined) return;
