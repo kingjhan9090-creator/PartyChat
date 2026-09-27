@@ -4492,7 +4492,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 
   Future<void> _joinZegoRoom() async {
-  Future<void> _joinZegoRoom() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null || _zegoJoined) return;
 
