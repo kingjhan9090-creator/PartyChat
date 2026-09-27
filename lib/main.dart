@@ -6528,64 +6528,7 @@ Widget _buildMessagesArea() {
     ),
   );
 }
-                          const InputDecoration(
-                        hintText: 'SMS',
-                        hintStyle:
-                            TextStyle(
-                          color:
-                              Colors.white30,
-                          fontSize: 10,
-                        ),
-                        border:
-                            InputBorder.none,
-                        isDense: true,
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.send_rounded,
-                    color:
-                        PartyColors.gold,
-                    size: 17,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 5),
-_RoomBottomAction(
-  icon: _micOn ? Icons.mic_rounded : Icons.mic_off_rounded,
-  isGlowing: _micOn &&
-      _speakingUsers.contains(
-        FirebaseAuth.instance.currentUser?.uid,
-      ),
-  onTap: () async {
-    if (!_zegoJoined) {
-      await _joinZegoRoom();
-    }
-    await _setZegoMicrophone(!_micOn);
-  },
-),
-          _RoomBottomAction(
-            icon:
-                Icons.music_note_rounded,
-            onTap: () {},
-          ),
-          _RoomBottomAction(
-            icon:
-                Icons.card_giftcard_rounded,
-            onTap: () {},
-          ),
-          _RoomBottomAction(
-            icon:
-                Icons.sports_esports_rounded,
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
-}
+                          
 
 
 
