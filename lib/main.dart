@@ -4522,9 +4522,7 @@ class PartyRoomPage extends StatefulWidget {
 final String title;
 final String description;
 
-String? _replyToMessageId;
-String? _replyToName;
-String? _replyToText;
+
 
   const PartyRoomPage({
     super.key,
@@ -4538,6 +4536,9 @@ String? _replyToText;
 }
 
 class _PartyRoomPageState extends State<PartyRoomPage> {
+  String? _replyToMessageId;
+  String? _replyToName;
+  String? _replyToText;
   bool leaving = false;
 
   bool _zegoJoined = false;
