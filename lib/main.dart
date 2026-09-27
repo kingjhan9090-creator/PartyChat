@@ -4586,7 +4586,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         ? user.displayName!.trim()
         : 'PartyChat User';
 
-    await ZegoUIKit().login(
+     ZegoUIKit().login(
       user.uid,
       userName,
     );
