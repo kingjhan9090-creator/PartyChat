@@ -4489,6 +4489,7 @@ void _listenToSoundLevel(String userId) {
   final TextEditingController messageController = TextEditingController();
 
     Future<void> _joinZegoRoom() async {
+Future<void> _joinZegoRoom() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null || _zegoJoined) return;
 
@@ -4506,12 +4507,33 @@ void _listenToSoundLevel(String userId) {
       setState(() {
         _zegoJoined = true;
       });
+
+      ZegoUIKit().turnMicrophoneOn(false);
+    } else {
+      setState(() {
+        _zegoJoined = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Voice connection failed. ZEGO error: ${result.errorCode}',
+          ),
+        ),
+      );
     }
-  } catch (_) {
+  } catch (e) {
     if (!mounted) return;
+
     setState(() {
       _zegoJoined = false;
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Voice connection failed: $e'),
+      ),
+    );
   }
 }
 
