@@ -58,6 +58,81 @@ jobs:
 
           settings.write_text(text)
 
+name: Build PartyChat APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify checked out source
+        run: |
+          echo "===== COMMIT ====="
+          git rev-parse HEAD
+          echo "===== BRANCH ====="
+          git branch --show-current
+          echo "===== MAIN.DART LINE COUNT ====="
+          wc -l lib/main.dart
+          echo "===== MAIN.DART END ====="
+          tail -n 10 lib/main.dart
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.0'
+          channel: stable
+
+      - name: Create Android project
+        run: flutter create --platforms=android .
+
+      - name: Install Android NDK
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
+
+      - name: Add microphone permission
+        run: |
+          sed -i '/<manifest/a\    <uses-permission android:name="android.permission.RECORD_AUDIO"/>' android/app/src/main/AndroidManifest.xml
+
+      - name: Fix package name
+        run: |
+          find android -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' \) -exec sed -i 's/com\.example\.partychat/com.partychat.app/g' {} +
+
+      - name: Fix Kotlin and JVM target
+        run: |
+          sed -i 's/id("org.jetbrains.kotlin.android") version "2.1.0"/id("org.jetbrains.kotlin.android") version "2.3.20"/' android/settings.gradle.kts
+          sed -i '/kotlinOptions {/,/}/d' android/app/build.gradle.kts
+          sed -i '/^android {/i kotlin {\n    compilerOptions {\n        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)\n    }\n}\n' android/app/build.gradle.kts
+
+      - name: Add Firebase config
+        env:
+          FIREBASE_JSON: ${{ secrets.FIREBASE_JSON }}
+        run: |
+          printf '%s' "$FIREBASE_JSON" > android/app/google-services.json
+
+      - name: Enable Google Services plugin
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          settings = Path("android/settings.gradle.kts")
+          text = settings.read_text()
+
+          text = text.replace(
+              'id("com.android.application") version ',
+              'id("com.google.gms.google-services") version "4.4.2" apply false\n    id("com.android.application") version ',
+              1
+          )
+
+          settings.write_text(text)
+
           app = Path("android/app/build.gradle.kts")
           text = app.read_text()
 
@@ -69,8 +144,6 @@ jobs:
 
           app.write_text(text)
           PY
-
-            
 
       - name: Create debug keystore
         run: |
@@ -92,12 +165,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      
       - name: Build APK
         run: |
-         flutter build apk --release \
-                --dart-define=ZEGO_APP_ID="${{ vars.ZEGOCLOUD_APP_ID }}" \
-          --dart-define=ZEGO_APP_SIGN="${{ secrets.ZEGOCLOUD_APP_SIGN }}"
+          flutter build apk --release \
+            --dart-define=ZEGO_APP_ID="${{ vars.ZEGOCLOUD_APP_ID }}" \
+            --dart-define=ZEGO_APP_SIGN="${{ secrets.ZEGOCLOUD_APP_SIGN }}"
 
       - name: Check release APK SHA-1
         run: |
