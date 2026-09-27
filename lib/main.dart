@@ -4492,6 +4492,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 
   Future<void> _joinZegoRoom() async {
+  Future<void> _joinZegoRoom() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null || _zegoJoined) return;
 
@@ -4505,7 +4506,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         ? user.displayName!.trim()
         : 'PartyChat User';
 
-     ZegoUIKit().login(
+    await ZegoUIKit().login(
       user.uid,
       userName,
     );
@@ -4539,24 +4540,24 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 }
 
   Future<void> _setZegoMicrophone(bool enabled) async {
-    if (!_zegoJoined) return;
+  if (!_zegoJoined) return;
 
-    try {
-      ZegoUIKit().turnMicrophoneOn(enabled);
+  try {
+    await ZegoUIKit().turnMicrophoneOn(enabled);
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() {
-        _micOn = enabled;
-      });
-    } catch (_) {
-      if (!mounted) return;
+    setState(() {
+      _micOn = enabled;
+    });
+  } catch (_) {
+    if (!mounted) return;
 
-      setState(() {
-        _micOn = false;
-      });
-    }
+    setState(() {
+      _micOn = false;
+    });
   }
+}
 
   Future<void> _joinCurrentRoom() async {
     final user = FirebaseAuth.instance.currentUser;
