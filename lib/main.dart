@@ -6094,8 +6094,14 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           ),
           const SizedBox(width: 5),
           _RoomBottomAction(
-            icon: Icons.mic_rounded,
-            onTap: () {},
+  icon: _micOn ? Icons.mic_rounded : Icons.mic_off_rounded,
+  onTap: () async {
+    if (!_zegoJoined) {
+      await _joinZegoRoom();
+    }
+    await _setZegoMicrophone(!_micOn);
+  },
+),
           ),
           _RoomBottomAction(
             icon:
