@@ -6528,14 +6528,8 @@ Widget _buildMessagesArea() {
     ),
   );
 }
-                          
 
-
-
-
-
-
-
+}
 
 class _MicLayoutPreview extends StatelessWidget {
   final int layout;
