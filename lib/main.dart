@@ -6102,7 +6102,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     await _setZegoMicrophone(!_micOn);
   },
 ),
-          ),
           _RoomBottomAction(
             icon:
                 Icons.music_note_rounded,
