@@ -4516,13 +4516,10 @@ class _EditRoomPageState extends State<EditRoomPage> {
 /* ============================================================
    PARTY ROOM PAGE
    ============================================================ */
-
 class PartyRoomPage extends StatefulWidget {
   final String roomId;
-final String title;
-final String description;
-
-
+  final String title;
+  final String description;
 
   const PartyRoomPage({
     super.key,
@@ -4539,285 +4536,462 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   String? _replyToMessageId;
   String? _replyToName;
   String? _replyToText;
+
   bool leaving = false;
 
   bool _zegoJoined = false;
+  bool _zegoJoining = false;
   bool _micOn = false;
 
-  final Set<String> _speakingUsers = <String>{};
+  final ValueNotifier<Set<String>> _speakingUsers =
+      ValueNotifier<Set<String>>(<String>{});
 
-  final Map<String, StreamSubscription<double>> _soundLevelSubscriptions =
+  final Map<String, StreamSubscription<double>>
+      _soundLevelSubscriptions =
       <String, StreamSubscription<double>>{};
 
-  final TextEditingController messageController = TextEditingController();
+  final TextEditingController messageController =
+      TextEditingController();
+
+  void _updateSpeakingUser(
+    String userId,
+    bool speaking,
+  ) {
+    if (!mounted || userId.isEmpty) return;
+
+    final current =
+        Set<String>.from(_speakingUsers.value);
+
+    final alreadySpeaking =
+        current.contains(userId);
+
+    if (speaking == alreadySpeaking) {
+      return;
+    }
+
+    if (speaking) {
+      current.add(userId);
+    } else {
+      current.remove(userId);
+    }
+
+    _speakingUsers.value = current;
+  }
 
   void _listenToSoundLevel(String userId) {
-    if (_soundLevelSubscriptions.containsKey(userId)) return;
+    if (userId.isEmpty) return;
+
+    if (_soundLevelSubscriptions
+        .containsKey(userId)) {
+      return;
+    }
 
     final subscription =
-        ZegoUIKit().getSoundLevelStream(userId).listen((level) {
-      if (!mounted) return;
+        ZegoUIKit()
+            .getSoundLevelStream(userId)
+            .listen(
+      (level) {
+        if (!mounted) return;
 
-      final speaking = level > 20;
+        final speaking = level > 20;
 
-      setState(() {
-        if (speaking) {
-          _speakingUsers.add(userId);
-        } else {
-          _speakingUsers.remove(userId);
-        }
-      });
-    });
+        _updateSpeakingUser(
+          userId,
+          speaking,
+        );
+      },
+      onError: (_) {
+        _updateSpeakingUser(
+          userId,
+          false,
+        );
+      },
+    );
 
-    _soundLevelSubscriptions[userId] = subscription;
+    _soundLevelSubscriptions[userId] =
+        subscription;
   }
 
   Future<void> _joinZegoRoom() async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null || _zegoJoined) return;
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-  try {
-    await ZegoUIKit().init(
-      appID: zegoAppId,
-      appSign: zegoAppSign,
-    );
+    if (user == null ||
+        _zegoJoined ||
+        _zegoJoining) {
+      return;
+    }
 
-    final userName = user.displayName?.trim().isNotEmpty == true
-        ? user.displayName!.trim()
-        : 'PartyChat User';
+    _zegoJoining = true;
 
-     ZegoUIKit().login(
-      user.uid,
-      userName,
-    );
+    try {
+      await ZegoUIKit().init(
+        appID: zegoAppId,
+        appSign: zegoAppSign,
+      );
 
-    final result = await ZegoUIKit().joinRoom(widget.roomId);
+      final userName =
+          user.displayName
+                      ?.trim()
+                      .isNotEmpty ==
+                  true
+              ? user.displayName!.trim()
+              : 'PartyChat User';
 
-    if (!mounted) return;
+      ZegoUIKit().login(
+        user.uid,
+        userName,
+      );
 
-    if (result.errorCode == 0) {
-      setState(() {
+      final result =
+          await ZegoUIKit().joinRoom(
+        widget.roomId,
+      );
+
+      if (!mounted) return;
+
+      if (result.errorCode == 0) {
         _zegoJoined = true;
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+
+        setState(() {
+          _micOn = false;
+        });
+
+        // Always enter the room muted.
+        ZegoUIKit().turnMicrophoneOn(false);
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+          SnackBar(
+            content: Text(
+              'Voice connection failed. ZEGO error: ${result.errorCode}',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         SnackBar(
           content: Text(
-            'Voice connection failed. ZEGO error: ${result.errorCode}',
+            'Voice connection failed: $e',
+          ),
+        ),
+      );
+    } finally {
+      _zegoJoining = false;
+    }
+  }
+
+  Future<void> _setZegoMicrophone(
+    bool enabled,
+  ) async {
+    if (!_zegoJoined) {
+      await _joinZegoRoom();
+    }
+
+    if (!_zegoJoined || !mounted) {
+      return;
+    }
+
+    try {
+      ZegoUIKit().turnMicrophoneOn(
+        enabled,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _micOn = enabled;
+      });
+
+      if (!enabled) {
+        final uid =
+            FirebaseAuth.instance
+                    .currentUser
+                    ?.uid ??
+                '';
+
+        if (uid.isNotEmpty) {
+          _updateSpeakingUser(
+            uid,
+            false,
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _micOn = false;
+      });
+
+      final uid =
+          FirebaseAuth.instance
+                  .currentUser
+                  ?.uid ??
+              '';
+
+      if (uid.isNotEmpty) {
+        _updateSpeakingUser(
+          uid,
+          false,
+        );
+      }
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        SnackBar(
+          content: Text(
+            'Microphone could not be changed: $e',
           ),
         ),
       );
     }
-  } catch (e) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Voice connection failed: $e'),
-      ),
-    );
-  }
-}
-
-  Future<void> _setZegoMicrophone(bool enabled) async {
-  if (!_zegoJoined) return;
-
-  try {
-    ZegoUIKit().turnMicrophoneOn(enabled);
-
-    if (!mounted) return;
-
-    setState(() {
-      _micOn = enabled;
-    });
-  } catch (_) {
-    if (!mounted) return;
-
-    setState(() {
-      _micOn = false;
-    });
-  }
-}
-
-Future<void> _sendRoomMessage() async {
-  final user =
-      FirebaseAuth.instance.currentUser;
-
-  final text =
-      messageController.text.trim();
-
-  if (user == null || text.isEmpty) {
-    return;
   }
 
-  try {
-    final userSnapshot =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
+  Future<void> _sendRoomMessage() async {
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-    final userData =
-        userSnapshot.data() ?? {};
+    final text =
+        messageController.text.trim();
 
-    final senderName =
-        (userData['name'] ??
-                user.displayName ??
-                'User')
-            .toString()
-            .trim();
-
-    final senderPhotoURL =
-        (userData['photoURL'] ??
-                user.photoURL ??
-                '')
-            .toString()
-            .trim();
-
-    final messageData =
-        <String, dynamic>{
-      'senderId': user.uid,
-      'name': senderName.isEmpty
-          ? 'User'
-          : senderName,
-      'photoURL': senderPhotoURL,
-      'text': text,
-      'createdAt':
-          FieldValue.serverTimestamp(),
-    };
-
-    if (_replyToMessageId != null) {
-      messageData['replyToId'] =
-          _replyToMessageId;
-
-      messageData['replyToName'] =
-          _replyToName ?? 'User';
-
-      messageData['replyToText'] =
-          _replyToText ?? '';
+    if (user == null || text.isEmpty) {
+      return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .collection('messages')
-        .add(messageData);
-
-    if (!mounted) return;
-
-    setState(() {
-      messageController.clear();
-      _replyToMessageId = null;
-      _replyToName = null;
-      _replyToText = null;
-    });
-  } catch (e) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Message could not be sent.',
-        ),
-      ),
-    );
-  }
-}
-
-  Future<void> _joinCurrentRoom() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final roomRef =
-        FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
-
-    final memberRef = roomRef.collection('members').doc(user.uid);
-
-    final joinedRoomRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('joinedRooms')
-        .doc(widget.roomId);
-
     try {
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final roomSnapshot = await transaction.get(roomRef);
+      final userSnapshot =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
 
-        if (!roomSnapshot.exists) {
-          throw Exception('Room no longer exists.');
-        }
+      final userData =
+          userSnapshot.data() ??
+              <String, dynamic>{};
 
-        final current = roomSnapshot.data() ?? <String, dynamic>{};
+      final senderName =
+          (userData['name'] ??
+                  user.displayName ??
+                  'User')
+              .toString()
+              .trim();
 
-        final status = current['status']?.toString().toLowerCase();
+      final senderPhotoURL =
+          (userData['photoURL'] ??
+                  user.photoURL ??
+                  '')
+              .toString()
+              .trim();
 
-        if (status != null &&
-            status.isNotEmpty &&
-            status != 'open') {
-          throw Exception('This room is closed.');
-        }
+      final messageData =
+          <String, dynamic>{
+        'senderId': user.uid,
+        'name': senderName.isEmpty
+            ? 'User'
+            : senderName,
+        'photoURL': senderPhotoURL,
+        'text': text,
+        'createdAt':
+            FieldValue.serverTimestamp(),
+      };
 
-        final capacity =
-            (current['userCapacity'] as num?)?.toInt() ?? 100;
+      if (_replyToMessageId != null) {
+        messageData['replyToId'] =
+            _replyToMessageId;
 
-        final currentCount =
-            (current['memberCount'] as num?)?.toInt() ?? 0;
+        messageData['replyToName'] =
+            _replyToName ?? 'User';
 
-        final memberSnapshot = await transaction.get(memberRef);
+        messageData['replyToText'] =
+            _replyToText ?? '';
+      }
 
-        if (!memberSnapshot.exists) {
-          if (currentCount >= capacity) {
-            throw Exception('This room is full.');
-          }
-
-          transaction.set(memberRef, {
-            'uid': user.uid,
-            'joinedAt': FieldValue.serverTimestamp(),
-          });
-
-          transaction.update(roomRef, {
-            'memberCount': currentCount + 1,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        }
-
-        transaction.set(
-          joinedRoomRef,
-          {
-            'roomId': widget.roomId,
-            'title': widget.title,
-            'joinedAt': FieldValue.serverTimestamp(),
-          },
-          SetOptions(merge: true),
-        );
-      });
+      await FirebaseFirestore.instance
+          .collection('rooms')
+          .doc(widget.roomId)
+          .collection('messages')
+          .add(messageData);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      setState(() {
+        messageController.clear();
+        _replyToMessageId = null;
+        _replyToName = null;
+        _replyToText = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         const SnackBar(
-          content: Text('You are now joined to this room.'),
+          content: Text(
+            'Message could not be sent.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _joinCurrentRoom() async {
+    final user =
+        FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    final roomRef =
+        FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(widget.roomId);
+
+    final memberRef =
+        roomRef
+            .collection('members')
+            .doc(user.uid);
+
+    final joinedRoomRef =
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('joinedRooms')
+            .doc(widget.roomId);
+
+    try {
+      await FirebaseFirestore.instance
+          .runTransaction(
+        (transaction) async {
+          final roomSnapshot =
+              await transaction.get(
+            roomRef,
+          );
+
+          if (!roomSnapshot.exists) {
+            throw Exception(
+              'Room no longer exists.',
+            );
+          }
+
+          final current =
+              roomSnapshot.data() ??
+                  <String, dynamic>{};
+
+          final status =
+              current['status']
+                  ?.toString()
+                  .toLowerCase();
+
+          if (status != null &&
+              status.isNotEmpty &&
+              status != 'open') {
+            throw Exception(
+              'This room is closed.',
+            );
+          }
+
+          final capacity =
+              (current['userCapacity']
+                          as num?)
+                      ?.toInt() ??
+                  100;
+
+          final currentCount =
+              (current['memberCount']
+                          as num?)
+                      ?.toInt() ??
+                  0;
+
+          final memberSnapshot =
+              await transaction.get(
+            memberRef,
+          );
+
+          if (!memberSnapshot.exists) {
+            if (currentCount >= capacity) {
+              throw Exception(
+                'This room is full.',
+              );
+            }
+
+            transaction.set(
+              memberRef,
+              {
+                'uid': user.uid,
+                'joinedAt':
+                    FieldValue.serverTimestamp(),
+              },
+            );
+
+            transaction.update(
+              roomRef,
+              {
+                'memberCount':
+                    currentCount + 1,
+                'updatedAt':
+                    FieldValue.serverTimestamp(),
+              },
+            );
+          }
+
+          transaction.set(
+            joinedRoomRef,
+            {
+              'roomId': widget.roomId,
+              'title': widget.title,
+              'joinedAt':
+                  FieldValue.serverTimestamp(),
+            },
+            SetOptions(
+              merge: true,
+            ),
+          );
+        },
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        const SnackBar(
+          content: Text(
+            'You are now joined to this room.',
+          ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         SnackBar(
           content: Text(
-            e.toString().replaceFirst('Exception: ', ''),
+            e
+                .toString()
+                .replaceFirst(
+                  'Exception: ',
+                  '',
+                ),
           ),
         ),
       );
     }
   }
 
-  Future<void> _showLeaveMenu(Map<String, dynamic> data) async {
-    final choice = await showDialog<String>(
+  Future<void> _showLeaveMenu(
+    Map<String, dynamic> data,
+  ) async {
+    final choice =
+        await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF120B1D),
+      builder: (dialogContext) =>
+          AlertDialog(
+        backgroundColor:
+            const Color(0xFF120B1D),
         title: const Text(
           'Room',
           style: TextStyle(
@@ -4826,7 +5000,8 @@ Future<void> _sendRoomMessage() async {
           ),
         ),
         content: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize:
+              MainAxisSize.min,
           children: [
             _dialogAction(
               dialogContext,
@@ -4851,14 +5026,22 @@ Future<void> _sendRoomMessage() async {
       ),
     );
 
-    if (!mounted || choice == null || choice == 'cancel') return;
+    if (!mounted ||
+        choice == null ||
+        choice == 'cancel') {
+      return;
+    }
 
     if (choice == 'keep') {
       PartyRoomKeepState.keep(
         roomId: widget.roomId,
-        title: data['title']?.toString() ?? widget.title,
+        title:
+            data['title']?.toString() ??
+                widget.title,
         description:
-            data['description']?.toString() ?? widget.description,
+            data['description']
+                    ?.toString() ??
+                widget.description,
         data: data,
       );
 
@@ -4889,96 +5072,189 @@ Future<void> _sendRoomMessage() async {
           fontWeight: FontWeight.w800,
         ),
       ),
-      onTap: () => Navigator.pop(dialogContext, value),
+      onTap: () => Navigator.pop(
+        dialogContext,
+        value,
+      ),
     );
   }
 
   Future<void> _leaveRoom() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-    if (user == null || leaving) return;
+    if (user == null || leaving) {
+      return;
+    }
 
-    setState(() => leaving = true);
+    setState(() {
+      leaving = true;
+    });
 
     try {
       final roomRef =
-          FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+          FirebaseFirestore.instance
+              .collection('rooms')
+              .doc(widget.roomId);
 
       final memberRef =
-          roomRef.collection('members').doc(user.uid);
+          roomRef
+              .collection('members')
+              .doc(user.uid);
 
-      final joinedRoomRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('joinedRooms')
-          .doc(widget.roomId);
+      final joinedRoomRef =
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('joinedRooms')
+              .doc(widget.roomId);
 
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final roomSnapshot = await transaction.get(roomRef);
-        final memberSnapshot = await transaction.get(memberRef);
+      await FirebaseFirestore.instance
+          .runTransaction(
+        (transaction) async {
+          final roomSnapshot =
+              await transaction.get(
+            roomRef,
+          );
 
-        if (!memberSnapshot.exists) return;
+          final memberSnapshot =
+              await transaction.get(
+            memberRef,
+          );
 
-        final current =
-            roomSnapshot.data() ?? <String, dynamic>{};
+          if (!memberSnapshot.exists) {
+            return;
+          }
 
-        final currentCount =
-            (current['memberCount'] as num?)?.toInt() ?? 0;
+          final current =
+              roomSnapshot.data() ??
+                  <String, dynamic>{};
 
-        transaction.delete(memberRef);
-        transaction.delete(joinedRoomRef);
+          final currentCount =
+              (current['memberCount']
+                          as num?)
+                      ?.toInt() ??
+                  0;
 
-        transaction.update(
-          roomRef,
-          {
-            'memberCount':
-                currentCount > 0 ? currentCount - 1 : 0,
-            'updatedAt': FieldValue.serverTimestamp(),
-          },
-        );
-      });
+          transaction.delete(
+            memberRef,
+          );
+
+          transaction.delete(
+            joinedRoomRef,
+          );
+
+          transaction.update(
+            roomRef,
+            {
+              'memberCount':
+                  currentCount > 0
+                      ? currentCount - 1
+                      : 0,
+              'updatedAt':
+                  FieldValue.serverTimestamp(),
+            },
+          );
+        },
+      );
+
+      final currentUid = user.uid;
+
+      final currentSeats =
+          await FirebaseFirestore.instance
+              .collection('rooms')
+              .doc(widget.roomId)
+              .collection('micSeats')
+              .where(
+                'uid',
+                isEqualTo: currentUid,
+              )
+              .get();
+
+      if (currentSeats.docs.isNotEmpty) {
+        final batch =
+            FirebaseFirestore.instance.batch();
+
+        for (final doc
+            in currentSeats.docs) {
+          batch.delete(
+            doc.reference,
+          );
+        }
+
+        await batch.commit();
+      }
 
       await _setZegoMicrophone(false);
 
+      if (_zegoJoined) {
+        try {
+          await ZegoUIKit().leaveRoom();
+        } catch (_) {}
+      }
+
       if (!mounted) return;
 
-      if (PartyRoomKeepState.keptRoom.value?['roomId'] ==
+      if (PartyRoomKeepState
+              .keptRoom
+              .value?['roomId'] ==
           widget.roomId) {
-        PartyRoomKeepState.keptRoom.value = null;
+        PartyRoomKeepState
+            .keptRoom
+            .value = null;
       }
 
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
 
-      setState(() => leaving = false);
+      setState(() {
+        leaving = false;
+      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         SnackBar(
           content: Text(
-            e.toString().replaceFirst('Exception: ', ''),
+            e
+                .toString()
+                .replaceFirst(
+                  'Exception: ',
+                  '',
+                ),
           ),
         ),
       );
     }
   }
 
-  Future<String> _currentRole(String ownerUid) async {
-    final user = FirebaseAuth.instance.currentUser;
+  Future<String> _currentRole(
+    String ownerUid,
+  ) async {
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-    if (user == null) return 'user';
+    if (user == null) {
+      return 'user';
+    }
 
-    if (user.uid == ownerUid) return 'leader';
+    if (user.uid == ownerUid) {
+      return 'leader';
+    }
 
-    final member = await FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .collection('members')
-        .doc(user.uid)
-        .get();
+    final member =
+        await FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(widget.roomId)
+            .collection('members')
+            .doc(user.uid)
+            .get();
 
     final role =
-        member.data()?['role']?.toString().toLowerCase() ?? 'user';
+        member.data()?['role']
+                ?.toString()
+                .toLowerCase() ??
+            'user';
 
     if (role == 'deputy' ||
         role == 'admin' ||
@@ -4989,14 +5265,18 @@ Future<void> _sendRoomMessage() async {
     return 'user';
   }
 
-  int _layoutForCapacity(int capacity) {
+  int _layoutForCapacity(
+    int capacity,
+  ) {
     if (capacity <= 5) return 1;
     if (capacity <= 9) return 2;
     if (capacity <= 12) return 3;
     return 4;
   }
 
-  int _capacityForLayout(int layout) {
+  int _capacityForLayout(
+    int layout,
+  ) {
     switch (layout) {
       case 1:
         return 5;
@@ -5013,10 +5293,13 @@ Future<void> _sendRoomMessage() async {
     Map<String, dynamic> data,
     String ownerUid,
   ) async {
-    final choice = await showDialog<String>(
+    final choice =
+        await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF120B1D),
+      builder: (dialogContext) =>
+          AlertDialog(
+        backgroundColor:
+            const Color(0xFF120B1D),
         title: const Text(
           'Room Menu',
           style: TextStyle(
@@ -5025,7 +5308,8 @@ Future<void> _sendRoomMessage() async {
           ),
         ),
         content: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize:
+              MainAxisSize.min,
           children: [
             _dialogAction(
               dialogContext,
@@ -5050,16 +5334,21 @@ Future<void> _sendRoomMessage() async {
       ),
     );
 
-    if (!mounted || choice == null) return;
+    if (!mounted || choice == null) {
+      return;
+    }
 
     if (choice == 'share') {
       await Clipboard.setData(
-        ClipboardData(text: widget.roomId),
+        ClipboardData(
+          text: widget.roomId,
+        ),
       );
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         const SnackBar(
           content: Text(
             'Room ID copied. You can share it with friends.',
@@ -5067,8 +5356,13 @@ Future<void> _sendRoomMessage() async {
         ),
       );
     } else if (choice == 'mic') {
-      if (FirebaseAuth.instance.currentUser?.uid != ownerUid) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (FirebaseAuth
+              .instance
+              .currentUser
+              ?.uid !=
+          ownerUid) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
           const SnackBar(
             content: Text(
               'Only the room owner can change mic setup.',
@@ -5084,21 +5378,31 @@ Future<void> _sendRoomMessage() async {
     }
   }
 
-  void _showRoomInfo(Map<String, dynamic> data) {
+  void _showRoomInfo(
+    Map<String, dynamic> data,
+  ) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF120B1D),
+      builder: (dialogContext) =>
+          AlertDialog(
+        backgroundColor:
+            const Color(0xFF120B1D),
         title: Text(
-          data['title']?.toString() ?? widget.title,
+          data['title']?.toString() ??
+              widget.title,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w900,
           ),
         ),
         content: Text(
-          (data['description']?.toString().trim().isNotEmpty == true)
-              ? data['description'].toString()
+          (data['description']
+                      ?.toString()
+                      .trim()
+                      .isNotEmpty ==
+                  true)
+              ? data['description']
+                  .toString()
               : 'No room description.',
           style: const TextStyle(
             color: Colors.white70,
@@ -5107,26 +5411,44 @@ Future<void> _sendRoomMessage() async {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Close'),
+            onPressed: () =>
+                Navigator.pop(
+              dialogContext,
+            ),
+            child: const Text(
+              'Close',
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _showMicSetup(Map<String, dynamic> data) async {
+  Future<void> _showMicSetup(
+    Map<String, dynamic> data,
+  ) async {
     final currentCapacity =
-        (data['micCapacity'] as num?)?.toInt() ?? 15;
+        (data['micCapacity'] as num?)
+                ?.toInt() ??
+            15;
 
-    int selectedLayout = _layoutForCapacity(currentCapacity);
+    int selectedLayout =
+        _layoutForCapacity(
+      currentCapacity,
+    );
 
-    final saved = await showDialog<bool>(
+    final saved =
+        await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) {
+      builder: (dialogContext) =>
+          StatefulBuilder(
+        builder: (
+          context,
+          setDialogState,
+        ) {
           return AlertDialog(
-            backgroundColor: const Color(0xFF100916),
+            backgroundColor:
+                const Color(0xFF100916),
             title: const Text(
               'Mic Setup',
               style: TextStyle(
@@ -5136,35 +5458,69 @@ Future<void> _sendRoomMessage() async {
             ),
             content: SizedBox(
               width: 390,
-              child: SingleChildScrollView(
+              child:
+                  SingleChildScrollView(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize:
+                      MainAxisSize.min,
                   children: [
-                    for (int layout = 1; layout <= 4; layout++) ...[
+                    for (
+                      int layout = 1;
+                      layout <= 4;
+                      layout++
+                    ) ...[
                       GestureDetector(
                         onTap: () {
                           setDialogState(
-                            () => selectedLayout = layout,
+                            () =>
+                                selectedLayout =
+                                    layout,
                           );
                         },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: selectedLayout == layout
-                                ? const Color(0x332D0B55)
-                                : const Color(0x660D0A12),
+                        child:
+                            Container(
+                          margin:
+                              const EdgeInsets
+                                  .only(
+                            bottom: 10,
+                          ),
+                          padding:
+                              const EdgeInsets
+                                  .all(
+                            10,
+                          ),
+                          decoration:
+                              BoxDecoration(
+                            color:
+                                selectedLayout ==
+                                        layout
+                                    ? const Color(
+                                        0x332D0B55)
+                                    : const Color(
+                                        0x660D0A12),
                             borderRadius:
-                                BorderRadius.circular(14),
-                            border: Border.all(
-                              color: selectedLayout == layout
-                                  ? PartyColors.gold
-                                  : PartyColors.purple,
+                                BorderRadius
+                                    .circular(
+                              14,
+                            ),
+                            border:
+                                Border.all(
+                              color:
+                                  selectedLayout ==
+                                          layout
+                                      ? PartyColors
+                                          .gold
+                                      : PartyColors
+                                          .purple,
                             ),
                           ),
-                          child: _MicLayoutPreview(
-                            layout: layout,
-                            selected: selectedLayout == layout,
+                          child:
+                              _MicLayoutPreview(
+                            layout:
+                                layout,
+                            selected:
+                                selectedLayout ==
+                                    layout,
                           ),
                         ),
                       ),
@@ -5176,29 +5532,52 @@ Future<void> _sendRoomMessage() async {
             actions: [
               TextButton(
                 onPressed: () =>
-                    Navigator.pop(dialogContext, false),
-                child: const Text('Cancel'),
+                    Navigator.pop(
+                  dialogContext,
+                  false,
+                ),
+                child:
+                    const Text(
+                  'Cancel',
+                ),
               ),
               FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: PartyColors.purple,
+                style:
+                    FilledButton.styleFrom(
+                  backgroundColor:
+                      PartyColors.purple,
                 ),
                 onPressed: () async {
-                  await FirebaseFirestore.instance
-                      .collection('rooms')
-                      .doc(widget.roomId)
+                  await FirebaseFirestore
+                      .instance
+                      .collection(
+                        'rooms',
+                      )
+                      .doc(
+                        widget.roomId,
+                      )
                       .update({
                     'micCapacity':
-                        _capacityForLayout(selectedLayout),
+                        _capacityForLayout(
+                      selectedLayout,
+                    ),
                     'updatedAt':
-                        FieldValue.serverTimestamp(),
+                        FieldValue
+                            .serverTimestamp(),
                   });
 
-                  if (dialogContext.mounted) {
-                    Navigator.pop(dialogContext, true);
+                  if (dialogContext
+                      .mounted) {
+                    Navigator.pop(
+                      dialogContext,
+                      true,
+                    );
                   }
                 },
-                child: const Text('Save'),
+                child:
+                    const Text(
+                  'Save',
+                ),
               ),
             ],
           );
@@ -5206,10 +5585,14 @@ Future<void> _sendRoomMessage() async {
       ),
     );
 
-    if (saved == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    if (saved == true &&
+        mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         const SnackBar(
-          content: Text('Mic setup updated.'),
+          content: Text(
+            'Mic setup updated.',
+          ),
         ),
       );
     }
@@ -5221,31 +5604,39 @@ Future<void> _sendRoomMessage() async {
     Map<String, dynamic> roomData,
   ) async {
     final ownerUid =
-        roomData['ownerUid']?.toString() ?? '';
+        roomData['ownerUid']
+                ?.toString() ??
+            '';
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user =
+        FirebaseAuth.instance.currentUser;
 
     if (user == null) return;
 
-    final memberSnapshot = await FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .collection('members')
-        .doc(user.uid)
-        .get();
+    final memberSnapshot =
+        await FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(widget.roomId)
+            .collection('members')
+            .doc(user.uid)
+            .get();
 
     if (!mounted) return;
 
     if (!memberSnapshot.exists) {
-      final join = await showDialog<bool>(
+      final join =
+          await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: const Color(0xFF120B1D),
+        builder: (dialogContext) =>
+            AlertDialog(
+          backgroundColor:
+              const Color(0xFF120B1D),
           title: const Text(
             'Join Required',
             style: TextStyle(
               color: Colors.white,
-              fontWeight: FontWeight.w900,
+              fontWeight:
+                  FontWeight.w900,
             ),
           ),
           content: const Text(
@@ -5257,13 +5648,25 @@ Future<void> _sendRoomMessage() async {
           actions: [
             TextButton(
               onPressed: () =>
-                  Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
+                  Navigator.pop(
+                dialogContext,
+                false,
+              ),
+              child:
+                  const Text(
+                'Cancel',
+              ),
             ),
             FilledButton(
               onPressed: () =>
-                  Navigator.pop(dialogContext, true),
-              child: const Text('Join the room'),
+                  Navigator.pop(
+                dialogContext,
+                true,
+              ),
+              child:
+                  const Text(
+                'Join the room',
+              ),
             ),
           ],
         ),
@@ -5276,7 +5679,10 @@ Future<void> _sendRoomMessage() async {
       return;
     }
 
-    final role = await _currentRole(ownerUid);
+    final role =
+        await _currentRole(
+      ownerUid,
+    );
 
     if (!mounted) return;
 
@@ -5287,33 +5693,42 @@ Future<void> _sendRoomMessage() async {
 
     final seatUid =
         seat?['uid']?.toString() ??
-        seat?['_uid']?.toString() ??
-        '';
+            seat?['_uid']?.toString() ??
+            '';
 
-    final locked = seat?['locked'] == true;
+    final locked =
+        seat?['locked'] == true;
 
     if (!isManager && locked) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         const SnackBar(
-          content: Text('This mic is locked.'),
+          content: Text(
+            'This mic is locked.',
+          ),
         ),
       );
       return;
     }
 
-    final choice = await showDialog<String>(
+    final choice =
+        await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF120B1D),
+      builder: (dialogContext) =>
+          AlertDialog(
+        backgroundColor:
+            const Color(0xFF120B1D),
         title: Text(
           'Mic $number',
           style: const TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w900,
+            fontWeight:
+                FontWeight.w900,
           ),
         ),
         content: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize:
+              MainAxisSize.min,
           children: isManager
               ? [
                   _dialogAction(
@@ -5325,20 +5740,26 @@ Future<void> _sendRoomMessage() async {
                   _dialogAction(
                     dialogContext,
                     locked
-                        ? Icons.lock_open_rounded
-                        : Icons.lock_outline_rounded,
-                    locked ? 'Unlock Mic' : 'Mic Lock',
+                        ? Icons
+                            .lock_open_rounded
+                        : Icons
+                            .lock_outline_rounded,
+                    locked
+                        ? 'Unlock Mic'
+                        : 'Mic Lock',
                     'lock',
                   ),
                   _dialogAction(
                     dialogContext,
-                    Icons.person_add_alt_1_rounded,
+                    Icons
+                        .person_add_alt_1_rounded,
                     'Invite Member',
                     'invite',
                   ),
                   _dialogAction(
                     dialogContext,
-                    Icons.mic_off_rounded,
+                    Icons
+                        .mic_off_rounded,
                     'Leave Mic',
                     'leave',
                   ),
@@ -5352,7 +5773,8 @@ Future<void> _sendRoomMessage() async {
                   ),
                   _dialogAction(
                     dialogContext,
-                    Icons.mic_off_rounded,
+                    Icons
+                        .mic_off_rounded,
                     'Leave Mic',
                     'leave',
                   ),
@@ -5361,27 +5783,37 @@ Future<void> _sendRoomMessage() async {
       ),
     );
 
-    if (!mounted || choice == null) return;
+    if (!mounted || choice == null) {
+      return;
+    }
 
-    final seatRef = FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .collection('micSeats')
-        .doc('$number');
-
-    if (choice == 'take') {
-      if (locked && !isManager) return;
-
-      try {
-        final oldSeats = await FirebaseFirestore.instance
+    final seatRef =
+        FirebaseFirestore.instance
             .collection('rooms')
             .doc(widget.roomId)
             .collection('micSeats')
-            .where('uid', isEqualTo: user.uid)
-            .get();
+            .doc('$number');
+
+    if (choice == 'take') {
+      if (locked && !isManager) {
+        return;
+      }
+
+      try {
+        final oldSeats =
+            await FirebaseFirestore.instance
+                .collection('rooms')
+                .doc(widget.roomId)
+                .collection('micSeats')
+                .where(
+                  'uid',
+                  isEqualTo: user.uid,
+                )
+                .get();
 
         final userData =
-            (await FirebaseFirestore.instance
+            (await FirebaseFirestore
+                    .instance
                     .collection('users')
                     .doc(user.uid)
                     .get())
@@ -5389,11 +5821,16 @@ Future<void> _sendRoomMessage() async {
                 <String, dynamic>{};
 
         final batch =
-            FirebaseFirestore.instance.batch();
+            FirebaseFirestore.instance
+                .batch();
 
-        for (final oldSeat in oldSeats.docs) {
-          if (oldSeat.id != '$number') {
-            batch.delete(oldSeat.reference);
+        for (final oldSeat
+            in oldSeats.docs) {
+          if (oldSeat.id !=
+              '$number') {
+            batch.delete(
+              oldSeat.reference,
+            );
           }
         }
 
@@ -5403,30 +5840,47 @@ Future<void> _sendRoomMessage() async {
             'uid': user.uid,
             '_uid': user.uid,
             'name':
-                userData['name']?.toString() ??
+                userData['name']
+                        ?.toString() ??
                     'Party User',
             'userId':
-                userData['userId']?.toString() ?? '',
+                userData['userId']
+                        ?.toString() ??
+                    '',
             'photoURL':
-                userData['photoURL']?.toString() ?? '',
+                userData['photoURL']
+                        ?.toString() ??
+                    '',
             'photoBase64':
-                userData['photoBase64']?.toString() ?? '',
+                userData['photoBase64']
+                        ?.toString() ??
+                    '',
             'role': role,
             'onSeat': true,
             'locked': locked,
             'joinedAt':
                 FieldValue.serverTimestamp(),
           },
-          SetOptions(merge: true),
+          SetOptions(
+            merge: true,
+          ),
         );
 
         await batch.commit();
 
-        await _setZegoMicrophone(true);
+        // Join ZEGO first, then enable microphone.
+        if (!_zegoJoined) {
+          await _joinZegoRoom();
+        }
+
+        await _setZegoMicrophone(
+          true,
+        );
       } catch (e) {
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
           SnackBar(
             content: Text(
               'Could not take mic: $e',
@@ -5441,12 +5895,18 @@ Future<void> _sendRoomMessage() async {
         {
           'locked': !locked,
         },
-        SetOptions(merge: true),
+        SetOptions(
+          merge: true,
+        ),
       );
     } else if (choice == 'leave') {
-      if (isManager || seatUid == user.uid) {
+      if (isManager ||
+          seatUid == user.uid) {
         await seatRef.delete();
-        await _setZegoMicrophone(false);
+
+        await _setZegoMicrophone(
+          false,
+        );
       }
     } else if (choice == 'invite') {
       if (!isManager) return;
@@ -5456,83 +5916,116 @@ Future<void> _sendRoomMessage() async {
   }
 
   Future<void> _inviteMember() async {
-    final members = await FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .collection('members')
-        .get();
+    final members =
+        await FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(widget.roomId)
+            .collection('members')
+            .get();
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-    if (user == null || !mounted) return;
+    if (user == null || !mounted) {
+      return;
+    }
 
-    final selectedUid = await showDialog<String>(
+    final selectedUid =
+        await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF120B1D),
+      builder: (dialogContext) =>
+          AlertDialog(
+        backgroundColor:
+            const Color(0xFF120B1D),
         title: const Text(
           'Invite Member',
           style: TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w900,
+            fontWeight:
+                FontWeight.w900,
           ),
         ),
         content: SizedBox(
           width: 360,
           height: 320,
           child: ListView(
-            children: members.docs.map((doc) {
-              final uid =
-                  doc.data()['uid']?.toString() ??
-                      doc.id;
+            children:
+                members.docs.map(
+              (doc) {
+                final uid =
+                    doc.data()['uid']
+                            ?.toString() ??
+                        doc.id;
 
-              return FutureBuilder<
-                  DocumentSnapshot<Map<String, dynamic>>>(
-                future: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(uid)
-                    .get(),
-                builder: (context, snapshot) {
-                  final d =
-                      snapshot.data?.data() ??
-                          <String, dynamic>{};
+                return FutureBuilder<
+                    DocumentSnapshot<
+                        Map<String,
+                            dynamic>>>(
+                  future:
+                      FirebaseFirestore
+                          .instance
+                          .collection(
+                            'users',
+                          )
+                          .doc(uid)
+                          .get(),
+                  builder:
+                      (context, snapshot) {
+                    final d =
+                        snapshot.data
+                                ?.data() ??
+                            <String,
+                                dynamic>{};
 
-                  return ListTile(
-                    leading: _NetworkOrAvatar(
-                      photoUrl:
-                          d['photoURL'] as String?,
-                      photoBase64:
-                          d['photoBase64'] as String?,
-                      avatar:
-                          d['avatar'] as String?,
-                      radius: 20,
-                    ),
-                    title: Text(
-                      d['name']?.toString() ??
-                          'Party User',
-                      style: const TextStyle(
-                        color: Colors.white,
+                    return ListTile(
+                      leading:
+                          _NetworkOrAvatar(
+                        photoUrl:
+                            d['photoURL']
+                                as String?,
+                        photoBase64:
+                            d['photoBase64']
+                                as String?,
+                        avatar:
+                            d['avatar']
+                                as String?,
+                        radius: 20,
                       ),
-                    ),
-                    onTap: () =>
-                        Navigator.pop(
-                      dialogContext,
-                      uid,
-                    ),
-                  );
-                },
-              );
-            }).toList(),
+                      title: Text(
+                        d['name']
+                                ?.toString() ??
+                            'Party User',
+                        style:
+                            const TextStyle(
+                          color:
+                              Colors.white,
+                        ),
+                      ),
+                      onTap: () =>
+                          Navigator.pop(
+                        dialogContext,
+                        uid,
+                      ),
+                    );
+                  },
+                );
+              },
+            ).toList(),
           ),
         ),
       ),
     );
 
-    if (selectedUid == null || !mounted) return;
+    if (selectedUid == null ||
+        !mounted) {
+      return;
+    }
 
-    final roomTitle = widget.title;
+    final roomTitle =
+        widget.title;
 
-    await ProfileUnreadService.createNotification(
+    await ProfileUnreadService
+        .createNotification(
       uid: selectedUid,
       type: 'roomInvites',
       title: 'Mic Invitation',
@@ -5540,17 +6033,23 @@ Future<void> _sendRoomMessage() async {
           'You were invited to take a mic in $roomTitle.',
       actorUid: user.uid,
       actorName:
-          (await PartyChatData.userData(user.uid))?['name']
-                  ?.toString() ??
+          (await PartyChatData
+                  .userData(
+                    user.uid,
+                  ))?['name']
+              ?.toString() ??
               'Party User',
       roomId: widget.roomId,
     );
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
       const SnackBar(
-        content: Text('Mic invitation sent.'),
+        content: Text(
+          'Mic invitation sent.',
+        ),
       ),
     );
   }
@@ -5558,18 +6057,23 @@ Future<void> _sendRoomMessage() async {
   @override
   void initState() {
     super.initState();
+
+    // Connect to ZEGO when the room opens.
     _joinZegoRoom();
   }
 
   @override
   void dispose() {
     for (final subscription
-        in _soundLevelSubscriptions.values) {
+        in _soundLevelSubscriptions
+            .values) {
       subscription.cancel();
     }
 
-    _soundLevelSubscriptions.clear();
-    _speakingUsers.clear();
+    _soundLevelSubscriptions
+        .clear();
+
+    _speakingUsers.dispose();
 
     messageController.dispose();
 
@@ -5577,43 +6081,56 @@ Future<void> _sendRoomMessage() async {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     final roomRef =
         FirebaseFirestore.instance
             .collection('rooms')
             .doc(widget.roomId);
 
     return Scaffold(
-      backgroundColor: PartyColors.black,
+      backgroundColor:
+          PartyColors.black,
       body: _NeonBackground(
         child: StreamBuilder<
-            DocumentSnapshot<Map<String, dynamic>>>(
-          stream: roomRef.snapshots(),
-          builder: (context, snapshot) {
+            DocumentSnapshot<
+                Map<String, dynamic>>>(
+          stream:
+              roomRef.snapshots(),
+          builder:
+              (context, snapshot) {
             final data =
                 snapshot.data?.data() ??
                     <String, dynamic>{};
 
             final title =
-                data['roomName']?.toString() ??
-                    data['title']?.toString() ??
+                data['roomName']
+                        ?.toString() ??
+                    data['title']
+                        ?.toString() ??
                     widget.title;
 
             final members =
-                (data['memberCount'] as num?)
+                (data['memberCount']
+                            as num?)
                         ?.toInt() ??
                     0;
 
             final capacity =
-                (data['userCapacity'] as num?)
+                (data['userCapacity']
+                            as num?)
                         ?.toInt() ??
                     100;
 
             final ownerUid =
-                data['ownerUid']?.toString() ?? '';
+                data['ownerUid']
+                        ?.toString() ??
+                    '';
 
             final description =
-                data['description']?.toString() ??
+                data['description']
+                        ?.toString() ??
                     widget.description;
 
             return SafeArea(
@@ -5622,23 +6139,29 @@ Future<void> _sendRoomMessage() async {
                   _buildRoomHeader(
                     title: title,
                     members: members,
-                    capacity: capacity,
-                    ownerUid: ownerUid,
+                    capacity:
+                        capacity,
+                    ownerUid:
+                        ownerUid,
                     data: data,
                   ),
                   Expanded(
                     child: Column(
                       children: [
                         _buildMicArea(
-                          data['micCapacity'],
+                          data[
+                              'micCapacity'],
                           data,
                         ),
                         _buildDescriptionArea(
                           description,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(
+                          height: 4,
+                        ),
                         Expanded(
-                          child: _buildMessagesArea(),
+                          child:
+                              _buildMessagesArea(),
                         ),
                         _buildBottomBar(),
                       ],
@@ -5660,23 +6183,45 @@ Future<void> _sendRoomMessage() async {
     required String ownerUid,
     required Map<String, dynamic> data,
   }) {
+    // Keep one image provider for this build.
+    // This avoids creating two separate providers
+    // for the same room image.
+    final roomImage =
+        _roomImageProvider(data);
+
     return Padding(
       padding:
-          const EdgeInsets.fromLTRB(8, 8, 8, 4),
+          const EdgeInsets.fromLTRB(
+        8,
+        8,
+        8,
+        4,
+      ),
       child: Container(
         padding:
-            const EdgeInsets.fromLTRB(10, 10, 8, 10),
-        decoration: BoxDecoration(
-          color: const Color(0xDD0D0915),
+            const EdgeInsets.fromLTRB(
+          10,
+          10,
+          8,
+          10,
+        ),
+        decoration:
+            BoxDecoration(
+          color:
+              const Color(0xDD0D0915),
           borderRadius:
-              BorderRadius.circular(20),
+              BorderRadius.circular(
+            20,
+          ),
           border: Border.all(
-            color: PartyColors.purple,
+            color:
+                PartyColors.purple,
             width: 1.2,
           ),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x332D0B55),
+              color:
+                  Color(0x332D0B55),
               blurRadius: 16,
               spreadRadius: 1,
             ),
@@ -5687,75 +6232,112 @@ Future<void> _sendRoomMessage() async {
             Container(
               width: 78,
               height: 78,
-              decoration: BoxDecoration(
+              decoration:
+                  BoxDecoration(
                 color:
-                    const Color(0xFF171126),
+                    const Color(
+                  0xFF171126,
+                ),
                 borderRadius:
-                    BorderRadius.circular(18),
+                    BorderRadius.circular(
+                  18,
+                ),
                 border: Border.all(
-                  color: PartyColors.gold,
+                  color:
+                      PartyColors.gold,
                   width: 1.5,
                 ),
               ),
-              child: _roomImageProvider(data) !=
+              child: roomImage !=
                       null
                   ? ClipRRect(
                       borderRadius:
-                          BorderRadius.circular(17),
+                          BorderRadius
+                              .circular(
+                        17,
+                      ),
                       child: Image(
-                        image:
-                            _roomImageProvider(data)!,
+                        image: roomImage,
                         fit: BoxFit.cover,
                       ),
                     )
                   : const Icon(
-                      Icons.image_outlined,
-                      color: PartyColors.gold,
+                      Icons
+                          .image_outlined,
+                      color:
+                          PartyColors.gold,
                       size: 36,
                     ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(
+              width: 10,
+            ),
             Expanded(
               child: Column(
                 crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                    CrossAxisAlignment
+                        .start,
                 children: [
                   Text(
                     title,
                     maxLines: 1,
                     overflow:
-                        TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                        TextOverflow
+                            .ellipsis,
+                    style:
+                        const TextStyle(
+                      color:
+                          Colors.white,
                       fontSize: 19,
-                      fontWeight: FontWeight.w900,
+                      fontWeight:
+                          FontWeight
+                              .w900,
                     ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(
+                    height: 5,
+                  ),
                   if (ownerUid.isEmpty)
                     const Text(
                       'ID: ------',
-                      style: TextStyle(
-                        color: PartyColors.gold,
+                      style:
+                          TextStyle(
+                        color:
+                            PartyColors
+                                .gold,
                         fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontWeight:
+                            FontWeight
+                                .w700,
                       ),
                     )
                   else
                     StreamBuilder<
                         DocumentSnapshot<
-                            Map<String, dynamic>>>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(ownerUid)
-                          .snapshots(),
+                            Map<String,
+                                dynamic>>>(
+                      stream:
+                          FirebaseFirestore
+                              .instance
+                              .collection(
+                                'users',
+                              )
+                              .doc(
+                                ownerUid,
+                              )
+                              .snapshots(),
                       builder:
-                          (context, snapshot) {
+                          (
+                        context,
+                        snapshot,
+                      ) {
                         final userData =
-                            snapshot.data?.data();
+                            snapshot.data
+                                ?.data();
 
                         final userId =
-                            userData?['userId']
+                            userData?[
+                                        'userId']
                                     ?.toString() ??
                                 '------';
 
@@ -5764,33 +6346,43 @@ Future<void> _sendRoomMessage() async {
                           style:
                               const TextStyle(
                             color:
-                                PartyColors.gold,
+                                PartyColors
+                                    .gold,
                             fontSize: 11,
                             fontWeight:
-                                FontWeight.w700,
+                                FontWeight
+                                    .w700,
                           ),
                         );
                       },
                     ),
-                  const SizedBox(height: 5),
+                  const SizedBox(
+                    height: 5,
+                  ),
                   Row(
                     children: [
                       const Icon(
                         Icons
                             .people_alt_outlined,
                         color:
-                            PartyColors.gold,
+                            PartyColors
+                                .gold,
                         size: 16,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(
+                        width: 4,
+                      ),
                       Text(
                         '$members/$capacity',
                         style:
                             const TextStyle(
-                          color: Colors.white70,
+                          color:
+                              Colors
+                                  .white70,
                           fontSize: 10,
                           fontWeight:
-                              FontWeight.w800,
+                              FontWeight
+                                  .w800,
                         ),
                       ),
                       if (FirebaseAuth
@@ -5798,70 +6390,91 @@ Future<void> _sendRoomMessage() async {
                               .currentUser
                               ?.uid ==
                           ownerUid) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(
+                          width: 8,
+                        ),
                         GestureDetector(
-                          onTap: () async {
+                          onTap:
+                              () async {
                             final result =
-                                await Navigator.push<
-                                    bool>(
+                                await Navigator
+                                    .push<
+                                        bool>(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    EditRoomPage(
+                                builder:
+                                    (_) =>
+                                        EditRoomPage(
                                   roomId:
                                       widget.roomId,
-                                  data: data,
+                                  data:
+                                      data,
                                 ),
                               ),
                             );
 
-                            if (result == true &&
+                            if (result ==
+                                    true &&
                                 mounted) {
                               Navigator.pop(
                                 context,
                               );
                             }
                           },
-                          child: Container(
+                          child:
+                              Container(
                             padding:
                                 const EdgeInsets
                                     .symmetric(
-                              horizontal: 7,
-                              vertical: 4,
+                              horizontal:
+                                  7,
+                              vertical:
+                                  4,
                             ),
                             decoration:
                                 BoxDecoration(
                               color:
                                   const Color(
-                                      0x33140A24),
+                                0x33140A24,
+                              ),
                               borderRadius:
                                   BorderRadius
-                                      .circular(8),
-                              border: Border.all(
+                                      .circular(
+                                8,
+                              ),
+                              border:
+                                  Border.all(
                                 color:
                                     PartyColors
                                         .gold,
                               ),
                             ),
-                            child: const Row(
+                            child:
+                                const Row(
                               mainAxisSize:
-                                  MainAxisSize.min,
+                                  MainAxisSize
+                                      .min,
                               children: [
                                 Icon(
-                                  Icons.edit_rounded,
+                                  Icons
+                                      .edit_rounded,
                                   color:
                                       PartyColors
                                           .gold,
                                   size: 13,
                                 ),
-                                SizedBox(width: 3),
+                                SizedBox(
+                                  width: 3,
+                                ),
                                 Text(
                                   'Edit',
                                   style:
                                       TextStyle(
-                                    color: Colors
-                                        .white70,
-                                    fontSize: 9,
+                                    color:
+                                        Colors
+                                            .white70,
+                                    fontSize:
+                                        9,
                                     fontWeight:
                                         FontWeight
                                             .w800,
@@ -5877,10 +6490,13 @@ Future<void> _sendRoomMessage() async {
                 ],
               ),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(
+              width: 5,
+            ),
             _PartyRoomTopAction(
               icon:
-                  Icons.people_alt_outlined,
+                  Icons
+                      .people_alt_outlined,
               label: '$members',
               onTap: () =>
                   Navigator.push(
@@ -5888,26 +6504,37 @@ Future<void> _sendRoomMessage() async {
                 MaterialPageRoute(
                   builder: (_) =>
                       JoinedUsersPage(
-                    roomId: widget.roomId,
+                    roomId:
+                        widget.roomId,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(
+              width: 4,
+            ),
             _PartyRoomTopAction(
-              icon: Icons.more_vert_rounded,
+              icon:
+                  Icons
+                      .more_vert_rounded,
               onTap: () =>
                   _showRoomMenu(
                 data,
                 ownerUid,
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(
+              width: 4,
+            ),
             _PartyRoomTopAction(
-              icon: Icons.close_rounded,
+              icon:
+                  Icons.close_rounded,
               onTap: leaving
                   ? null
-                  : () => _showLeaveMenu(data),
+                  : () =>
+                      _showLeaveMenu(
+                    data,
+                  ),
             ),
           ],
         ),
@@ -5920,38 +6547,55 @@ Future<void> _sendRoomMessage() async {
     Map<String, dynamic> roomData,
   ) {
     final capacity =
-        (value as num?)?.toInt() ?? 15;
+        (value as num?)?.toInt() ??
+            15;
 
     final layout =
-        _layoutForCapacity(capacity);
+        _layoutForCapacity(
+      capacity,
+    );
 
-    final seatsRef = FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .collection('micSeats');
+    final seatsRef =
+        FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(widget.roomId)
+            .collection('micSeats');
 
     return StreamBuilder<
-        QuerySnapshot<Map<String, dynamic>>>(
-      stream: seatsRef.snapshots(),
-      builder: (context, snapshot) {
+        QuerySnapshot<
+            Map<String, dynamic>>>(
+      stream:
+          seatsRef.snapshots(),
+      builder:
+          (context, snapshot) {
         final seats =
-            <int, Map<String, dynamic>>{};
+            <int,
+                Map<String,
+                    dynamic>>{};
 
         for (final doc
-            in snapshot.data?.docs ?? []) {
+            in snapshot.data
+                    ?.docs ??
+                []) {
           final number =
-              int.tryParse(doc.id);
+              int.tryParse(
+            doc.id,
+          );
 
           if (number != null) {
-            seats[number] = doc.data();
+            seats[number] =
+                doc.data();
           }
         }
 
-        _syncSoundLevelListeners(seats);
+        _syncSoundLevelListeners(
+          seats,
+        );
 
         return Padding(
           padding:
-              const EdgeInsets.fromLTRB(
+              const EdgeInsets
+                  .fromLTRB(
             8,
             8,
             8,
@@ -5959,56 +6603,84 @@ Future<void> _sendRoomMessage() async {
           ),
           child: Column(
             children:
-                _micLayoutRows(layout)
-                    .map((row) {
-              return Padding(
-                padding:
-                    const EdgeInsets.only(
-                  bottom: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
-                  children: row.map((number) {
-                    final seat =
-                        seats[number];
+                _micLayoutRows(
+              layout,
+            ).map(
+              (row) {
+                return Padding(
+                  padding:
+                      const EdgeInsets
+                          .only(
+                    bottom: 8,
+                  ),
+                  child: Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment
+                            .center,
+                    children:
+                        row.map(
+                      (number) {
+                        final seat =
+                            seats[number];
 
-                    final userId =
-                        seat?['uid']
-                                ?.toString() ??
-                            '';
+                        final userId =
+                            seat?['uid']
+                                    ?.toString() ??
+                                '';
 
-                    return Expanded(
-                      child: Center(
-                        child: Padding(
-                          padding:
-                              const EdgeInsets
-                                  .symmetric(
-                            horizontal: 3,
-                          ),
+                        return Expanded(
                           child:
-                              _MicSeatWidget(
-                            number: number,
-                            seat: seat,
-                            isSpeaking:
-                                userId.isNotEmpty &&
-                                    _speakingUsers
-                                        .contains(
-                                            userId),
-                            onTap: () =>
-                                _showMicSeatOptions(
-                              number,
-                              seat,
-                              roomData,
+                              Center(
+                            child:
+                                Padding(
+                              padding:
+                                  const EdgeInsets
+                                      .symmetric(
+                                horizontal:
+                                    3,
+                              ),
+                              child:
+                                  ValueListenableBuilder<
+                                      Set<
+                                          String>>(
+                                valueListenable:
+                                    _speakingUsers,
+                                builder:
+                                    (
+                                  context,
+                                  speakingUsers,
+                                  child,
+                                ) {
+                                  return _MicSeatWidget(
+                                    number:
+                                        number,
+                                    seat:
+                                        seat,
+                                    isSpeaking:
+                                        userId.isNotEmpty &&
+                                            speakingUsers
+                                                .contains(
+                                              userId,
+                                            ),
+                                    onTap:
+                                        () =>
+                                            _showMicSeatOptions(
+                                      number,
+                                      seat,
+                                      roomData,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              );
-            }).toList(),
+                        );
+                      },
+                    ).toList(),
+                  ),
+                );
+              },
+            ).toList(),
           ),
         );
       },
@@ -6018,40 +6690,58 @@ Future<void> _sendRoomMessage() async {
   void _syncSoundLevelListeners(
     Map<int, Map<String, dynamic>> seats,
   ) {
-    final activeUserIds = <String>{};
+    final activeUserIds =
+        <String>{};
 
-    for (final seat in seats.values) {
+    for (final seat
+        in seats.values) {
       final userId =
-          seat['uid']?.toString() ?? '';
+          seat['uid']
+                  ?.toString() ??
+              '';
 
       if (userId.isNotEmpty) {
-        activeUserIds.add(userId);
-        _listenToSoundLevel(userId);
+        activeUserIds.add(
+          userId,
+        );
+
+        _listenToSoundLevel(
+          userId,
+        );
       }
     }
 
     final removedUserIds =
-        _soundLevelSubscriptions.keys
+        _soundLevelSubscriptions
+            .keys
             .where(
               (userId) =>
-                  !activeUserIds.contains(
+                  !activeUserIds
+                      .contains(
                 userId,
               ),
             )
             .toList();
 
-    for (final userId in removedUserIds) {
-      _soundLevelSubscriptions[userId]
+    for (final userId
+        in removedUserIds) {
+      _soundLevelSubscriptions[
+              userId]
           ?.cancel();
 
       _soundLevelSubscriptions
           .remove(userId);
 
-      _speakingUsers.remove(userId);
+      _updateSpeakingUser(
+        userId,
+        false,
+      );
     }
   }
 
-  List<List<int>> _micLayoutRows(int layout) {
+  List<List<int>> _micLayoutRows(
+    int layout,
+  ) {
     switch (layout) {
       case 1:
         return [
@@ -6105,33 +6795,41 @@ Future<void> _sendRoomMessage() async {
   Widget _buildDescriptionArea(
     String description,
   ) {
-    final clean = description.trim();
+    final clean =
+        description.trim();
 
     if (clean.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
       margin:
-          const EdgeInsets.fromLTRB(
+          const EdgeInsets
+              .fromLTRB(
         10,
         2,
         10,
         5,
       ),
       padding:
-          const EdgeInsets.symmetric(
+          const EdgeInsets
+              .symmetric(
         horizontal: 11,
         vertical: 8,
       ),
-      decoration: BoxDecoration(
+      decoration:
+          BoxDecoration(
         color:
             const Color(0x55100A18),
         borderRadius:
-            BorderRadius.circular(12),
+            BorderRadius.circular(
+          12,
+        ),
         border: Border.all(
-          color: PartyColors.purple
+          color: PartyColors
+              .purple
               .withOpacity(.45),
         ),
       ),
@@ -6140,592 +6838,498 @@ Future<void> _sendRoomMessage() async {
         maxLines: 2,
         overflow:
             TextOverflow.ellipsis,
-        style: const TextStyle(
-          color: Colors.white70,
+        style:
+            const TextStyle(
+          color:
+              Colors.white70,
           fontSize: 11,
           height: 1.3,
         ),
       ),
     );
   }
-Widget _buildMessagesArea() {
-  final messagesRef = FirebaseFirestore.instance
-      .collection('rooms')
-      .doc(widget.roomId)
-      .collection('messages')
-      .orderBy('createdAt', descending: false);
 
-  return Container(
-    width: double.infinity,
-    margin:
-        const EdgeInsets.fromLTRB(
-      10,
-      2,
-      10,
-      5,
-    ),
-    padding:
-        const EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color:
-          const Color(0x440D0A12),
-      borderRadius:
-          BorderRadius.circular(13),
-      border: Border.all(
-        color: PartyColors.purple
-            .withOpacity(0.4),
+  Widget _buildMessagesArea() {
+    final messagesRef =
+        FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(widget.roomId)
+            .collection('messages')
+            .orderBy(
+              'createdAt',
+              descending: false,
+            );
+
+    return Container(
+      width:
+          double.infinity,
+      margin:
+          const EdgeInsets
+              .fromLTRB(
+        10,
+        2,
+        10,
+        5,
       ),
-    ),
-    child:
-        StreamBuilder<
-            QuerySnapshot<
-                Map<String, dynamic>>>(
-      stream:
-          messagesRef.snapshots(),
-      builder:
-          (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text(
-            'Unable to load messages.',
-            style: TextStyle(
-              color: Colors.white30,
-              fontSize: 10,
-            ),
-          );
-        }
-
-        if (!snapshot.hasData ||
-            snapshot.data!.docs.isEmpty) {
-          return const Align(
-            alignment:
-                Alignment.topLeft,
-            child: Text(
-              'No messages yet.',
-              style: TextStyle(
-                color: Colors.white30,
+      padding:
+          const EdgeInsets.all(
+        8,
+      ),
+      decoration:
+          BoxDecoration(
+        color:
+            const Color(0x440D0A12),
+        borderRadius:
+            BorderRadius.circular(
+          13,
+        ),
+        border: Border.all(
+          color: PartyColors
+              .purple
+              .withOpacity(
+            0.4,
+          ),
+        ),
+      ),
+      child: StreamBuilder<
+          QuerySnapshot<
+              Map<String,
+                  dynamic>>>(
+        stream:
+            messagesRef.snapshots(),
+        builder:
+            (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text(
+              'Unable to load messages.',
+              style:
+                  TextStyle(
+                color:
+                    Colors.white30,
                 fontSize: 10,
               ),
+            );
+          }
+
+          if (!snapshot.hasData ||
+              snapshot.data!
+                  .docs
+                  .isEmpty) {
+            return const Align(
+              alignment:
+                  Alignment.topLeft,
+              child: Text(
+                'No messages yet.',
+                style:
+                    TextStyle(
+                  color:
+                      Colors.white30,
+                  fontSize: 10,
+                ),
+              ),
+            );
+          }
+
+          final messages =
+              snapshot.data!.docs;
+
+          return ConstrainedBox(
+            constraints:
+                const BoxConstraints(
+              maxHeight: 180,
+            ),
+            child:
+                ListView.builder(
+              shrinkWrap: true,
+              itemCount:
+                  messages.length,
+              itemBuilder:
+                  (context, index) {
+                final doc =
+                    messages[index];
+
+                final data =
+                    doc.data();
+
+                final name =
+                    (data['name'] ??
+                            'User')
+                        .toString();
+
+                final text =
+                    (data['text'] ??
+                            '')
+                        .toString();
+
+                final photoURL =
+                    (data['photoURL'] ??
+                            '')
+                        .toString();
+
+                final replyName =
+                    (data[
+                                'replyToName'] ??
+                            '')
+                        .toString();
+
+                final replyText =
+                    (data[
+                                'replyToText'] ??
+                            '')
+                        .toString();
+
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _replyToMessageId =
+                          doc.id;
+
+                      _replyToName =
+                          name;
+
+                      _replyToText =
+                          text;
+                    });
+                  },
+                  borderRadius:
+                      BorderRadius
+                          .circular(
+                    10,
+                  ),
+                  child:
+                      Padding(
+                    padding:
+                        const EdgeInsets
+                            .symmetric(
+                      vertical: 5,
+                    ),
+                    child:
+                        Row(
+                      crossAxisAlignment:
+                          CrossAxisAlignment
+                              .start,
+                      children: [
+                        CircleAvatar(
+                          radius: 17,
+                          backgroundColor:
+                              PartyColors
+                                  .purple,
+                          backgroundImage:
+                              photoURL
+                                      .isNotEmpty
+                                  ? NetworkImage(
+                                      photoURL,
+                                    )
+                                  : null,
+                          child:
+                              photoURL.isEmpty
+                                  ? const Icon(
+                                      Icons
+                                          .person,
+                                      color:
+                                          Colors.white70,
+                                      size:
+                                          18,
+                                    )
+                                  : null,
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        Expanded(
+                          child:
+                              Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment
+                                    .start,
+                            children: [
+                              Text(
+                                name,
+                                style:
+                                    const TextStyle(
+                                  color:
+                                      PartyColors
+                                          .gold,
+                                  fontSize:
+                                      10,
+                                  fontWeight:
+                                      FontWeight
+                                          .w700,
+                                ),
+                              ),
+                              if (replyName
+                                      .isNotEmpty &&
+                                  replyText
+                                      .isNotEmpty)
+                                Container(
+                                  margin:
+                                      const EdgeInsets
+                                          .only(
+                                    top: 3,
+                                    bottom:
+                                        3,
+                                  ),
+                                  padding:
+                                      const EdgeInsets
+                                          .all(
+                                    5,
+                                  ),
+                                  decoration:
+                                      BoxDecoration(
+                                    color:
+                                        const Color(
+                                      0x331B1425,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius
+                                            .circular(
+                                      6,
+                                    ),
+                                  ),
+                                  child:
+                                      Text(
+                                    '$replyName: $replyText',
+                                    maxLines:
+                                        1,
+                                    overflow:
+                                        TextOverflow
+                                            .ellipsis,
+                                    style:
+                                        const TextStyle(
+                                      color:
+                                          Colors
+                                              .white38,
+                                      fontSize:
+                                          8,
+                                    ),
+                                  ),
+                                ),
+                              Text(
+                                text,
+                                style:
+                                    const TextStyle(
+                                  color:
+                                      Colors
+                                          .white70,
+                                  fontSize:
+                                      11,
+                                  height:
+                                      1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           );
-        }
+        },
+      ),
+    );
+  }
 
-        final messages =
-            snapshot.data!.docs;
+  Widget _buildBottomBar() {
+    final replyName =
+        _replyToName;
 
-        return ConstrainedBox(
-          constraints:
-              const BoxConstraints(
-            maxHeight: 180,
+    return Container(
+      padding:
+          const EdgeInsets
+              .fromLTRB(
+        9,
+        6,
+        9,
+        8,
+      ),
+      decoration:
+          const BoxDecoration(
+        color:
+            Color(0xEE0D0915),
+        border:
+            Border(
+          top: BorderSide(
+            color:
+                PartyColors.purple,
+            width: 0.8,
           ),
-          child:
-              ListView.builder(
-            shrinkWrap: true,
-            itemCount:
-                messages.length,
-            itemBuilder:
-                (context, index) {
-              final doc =
-                  messages[index];
-
-              final data =
-                  doc.data();
-
-              final name =
-                  (data['name'] ??
-                          'User')
-                      .toString();
-
-              final text =
-                  (data['text'] ??
-                          '')
-                      .toString();
-
-              final photoURL =
-                  (data['photoURL'] ??
-                          '')
-                      .toString();
-
-              final replyName =
-                  (data['replyToName'] ??
-                          '')
-                      .toString();
-
-              final replyText =
-                  (data['replyToText'] ??
-                          '')
-                      .toString();
-
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _replyToMessageId =
-                        doc.id;
-                    _replyToName =
-                        name;
-                    _replyToText =
-                        text;
-                  });
-                },
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child:
+                Container(
+              height: 36,
+              padding:
+                  const EdgeInsets
+                      .symmetric(
+                horizontal: 11,
+              ),
+              decoration:
+                  BoxDecoration(
+                color:
+                    const Color(
+                  0xFF08070F,
+                ),
                 borderRadius:
-                    BorderRadius.circular(
-                  10,
+                    BorderRadius
+                        .circular(
+                  13,
                 ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets
-                          .symmetric(
-                    vertical: 5,
-                  ),
-                  child: Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .start,
-                    children: [
-                      CircleAvatar(
-                        radius: 17,
-                        backgroundColor:
-                            PartyColors
-                                .purple,
-                        backgroundImage:
-                            photoURL
-                                    .isNotEmpty
-                                ? NetworkImage(
-                                    photoURL,
-                                  )
-                                : null,
-                        child:
-                            photoURL.isEmpty
-                                ? const Icon(
-                                    Icons
-                                        .person,
-                                    color: Colors
-                                        .white70,
-                                    size: 18,
-                                  )
-                                : null,
+                border:
+                    Border.all(
+                  color:
+                      PartyColors
+                          .purple,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child:
+                        TextField(
+                      controller:
+                          messageController,
+                      style:
+                          const TextStyle(
+                        color:
+                            Colors
+                                .white,
+                        fontSize:
+                            11,
                       ),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start,
-                          children: [
-                            Text(
-                              name,
-                              style:
-                                  const TextStyle(
-                                color:
-                                    PartyColors
-                                        .gold,
-                                fontSize: 10,
-                                fontWeight:
-                                    FontWeight
-                                        .w700,
-                              ),
-                            ),
-                            if (replyName
-                                    .isNotEmpty &&
-                                replyText
-                                    .isNotEmpty)
-                              Container(
-                                margin:
-                                    const EdgeInsets
-                                        .only(
-                                  top: 3,
-                                  bottom: 3,
-                                ),
-                                padding:
-                                    const EdgeInsets
-                                        .all(5),
-                                decoration:
-                                    BoxDecoration(
-                                  color:
-                                      const Color(
-                                    0x331B1425,
-                                  ),
-                                  borderRadius:
-                                      BorderRadius
-                                          .circular(
-                                    6,
-                                  ),
-                                ),
-                                child: Text(
-                                  '$replyName: $replyText',
-                                  maxLines: 1,
-                                  overflow:
-                                      TextOverflow
-                                          .ellipsis,
-                                  style:
-                                      const TextStyle(
-                                    color:
-                                        Colors
-                                            .white38,
-                                    fontSize: 8,
-                                  ),
-                                ),
-                              ),
-                            Text(
-                              text,
-                              style:
-                                  const TextStyle(
-                                color:
-                                    Colors
-                                        .white70,
-                                fontSize: 11,
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
+                      onSubmitted:
+                          (_) {
+                        _sendRoomMessage();
+                      },
+                      decoration:
+                          InputDecoration(
+                        hintText:
+                            replyName !=
+                                    null
+                                ? 'Reply to $replyName'
+                                : 'SMS',
+                        hintStyle:
+                            const TextStyle(
+                          color:
+                              Colors
+                                  .white30,
+                          fontSize:
+                              10,
                         ),
+                        border:
+                            InputBorder
+                                .none,
+                        isDense:
+                            true,
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  IconButton(
+                    onPressed:
+                        _sendRoomMessage,
+                    padding:
+                        EdgeInsets
+                            .zero,
+                    constraints:
+                        const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
+                    ),
+                    icon:
+                        const Icon(
+                      Icons
+                          .send_rounded,
+                      color:
+                          PartyColors
+                              .gold,
+                      size: 17,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(
+            width: 5,
+          ),
+
+          // Mic button listens only to its own
+          // speaking state instead of rebuilding
+          // the whole Room page.
+          ValueListenableBuilder<
+              Set<String>>(
+            valueListenable:
+                _speakingUsers,
+            builder: (
+              context,
+              speakingUsers,
+              child,
+            ) {
+              final uid =
+                  FirebaseAuth
+                      .instance
+                      .currentUser
+                      ?.uid;
+
+              final isSpeaking =
+                  _micOn &&
+                  uid != null &&
+                  speakingUsers
+                      .contains(uid);
+
+              return _RoomBottomAction(
+                icon: _micOn
+                    ? Icons
+                        .mic_rounded
+                    : Icons
+                        .mic_off_rounded,
+                isGlowing:
+                    isSpeaking,
+                onTap:
+                    () async {
+                  if (!_zegoJoined) {
+                    await _joinZegoRoom();
+                  }
+
+                  await _setZegoMicrophone(
+                    !_micOn,
+                  );
+                },
               );
             },
           ),
-        );
-      },
-    ),
-  );
-}
 
-  Widget _buildBottomBar() {
-  final replyName = _replyToName;
-  final replyText = _replyToText;
-
-  return Container(
-    padding:
-        const EdgeInsets.fromLTRB(
-      9,
-      6,
-      9,
-      8,
-    ),
-    decoration:
-        const BoxDecoration(
-      color: Color(0xEE0D0915),
-      border: Border(
-        top: BorderSide(
-          color: PartyColors.purple,
-          width: 0.8,
-        ),
-      ),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 36,
-            padding:
-                const EdgeInsets.symmetric(
-              horizontal: 11,
-            ),
-            decoration:
-                BoxDecoration(
-              color:
-                  const Color(0xFF08070F),
-              borderRadius:
-                  BorderRadius.circular(13),
-              border: Border.all(
-                color:
-                    PartyColors.purple,
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller:
-                        messageController,
-                    style:
-                        const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                    ),
-                    onSubmitted: (_) {
-                      _sendRoomMessage();
-                    },
-                    decoration:
-                        InputDecoration(
-                      hintText:
-                          replyName != null
-                              ? 'Reply to $replyName'
-                              : 'SMS',
-                      hintStyle:
-                          const TextStyle(
-                        color:
-                            Colors.white30,
-                        fontSize: 10,
-                      ),
-                      border:
-                          InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed:
-                      _sendRoomMessage,
-                  padding:
-                      EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(
-                    minWidth: 24,
-                    minHeight: 24,
-                  ),
-                  icon:
-                      const Icon(
-                    Icons.send_rounded,
-                    color:
-                        PartyColors.gold,
-                    size: 17,
-                  ),
-                ),
-              ],
-            ),
+          _RoomBottomAction(
+            icon:
+                Icons
+                    .music_note_rounded,
+            onTap: () {},
           ),
-        ),
-        const SizedBox(width: 5),
-        _RoomBottomAction(
-          icon: _micOn
-              ? Icons.mic_rounded
-              : Icons.mic_off_rounded,
-          isGlowing: _micOn &&
-              _speakingUsers.contains(
-                FirebaseAuth.instance
-                    .currentUser
-                    ?.uid,
-              ),
-          onTap: () async {
-            if (!_zegoJoined) {
-              await _joinZegoRoom();
-            }
-            await _setZegoMicrophone(
-              !_micOn,
-            );
-          },
-        ),
-        _RoomBottomAction(
-          icon:
-              Icons.music_note_rounded,
-          onTap: () {},
-        ),
-        _RoomBottomAction(
-          icon:
-              Icons.card_giftcard_rounded,
-          onTap: () {},
-        ),
-        _RoomBottomAction(
-          icon:
-              Icons.sports_esports_rounded,
-          onTap: () {},
-        ),
-      ],
-    ),
-  );
-}
 
-}
-
-class _MicLayoutPreview extends StatelessWidget {
-  final int layout;
-  final bool selected;
-
-  const _MicLayoutPreview({required this.layout, required this.selected});
-
-  @override
-  Widget build(BuildContext context) {
-    final rows = switch (layout) {
-      1 => [5],
-      2 => [1, 4, 4],
-      3 => [4, 4, 4],
-      _ => [5, 5, 5],
-    };
-    int number = 1;
-    return Column(
-      children: [
-        Row(
-          children: [
-            Text('Position $layout', style: TextStyle(color: selected ? PartyColors.gold : Colors.white, fontWeight: FontWeight.w900)),
-            const Spacer(),
-            Text('${rows.fold<int>(0, (a, b) => a + b)} mics', style: const TextStyle(color: Colors.white54, fontSize: 10)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...rows.map((count) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(count, (_) {
-                final n = number++;
-                return Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    height: 25,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF21152F), border: Border.all(color: selected ? PartyColors.gold : PartyColors.purple)),
-                    child: Text('$n', style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w800)),
-                  ),
-                );
-              }),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-}
-
-class _MicSeatWidget extends StatelessWidget {
-  final int number;
-  final Map<String, dynamic>? seat;
-  final VoidCallback onTap;
-    final bool isSpeaking;
-
-const _MicSeatWidget({
-  required this.number,
-  required this.seat,
-  required this.onTap,
-  this.isSpeaking = false,
-});
-
-  ImageProvider<Object>? _image() {
-    if (seat == null) return null;
-    final base64Image = seat?['photoBase64']?.toString() ?? '';
-    if (base64Image.isNotEmpty) {
-      try { return MemoryImage(base64Decode(base64Image)); } catch (_) {}
-    }
-    final url = seat?['photoURL']?.toString() ?? '';
-    if (url.isNotEmpty) return NetworkImage(url);
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final occupied = seat != null;
-    final locked = seat?['locked'] == true;
-    final speaking = occupied && isSpeaking;
-    final image = _image();
-    final name = seat?['name']?.toString() ?? 'Mic $number';
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 68,
-            height: 68,
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: occupied
-                  ? const LinearGradient(colors: [PartyColors.gold, PartyColors.purpleBright])
-                  : const LinearGradient(colors: [Color(0xFF32175C), Color(0xFF7A2CFF)]),
-              boxShadow: speaking
-    ? const [
-        BoxShadow(
-          color: Colors.white,
-          blurRadius: 22,
-          spreadRadius: 7,
-        ),
-      ]
-    : const [
-        BoxShadow(
-          color: Color(0x447A2CFF),
-          blurRadius: 12,
-        ),
-      ],
-            ),
-            child: CircleAvatar(
-              backgroundColor: const Color(0xFF100C18),
-              backgroundImage: image,
-              child: occupied
-                  ? (image == null ? const Icon(Icons.person_rounded, color: PartyColors.gold, size: 27) : null)
-                  : Icon(locked ? Icons.lock_outline_rounded : Icons.add_rounded, color: locked ? Colors.white38 : PartyColors.gold, size: 29),
-            ),
+          _RoomBottomAction(
+            icon:
+                Icons
+                    .card_giftcard_rounded,
+            onTap: () {},
           ),
-          const SizedBox(height: 3),
-          Text(
-            occupied ? name : (locked ? 'Locked' : 'Mic $number'),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: occupied ? Colors.white : Colors.white60, fontSize: 9, fontWeight: FontWeight.w800),
+
+          _RoomBottomAction(
+            icon:
+                Icons
+                    .sports_esports_rounded,
+            onTap: () {},
           ),
         ],
       ),
     );
   }
 }
-
-class _PartyRoomTopAction extends StatelessWidget {
-  final IconData icon;
-  final String? label;
-  final VoidCallback? onTap;
-
-  const _PartyRoomTopAction({
-    required this.icon,
-    required this.onTap,
-    this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 38,
-        padding:
-            const EdgeInsets.symmetric(
-          horizontal: 9,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D0A12),
-          borderRadius:
-              BorderRadius.circular(9),
-          border: Border.all(
-            color: PartyColors.purple,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: PartyColors.gold,
-              size: 18,
-            ),
-            if (label != null) ...[
-              const SizedBox(width: 3),
-              Text(
-                label!,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-
-
-
-
-
-
-
+ 
 /* ============================================================
        MAIN PAGE
        ============================================================ */
