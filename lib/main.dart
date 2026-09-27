@@ -4532,7 +4532,7 @@ class PartyRoomPage extends StatefulWidget {
   State createState() => _PartyRoomPageState();
 }
 
-class _PartyRoomPageState extends State {
+class _PartyRoomPageState extends State<PartyRoomPage> {
   String? _replyToMessageId;
   String? _replyToName;
   String? _replyToText;
