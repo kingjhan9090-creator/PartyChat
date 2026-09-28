@@ -6658,27 +6658,18 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                             '')
                         .toString();
 
-                return InkWell(
-                  onTap: () {
-                    setState(() {
-                      _replyToMessageId =
-                          doc.id;
-                      _replyToName =
-                          name;
-                      _replyToText =
-                          text;
-                    });
-                  },
-                  borderRadius:
-                      BorderRadius.circular(
-                    10,
-                  ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets
-                            .symmetric(
-                      vertical: 5,
-                    ),
+                return GestureDetector(
+  onLongPress: () {
+    setState(() {
+      _replyToMessageId = doc.id;
+      _replyToName = name;
+      _replyToText = text;
+    });
+  },
+  child: Padding(
+    padding: const EdgeInsets.symmetric(
+      vertical: 5,
+    ),
                     child: Row(
                       crossAxisAlignment:
                           CrossAxisAlignment
