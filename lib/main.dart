@@ -4529,50 +4529,32 @@ class PartyRoomPage extends StatefulWidget {
   });
 
   @override
-  State createState() => _PartyRoomPageState();
+  State<PartyRoomPage> createState() => _PartyRoomPageState();
 }
 
 class _PartyRoomPageState extends State<PartyRoomPage> {
   String? _replyToMessageId;
   String? _replyToName;
   String? _replyToText;
+
   bool leaving = false;
+
+  // ============================================================
+  // NEW ZEGO MIC + VOICE STATE
+  // ============================================================
 
   bool _zegoJoined = false;
   bool _micOn = false;
 
-  final Set _speakingUsers = {};
+  final TextEditingController messageController =
+      TextEditingController();
 
-  final Map<String, StreamSubscription> _soundLevelSubscriptions =
-      <String, StreamSubscription>{};
-
-  final TextEditingController messageController = TextEditingController();
-
-  void _listenToSoundLevel(String userId) {
-    if (_soundLevelSubscriptions.containsKey(userId)) return;
-
-    final subscription =
-        ZegoUIKit().getSoundLevelStream(userId).listen((level) {
-      if (!mounted) return;
-
-      final speaking = level > 20;
-
-      setState(() {
-        if (speaking) {
-          _speakingUsers.add(userId);
-        } else {
-          _speakingUsers.remove(userId);
-        }
-      });
-    });
-
-    _soundLevelSubscriptions[userId] = subscription;
-  }
-
-  Future _joinZegoRoom() async {
+  Future<void> _joinZegoRoom() async {
     final user = FirebaseAuth.instance.currentUser;
 
-    if (user == null || _zegoJoined) return;
+    if (user == null || _zegoJoined) {
+      return;
+    }
 
     try {
       await ZegoUIKit().init(
@@ -4585,7 +4567,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               ? user.displayName!.trim()
               : 'PartyChat User';
 
-      ZegoUIKit().login(
+      await ZegoUIKit().login(
         user.uid,
         userName,
       );
@@ -4594,12 +4576,17 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         widget.roomId,
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       if (result.errorCode == 0) {
         setState(() {
           _zegoJoined = true;
+          _micOn = false;
         });
+
+        await ZegoUIKit().turnMicrophoneOn(false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -4610,7 +4597,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         );
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -4622,27 +4611,60 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-  Future _setZegoMicrophone(bool enabled) async {
-    if (!_zegoJoined) return;
+  Future<void> _setZegoMicrophone(bool enabled) async {
+    if (!_zegoJoined) {
+      return;
+    }
 
     try {
-      ZegoUIKit().turnMicrophoneOn(enabled);
+      await ZegoUIKit().turnMicrophoneOn(
+        enabled,
+      );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _micOn = enabled;
       });
-    } catch (_) {
-      if (!mounted) return;
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _micOn = false;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Microphone could not be changed: $e',
+          ),
+        ),
+      );
     }
   }
 
-  Future _sendRoomMessage() async {
+  Future<void> _leaveZegoRoom() async {
+    try {
+      if (_zegoJoined) {
+        await ZegoUIKit().turnMicrophoneOn(false);
+        await ZegoUIKit().leaveRoom();
+        await ZegoUIKit().logout();
+      }
+    } catch (_) {}
+
+    _zegoJoined = false;
+    _micOn = false;
+  }
+
+  // ============================================================
+  // ROOM MESSAGE
+  // ============================================================
+
+  Future<void> _sendRoomMessage() async {
     final user =
         FirebaseAuth.instance.currentUser;
 
@@ -4706,7 +4728,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           .collection('messages')
           .add(messageData);
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         messageController.clear();
@@ -4714,11 +4738,12 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         _replyToName = null;
         _replyToText = null;
       });
-    } catch (e) {
-      if (!mounted) return;
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Message could not be sent.',
@@ -4728,11 +4753,17 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-  Future _joinCurrentRoom() async {
+  // ============================================================
+  // FIRESTORE ROOM JOIN
+  // ============================================================
+
+  Future<void> _joinCurrentRoom() async {
     final user =
         FirebaseAuth.instance.currentUser;
 
-    if (user == null) return;
+    if (user == null) {
+      return;
+    }
 
     final roomRef =
         FirebaseFirestore.instance
@@ -4838,10 +4869,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         },
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'You are now joined to this room.',
@@ -4849,10 +4881,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         ),
       );
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             e.toString().replaceFirst(
@@ -4865,10 +4898,10 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-  Future _showLeaveMenu(
+  Future<void> _showLeaveMenu(
     Map<String, dynamic> data,
   ) async {
-    final choice = await showDialog(
+    final choice = await showDialog<String>(
       context: context,
       builder: (dialogContext) =>
           AlertDialog(
@@ -4917,14 +4950,20 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     if (choice == 'keep') {
       PartyRoomKeepState.keep(
         roomId: widget.roomId,
-        title: data['title']?.toString() ??
-            widget.title,
+        title:
+            data['title']?.toString() ??
+                widget.title,
         description:
-            data['description']
-                    ?.toString() ??
+            data['description']?.toString() ??
                 widget.description,
         data: data,
       );
+
+      await _leaveZegoRoom();
+
+      if (!mounted) {
+        return;
+      }
 
       Navigator.pop(context);
       return;
@@ -4953,21 +4992,24 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           fontWeight: FontWeight.w800,
         ),
       ),
-      onTap: () =>
-          Navigator.pop(
+      onTap: () => Navigator.pop(
         dialogContext,
         value,
       ),
     );
   }
 
-  Future _leaveRoom() async {
+  Future<void> _leaveRoom() async {
     final user =
         FirebaseAuth.instance.currentUser;
 
-    if (user == null || leaving) return;
+    if (user == null || leaving) {
+      return;
+    }
 
-    setState(() => leaving = true);
+    setState(() {
+      leaving = true;
+    });
 
     try {
       final roomRef =
@@ -4991,9 +5033,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           .runTransaction(
         (transaction) async {
           final roomSnapshot =
-              await transaction.get(
-            roomRef,
-          );
+              await transaction.get(roomRef);
 
           final memberSnapshot =
               await transaction.get(
@@ -5037,8 +5077,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       );
 
       await _setZegoMicrophone(false);
+      await _leaveZegoRoom();
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       if (PartyRoomKeepState
               .keptRoom.value?['roomId'] ==
@@ -5049,12 +5092,15 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
       Navigator.pop(context);
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
-      setState(() => leaving = false);
+      setState(() {
+        leaving = false;
+      });
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             e.toString().replaceFirst(
@@ -5067,13 +5113,15 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-  Future _currentRole(
+      Future<String> _currentRole(
     String ownerUid,
   ) async {
     final user =
         FirebaseAuth.instance.currentUser;
 
-    if (user == null) return 'user';
+    if (user == null) {
+      return 'user';
+    }
 
     if (user.uid == ownerUid) {
       return 'leader';
@@ -5126,11 +5174,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-  Future _showRoomMenu(
+  Future<void> _showRoomMenu(
     Map<String, dynamic> data,
     String ownerUid,
   ) async {
-    final choice = await showDialog(
+    final choice = await showDialog<String>(
       context: context,
       builder: (dialogContext) =>
           AlertDialog(
@@ -5181,10 +5229,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         ),
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Room ID copied. You can share it with friends.',
@@ -5192,13 +5241,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         ),
       );
     } else if (choice == 'mic') {
-      if (FirebaseAuth
-              .instance
-              .currentUser
-              ?.uid !=
+      if (FirebaseAuth.instance.currentUser?.uid !=
           ownerUid) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
               'Only the room owner can change mic setup.',
@@ -5237,8 +5282,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                       .trim()
                       .isNotEmpty ==
                   true)
-              ? data['description']
-                  .toString()
+              ? data['description'].toString()
               : 'No room description.',
           style: const TextStyle(
             color: Colors.white70,
@@ -5248,18 +5292,15 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         actions: [
           TextButton(
             onPressed: () =>
-                Navigator.pop(
-              dialogContext,
-            ),
-            child:
-                const Text('Close'),
+                Navigator.pop(dialogContext),
+            child: const Text('Close'),
           ),
         ],
       ),
     );
   }
 
-  Future _showMicSetup(
+  Future<void> _showMicSetup(
     Map<String, dynamic> data,
   ) async {
     final currentCapacity =
@@ -5292,8 +5333,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             ),
             content: SizedBox(
               width: 390,
-              child:
-                  SingleChildScrollView(
+              child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize:
                       MainAxisSize.min,
@@ -5311,16 +5351,15 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                     layout,
                           );
                         },
-                        child:
-                            Container(
+                        child: Container(
                           margin:
-                              const EdgeInsets
-                                  .only(
+                              const EdgeInsets.only(
                             bottom: 10,
                           ),
                           padding:
-                              const EdgeInsets
-                                  .all(10),
+                              const EdgeInsets.all(
+                            10,
+                          ),
                           decoration:
                               BoxDecoration(
                             color:
@@ -5333,8 +5372,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                         0x660D0A12,
                                       ),
                             borderRadius:
-                                BorderRadius
-                                    .circular(
+                                BorderRadius.circular(
                               14,
                             ),
                             border:
@@ -5393,8 +5431,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                             .serverTimestamp(),
                   });
 
-                  if (dialogContext
-                      .mounted) {
+                  if (dialogContext.mounted) {
                     Navigator.pop(
                       dialogContext,
                       true,
@@ -5411,8 +5448,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     );
 
     if (saved == true && mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Mic setup updated.',
@@ -5422,20 +5458,20 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-  Future _showMicSeatOptions(
+  Future<void> _showMicSeatOptions(
     int number,
     Map<String, dynamic>? seat,
     Map<String, dynamic> roomData,
   ) async {
     final ownerUid =
-        roomData['ownerUid']
-                ?.toString() ??
-            '';
+        roomData['ownerUid']?.toString() ?? '';
 
     final user =
         FirebaseAuth.instance.currentUser;
 
-    if (user == null) return;
+    if (user == null) {
+      return;
+    }
 
     final memberSnapshot =
         await FirebaseFirestore.instance
@@ -5445,7 +5481,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             .doc(user.uid)
             .get();
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     if (!memberSnapshot.exists) {
       final join =
@@ -5459,8 +5497,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             'Join Required',
             style: TextStyle(
               color: Colors.white,
-              fontWeight:
-                  FontWeight.w900,
+              fontWeight: FontWeight.w900,
             ),
           ),
           content: const Text(
@@ -5485,7 +5522,8 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 dialogContext,
                 true,
               ),
-              child: const Text(
+              child:
+                  const Text(
                 'Join the room',
               ),
             ),
@@ -5501,11 +5539,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
 
     final role =
-        await _currentRole(
-      ownerUid,
-    );
+        await _currentRole(ownerUid);
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     final isManager =
         role == 'leader' ||
@@ -5521,8 +5559,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         seat?['locked'] == true;
 
     if (!isManager && locked) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'This mic is locked.',
@@ -5560,10 +5597,8 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   _dialogAction(
                     dialogContext,
                     locked
-                        ? Icons
-                            .lock_open_rounded
-                        : Icons
-                            .lock_outline_rounded,
+                        ? Icons.lock_open_rounded
+                        : Icons.lock_outline_rounded,
                     locked
                         ? 'Unlock Mic'
                         : 'Mic Lock',
@@ -5571,8 +5606,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   ),
                   _dialogAction(
                     dialogContext,
-                    Icons
-                        .person_add_alt_1_rounded,
+                    Icons.person_add_alt_1_rounded,
                     'Invite Member',
                     'invite',
                   ),
@@ -5630,8 +5664,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 .get();
 
         final userData =
-            (await FirebaseFirestore
-                    .instance
+            (await FirebaseFirestore.instance
                     .collection('users')
                     .doc(user.uid)
                     .get())
@@ -5639,13 +5672,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 <String, dynamic>{};
 
         final batch =
-            FirebaseFirestore.instance
-                .batch();
+            FirebaseFirestore.instance.batch();
 
         for (final oldSeat
             in oldSeats.docs) {
-          if (oldSeat.id !=
-              '$number') {
+          if (oldSeat.id != '$number') {
             batch.delete(
               oldSeat.reference,
             );
@@ -5657,19 +5688,17 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           {
             'uid': user.uid,
             '_uid': user.uid,
-            'name': userData['name']
-                    ?.toString() ??
-                'Party User',
-            'userId': userData['userId']
-                    ?.toString() ??
-                '',
+            'name':
+                userData['name']?.toString() ??
+                    'Party User',
+            'userId':
+                userData['userId']?.toString() ??
+                    '',
             'photoURL':
-                userData['photoURL']
-                        ?.toString() ??
+                userData['photoURL']?.toString() ??
                     '',
             'photoBase64':
-                userData['photoBase64']
-                        ?.toString() ??
+                userData['photoBase64']?.toString() ??
                     '',
             'role': role,
             'onSeat': true,
@@ -5677,21 +5706,19 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             'joinedAt':
                 FieldValue.serverTimestamp(),
           },
-          SetOptions(
-            merge: true,
-          ),
+          SetOptions(merge: true),
         );
 
         await batch.commit();
 
-        await _setZegoMicrophone(
-          true,
-        );
+        // Start actual voice transmission.
+        await _setZegoMicrophone(true);
       } catch (e) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'Could not take mic: $e',
@@ -5700,33 +5727,33 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         );
       }
     } else if (choice == 'lock') {
-      if (!isManager) return;
+      if (!isManager) {
+        return;
+      }
 
       await seatRef.set(
         {
           'locked': !locked,
         },
-        SetOptions(
-          merge: true,
-        ),
+        SetOptions(merge: true),
       );
     } else if (choice == 'leave') {
       if (isManager ||
           seatUid == user.uid) {
         await seatRef.delete();
 
-        await _setZegoMicrophone(
-          false,
-        );
+        await _setZegoMicrophone(false);
       }
     } else if (choice == 'invite') {
-      if (!isManager) return;
+      if (!isManager) {
+        return;
+      }
 
       await _inviteMember();
     }
   }
 
-  Future _inviteMember() async {
+  Future<void> _inviteMember() async {
     final members =
         await FirebaseFirestore.instance
             .collection('rooms')
@@ -5759,32 +5786,24 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           width: 360,
           height: 320,
           child: ListView(
-            children: members.docs
-                .map((doc) {
+            children: members.docs.map((doc) {
               final uid =
-                  doc.data()['uid']
-                          ?.toString() ??
+                  doc.data()['uid']?.toString() ??
                       doc.id;
 
               return FutureBuilder<
                   DocumentSnapshot<
-                      Map<String,
-                          dynamic>>>(
+                      Map<String, dynamic>>>(
                 future:
-                    FirebaseFirestore
-                        .instance
-                        .collection(
-                          'users',
-                        )
+                    FirebaseFirestore.instance
+                        .collection('users')
                         .doc(uid)
                         .get(),
                 builder:
                     (context, snapshot) {
                   final d =
-                      snapshot.data
-                              ?.data() ??
-                          <String,
-                              dynamic>{};
+                      snapshot.data?.data() ??
+                          <String, dynamic>{};
 
                   return ListTile(
                     leading:
@@ -5801,13 +5820,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                       radius: 20,
                     ),
                     title: Text(
-                      d['name']
-                              ?.toString() ??
+                      d['name']?.toString() ??
                           'Party User',
                       style:
                           const TextStyle(
-                        color:
-                            Colors.white,
+                        color: Colors.white,
                       ),
                     ),
                     onTap: () =>
@@ -5824,16 +5841,13 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       ),
     );
 
-    if (selectedUid == null ||
-        !mounted) {
+    if (selectedUid == null || !mounted) {
       return;
     }
 
-    final roomTitle =
-        widget.title;
+    final roomTitle = widget.title;
 
-    await ProfileUnreadService
-        .createNotification(
+    await ProfileUnreadService.createNotification(
       uid: selectedUid,
       type: 'roomInvites',
       title: 'Mic Invitation',
@@ -5841,8 +5855,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           'You were invited to take a mic in $roomTitle.',
       actorUid: user.uid,
       actorName:
-          (await PartyChatData
-                      .userData(
+          (await PartyChatData.userData(
                 user.uid,
               ))?['name']
                   ?.toString() ??
@@ -5850,10 +5863,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       roomId: widget.roomId,
     );
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
           'Mic invitation sent.',
@@ -5861,23 +5875,19 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       ),
     );
   }
-
-  @override
+                
+    @override
   void initState() {
     super.initState();
+
+    // Join ZEGO once when the room opens.
     _joinZegoRoom();
   }
 
   @override
   void dispose() {
-    for (final subscription
-        in _soundLevelSubscriptions
-            .values) {
-      subscription.cancel();
-    }
-
-    _soundLevelSubscriptions.clear();
-    _speakingUsers.clear();
+    // Do not leave an active microphone behind.
+    _leaveZegoRoom();
 
     messageController.dispose();
 
@@ -5894,47 +5904,37 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             .doc(widget.roomId);
 
     return Scaffold(
-      backgroundColor:
-          PartyColors.black,
+      backgroundColor: PartyColors.black,
       body: _NeonBackground(
         child: StreamBuilder<
-            DocumentSnapshot<
-                Map<String, dynamic>>>(
-          stream:
-              roomRef.snapshots(),
-          builder:
-              (context, snapshot) {
+            DocumentSnapshot<Map<String, dynamic>>>(
+          stream: roomRef.snapshots(),
+          builder: (context, snapshot) {
             final data =
                 snapshot.data?.data() ??
                     <String, dynamic>{};
 
             final title =
-                data['roomName']
-                        ?.toString() ??
-                    data['title']
-                        ?.toString() ??
+                data['roomName']?.toString() ??
+                    data['title']?.toString() ??
                     widget.title;
 
             final members =
-                (data['memberCount']
-                            as num?)
+                (data['memberCount'] as num?)
                         ?.toInt() ??
                     0;
 
             final capacity =
-                (data['userCapacity']
-                            as num?)
+                (data['userCapacity'] as num?)
                         ?.toInt() ??
                     100;
 
             final ownerUid =
-                data['ownerUid']
-                        ?.toString() ??
+                data['ownerUid']?.toString() ??
                     '';
 
             final description =
-                data['description']
-                        ?.toString() ??
+                data['description']?.toString() ??
                     widget.description;
 
             return SafeArea(
@@ -5943,26 +5943,21 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   _buildRoomHeader(
                     title: title,
                     members: members,
-                    capacity:
-                        capacity,
-                    ownerUid:
-                        ownerUid,
+                    capacity: capacity,
+                    ownerUid: ownerUid,
                     data: data,
                   ),
                   Expanded(
                     child: Column(
                       children: [
                         _buildMicArea(
-                          data[
-                              'micCapacity'],
+                          data['micCapacity'],
                           data,
                         ),
                         _buildDescriptionArea(
                           description,
                         ),
-                        const SizedBox(
-                          height: 4,
-                        ),
+                        const SizedBox(height: 4),
                         Expanded(
                           child:
                               _buildMessagesArea(),
@@ -5988,38 +5983,30 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     required Map<String, dynamic> data,
   }) {
     return Padding(
-      padding:
-          const EdgeInsets.fromLTRB(
+      padding: const EdgeInsets.fromLTRB(
         8,
         8,
         8,
         4,
       ),
       child: Container(
-        padding:
-            const EdgeInsets.fromLTRB(
+        padding: const EdgeInsets.fromLTRB(
           10,
           10,
           8,
           10,
         ),
-        decoration:
-            BoxDecoration(
-          color:
-              const Color(0xDD0D0915),
+        decoration: BoxDecoration(
+          color: const Color(0xDD0D0915),
           borderRadius:
-              BorderRadius.circular(
-            20,
-          ),
+              BorderRadius.circular(20),
           border: Border.all(
-            color:
-                PartyColors.purple,
+            color: PartyColors.purple,
             width: 1.2,
           ),
           boxShadow: const [
             BoxShadow(
-              color:
-                  Color(0x332D0B55),
+              color: Color(0x332D0B55),
               blurRadius: 16,
               spreadRadius: 1,
             ),
@@ -6030,31 +6017,21 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             Container(
               width: 78,
               height: 78,
-              decoration:
-                  BoxDecoration(
+              decoration: BoxDecoration(
                 color:
-                    const Color(
-                  0xFF171126,
-                ),
+                    const Color(0xFF171126),
                 borderRadius:
-                    BorderRadius.circular(
-                  18,
-                ),
+                    BorderRadius.circular(18),
                 border: Border.all(
-                  color:
-                      PartyColors.gold,
+                  color: PartyColors.gold,
                   width: 1.5,
                 ),
               ),
               child:
-                  _roomImageProvider(
-                            data,
-                          ) !=
-                          null
+                  _roomImageProvider(data) != null
                       ? ClipRRect(
                           borderRadius:
-                              BorderRadius
-                                  .circular(
+                              BorderRadius.circular(
                             17,
                           ),
                           child: Image(
@@ -6062,59 +6039,44 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                 _roomImageProvider(
                               data,
                             )!,
-                            fit:
-                                BoxFit.cover,
+                            fit: BoxFit.cover,
                           ),
                         )
                       : const Icon(
-                          Icons
-                              .image_outlined,
+                          Icons.image_outlined,
                           color:
-                              PartyColors
-                                  .gold,
+                              PartyColors.gold,
                           size: 36,
                         ),
             ),
-            const SizedBox(
-              width: 10,
-            ),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment:
-                    CrossAxisAlignment
-                        .start,
+                    CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
                     maxLines: 1,
                     overflow:
-                        TextOverflow
-                            .ellipsis,
-                    style:
-                        const TextStyle(
-                      color:
-                          Colors.white,
+                        TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 19,
                       fontWeight:
-                          FontWeight
-                              .w900,
+                          FontWeight.w900,
                     ),
                   ),
-                  const SizedBox(
-                    height: 5,
-                  ),
+                  const SizedBox(height: 5),
                   if (ownerUid.isEmpty)
                     const Text(
                       'ID: ------',
-                      style:
-                          TextStyle(
+                      style: TextStyle(
                         color:
-                            PartyColors
-                                .gold,
+                            PartyColors.gold,
                         fontSize: 11,
                         fontWeight:
-                            FontWeight
-                                .w700,
+                            FontWeight.w700,
                       ),
                     )
                   else
@@ -6125,24 +6087,16 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                       stream:
                           FirebaseFirestore
                               .instance
-                              .collection(
-                                'users',
-                              )
-                              .doc(
-                                ownerUid,
-                              )
+                              .collection('users')
+                              .doc(ownerUid)
                               .snapshots(),
                       builder:
-                          (context,
-                              snapshot) {
+                          (context, snapshot) {
                         final userData =
-                            snapshot
-                                .data
-                                ?.data();
+                            snapshot.data?.data();
 
                         final userId =
-                            userData?[
-                                        'userId']
+                            userData?['userId']
                                     ?.toString() ??
                                 '------';
 
@@ -6153,42 +6107,32 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                             color:
                                 PartyColors
                                     .gold,
-                            fontSize:
-                                11,
+                            fontSize: 11,
                             fontWeight:
-                                FontWeight
-                                    .w700,
+                                FontWeight.w700,
                           ),
                         );
                       },
                     ),
-                  const SizedBox(
-                    height: 5,
-                  ),
+                  const SizedBox(height: 5),
                   Row(
                     children: [
                       const Icon(
-                        Icons
-                            .people_alt_outlined,
+                        Icons.people_alt_outlined,
                         color:
-                            PartyColors
-                                .gold,
+                            PartyColors.gold,
                         size: 16,
                       ),
-                      const SizedBox(
-                        width: 4,
-                      ),
+                      const SizedBox(width: 4),
                       Text(
                         '$members/$capacity',
                         style:
                             const TextStyle(
                           color:
-                              Colors
-                                  .white70,
+                              Colors.white70,
                           fontSize: 10,
                           fontWeight:
-                              FontWeight
-                                  .w800,
+                              FontWeight.w800,
                         ),
                       ),
                       if (FirebaseAuth
@@ -6196,9 +6140,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                               .currentUser
                               ?.uid ==
                           ownerUid) ...[
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () async {
                             final result =
@@ -6206,32 +6148,27 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                     bool>(
                               context,
                               MaterialPageRoute(
-                                builder:
-                                    (_) =>
-                                        EditRoomPage(
+                                builder: (_) =>
+                                    EditRoomPage(
                                   roomId:
                                       widget.roomId,
-                                  data:
-                                      data,
+                                  data: data,
                                 ),
                               ),
                             );
 
-                            if (result ==
-                                    true &&
+                            if (result == true &&
                                 mounted) {
                               Navigator.pop(
                                 context,
                               );
                             }
                           },
-                          child:
-                              Container(
+                          child: Container(
                             padding:
                                 const EdgeInsets
                                     .symmetric(
-                              horizontal:
-                                  7,
+                              horizontal: 7,
                               vertical: 4,
                             ),
                             decoration:
@@ -6241,8 +6178,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                 0x33140A24,
                               ),
                               borderRadius:
-                                  BorderRadius
-                                      .circular(
+                                  BorderRadius.circular(
                                 8,
                               ),
                               border:
@@ -6252,32 +6188,25 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                         .gold,
                               ),
                             ),
-                            child:
-                                const Row(
+                            child: const Row(
                               mainAxisSize:
-                                  MainAxisSize
-                                      .min,
+                                  MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons
-                                      .edit_rounded,
+                                  Icons.edit_rounded,
                                   color:
                                       PartyColors
                                           .gold,
                                   size: 13,
                                 ),
-                                SizedBox(
-                                  width: 3,
-                                ),
+                                SizedBox(width: 3),
                                 Text(
                                   'Edit',
                                   style:
                                       TextStyle(
-                                    color:
-                                        Colors
-                                            .white70,
-                                    fontSize:
-                                        9,
+                                    color: Colors
+                                        .white70,
+                                    fontSize: 9,
                                     fontWeight:
                                         FontWeight
                                             .w800,
@@ -6293,14 +6222,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 ],
               ),
             ),
-            const SizedBox(
-              width: 5,
-            ),
+            const SizedBox(width: 5),
             _PartyRoomTopAction(
               icon:
                   Icons.people_alt_outlined,
-              label:
-                  '$members',
+              label: '$members',
               onTap: () =>
                   Navigator.push(
                 context,
@@ -6313,9 +6239,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 ),
               ),
             ),
-            const SizedBox(
-              width: 4,
-            ),
+            const SizedBox(width: 4),
             _PartyRoomTopAction(
               icon:
                   Icons.more_vert_rounded,
@@ -6325,9 +6249,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 ownerUid,
               ),
             ),
-            const SizedBox(
-              width: 4,
-            ),
+            const SizedBox(width: 4),
             _PartyRoomTopAction(
               icon:
                   Icons.close_rounded,
@@ -6344,18 +6266,19 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     );
   }
 
+  // ============================================================
+  // NEW MIC AREA
+  // ============================================================
+
   Widget _buildMicArea(
     dynamic value,
     Map<String, dynamic> roomData,
   ) {
     final capacity =
-        (value as num?)?.toInt() ??
-            15;
+        (value as num?)?.toInt() ?? 15;
 
     final layout =
-        _layoutForCapacity(
-      capacity,
-    );
+        _layoutForCapacity(capacity);
 
     final seatsRef =
         FirebaseFirestore.instance
@@ -6364,57 +6287,42 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
             .collection('micSeats');
 
     return StreamBuilder<
-        QuerySnapshot<
-            Map<String, dynamic>>>(
-      stream:
-          seatsRef.snapshots(),
-      builder:
-          (context, snapshot) {
+        QuerySnapshot<Map<String, dynamic>>>(
+      stream: seatsRef.snapshots(),
+      builder: (context, snapshot) {
         final seats =
             <int, Map<String, dynamic>>{};
 
         for (final doc
-            in snapshot.data?.docs ??
-                []) {
+            in snapshot.data?.docs ?? []) {
           final number =
               int.tryParse(doc.id);
 
           if (number != null) {
-            seats[number] =
-                doc.data();
+            seats[number] = doc.data();
           }
         }
 
-        _syncSoundLevelListeners(
-          seats,
-        );
-
         return Padding(
-          padding:
-              const EdgeInsets
-                  .fromLTRB(
+          padding: const EdgeInsets.fromLTRB(
             8,
             8,
             8,
             2,
           ),
           child: Column(
-            children:
-                _micLayoutRows(
+            children: _micLayoutRows(
               layout,
             ).map((row) {
               return Padding(
                 padding:
-                    const EdgeInsets
-                        .only(
+                    const EdgeInsets.only(
                   bottom: 8,
                 ),
                 child: Row(
                   mainAxisAlignment:
-                      MainAxisAlignment
-                          .center,
-                  children:
-                      row.map((number) {
+                      MainAxisAlignment.center,
+                  children: row.map((number) {
                     final seat =
                         seats[number];
 
@@ -6425,34 +6333,57 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
                     return Expanded(
                       child: Center(
-                        child:
-                            Padding(
+                        child: Padding(
                           padding:
                               const EdgeInsets
                                   .symmetric(
-                            horizontal:
-                                3,
+                            horizontal: 3,
                           ),
-                          child:
-                              _MicSeatWidget(
-                            number:
-                                number,
-                            seat:
-                                seat,
-                            isSpeaking:
-                                userId
-                                        .isNotEmpty &&
-                                    _speakingUsers
-                                        .contains(
-                                      userId,
-                                    ),
-                            onTap: () =>
-                                _showMicSeatOptions(
-                              number,
-                              seat,
-                              roomData,
-                            ),
-                          ),
+                          child: userId.isEmpty
+                              ? _MicSeatWidget(
+                                  number: number,
+                                  seat: seat,
+                                  isSpeaking: false,
+                                  onTap: () =>
+                                      _showMicSeatOptions(
+                                    number,
+                                    seat,
+                                    roomData,
+                                  ),
+                                )
+                              : StreamBuilder<double>(
+                                  stream:
+                                      ZegoUIKit()
+                                          .getSoundLevelStream(
+                                    userId,
+                                  ),
+                                  builder:
+                                      (context,
+                                          soundSnapshot) {
+                                    final level =
+                                        soundSnapshot
+                                                .data ??
+                                            0.0;
+
+                                    final isSpeaking =
+                                        level > 20;
+
+                                    return _MicSeatWidget(
+                                      number:
+                                          number,
+                                      seat:
+                                          seat,
+                                      isSpeaking:
+                                          isSpeaking,
+                                      onTap: () =>
+                                          _showMicSeatOptions(
+                                        number,
+                                        seat,
+                                        roomData,
+                                      ),
+                                    );
+                                  },
+                                ),
                         ),
                       ),
                     );
@@ -6466,62 +6397,13 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     );
   }
 
-  void _syncSoundLevelListeners(
-    Map<int, Map<String, dynamic>> seats,
-  ) {
-    final activeUserIds = <String>{};
-
-    for (final seat
-        in seats.values) {
-      final userId =
-          seat['uid']
-                  ?.toString() ??
-              '';
-
-      if (userId.isNotEmpty) {
-        activeUserIds.add(userId);
-        _listenToSoundLevel(
-          userId,
-        );
-      }
-    }
-
-    final removedUserIds =
-        _soundLevelSubscriptions
-            .keys
-            .where(
-              (userId) =>
-                  !activeUserIds
-                      .contains(
-                userId,
-              ),
-            )
-            .toList();
-
-    for (final userId
-        in removedUserIds) {
-      _soundLevelSubscriptions[
-              userId]
-          ?.cancel();
-
-      _soundLevelSubscriptions
-          .remove(userId);
-
-      _speakingUsers
-          .remove(userId);
-    }
-  }
-
-  List<List> _micLayoutRows(
+  List<List<int>> _micLayoutRows(
     int layout,
   ) {
     switch (layout) {
       case 1:
         return [
-          List.generate(
-            5,
-            (i) => i + 1,
-          ),
+          List.generate(5, (i) => i + 1),
         ];
 
       case 2:
@@ -6533,34 +6415,16 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
       case 3:
         return [
-          List.generate(
-            4,
-            (i) => i + 1,
-          ),
-          List.generate(
-            4,
-            (i) => i + 5,
-          ),
-          List.generate(
-            4,
-            (i) => i + 9,
-          ),
+          List.generate(4, (i) => i + 1),
+          List.generate(4, (i) => i + 5),
+          List.generate(4, (i) => i + 9),
         ];
 
       default:
         return [
-          List.generate(
-            5,
-            (i) => i + 1,
-          ),
-          List.generate(
-            5,
-            (i) => i + 6,
-          ),
-          List.generate(
-            5,
-            (i) => i + 11,
-          ),
+          List.generate(5, (i) => i + 1),
+          List.generate(5, (i) => i + 6),
+          List.generate(5, (i) => i + 11),
         ];
     }
   }
@@ -6577,8 +6441,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
     return Container(
       width: double.infinity,
-      margin:
-          const EdgeInsets.fromLTRB(
+      margin: const EdgeInsets.fromLTRB(
         10,
         2,
         10,
@@ -6589,14 +6452,10 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         horizontal: 11,
         vertical: 8,
       ),
-      decoration:
-          BoxDecoration(
-        color:
-            const Color(0x55100A18),
+      decoration: BoxDecoration(
+        color: const Color(0x55100A18),
         borderRadius:
-            BorderRadius.circular(
-          12,
-        ),
+            BorderRadius.circular(12),
         border: Border.all(
           color: PartyColors.purple
               .withOpacity(.45),
@@ -6629,8 +6488,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
     return Container(
       width: double.infinity,
-      margin:
-          const EdgeInsets.fromLTRB(
+      margin: const EdgeInsets.fromLTRB(
         10,
         2,
         10,
@@ -6638,17 +6496,14 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       ),
       padding:
           const EdgeInsets.all(8),
-      decoration:
-          BoxDecoration(
-        color:
-            const Color(0x440D0A12),
+      decoration: BoxDecoration(
+        color: const Color(0x440D0A12),
         borderRadius:
-            BorderRadius.circular(
-          13,
-        ),
+            BorderRadius.circular(13),
         border: Border.all(
-          color: PartyColors.purple
-              .withOpacity(0.4),
+          color:
+              PartyColors.purple
+                  .withOpacity(.4),
         ),
       ),
       child: StreamBuilder<
@@ -6669,10 +6524,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           }
 
           if (!snapshot.hasData ||
-              snapshot
-                  .data!
-                  .docs
-                  .isEmpty) {
+              snapshot.data!.docs.isEmpty) {
             return const Align(
               alignment:
                   Alignment.topLeft,
@@ -6724,14 +6576,12 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                         .toString();
 
                 final replyName =
-                    (data[
-                                'replyToName'] ??
+                    (data['replyToName'] ??
                             '')
                         .toString();
 
                 final replyText =
-                    (data[
-                                'replyToText'] ??
+                    (data['replyToText'] ??
                             '')
                         .toString();
 
@@ -6776,10 +6626,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                           child: photoURL
                                   .isEmpty
                               ? const Icon(
-                                  Icons
-                                      .person,
-                                  color: Colors
-                                      .white70,
+                                  Icons.person,
+                                  color:
+                                      Colors.white70,
                                   size: 18,
                                 )
                               : null,
@@ -6858,8 +6707,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                 style:
                                     const TextStyle(
                                   color:
-                                      Colors
-                                          .white70,
+                                      Colors.white70,
                                   fontSize:
                                       11,
                                   height:
@@ -6886,8 +6734,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         _replyToName;
 
     return Container(
-      padding:
-          const EdgeInsets.fromLTRB(
+      padding: const EdgeInsets.fromLTRB(
         9,
         6,
         9,
@@ -6932,8 +6779,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child:
-                        TextField(
+                    child: TextField(
                       controller:
                           messageController,
                       style:
@@ -6949,20 +6795,17 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                       decoration:
                           InputDecoration(
                         hintText:
-                            replyName !=
-                                    null
+                            replyName != null
                                 ? 'Reply to $replyName'
                                 : 'SMS',
                         hintStyle:
                             const TextStyle(
                           color:
-                              Colors
-                                  .white30,
+                              Colors.white30,
                           fontSize: 10,
                         ),
                         border:
-                            InputBorder
-                                .none,
+                            InputBorder.none,
                         isDense: true,
                       ),
                     ),
@@ -6979,11 +6822,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                     ),
                     icon:
                         const Icon(
-                      Icons
-                          .send_rounded,
+                      Icons.send_rounded,
                       color:
-                          PartyColors
-                              .gold,
+                          PartyColors.gold,
                       size: 17,
                     ),
                   ),
@@ -6991,25 +6832,24 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               ),
             ),
           ),
-          const SizedBox(
-            width: 5,
-          ),
+          const SizedBox(width: 5),
+
+          // ==================================================
+          // NEW MIC BUTTON
+          // ==================================================
+
           _RoomBottomAction(
             icon: _micOn
                 ? Icons.mic_rounded
-                : Icons
-                    .mic_off_rounded,
-            isGlowing: _micOn &&
-                _speakingUsers
-                    .contains(
-              FirebaseAuth
-                  .instance
-                  .currentUser
-                  ?.uid,
-            ),
+                : Icons.mic_off_rounded,
+            isGlowing: _micOn,
             onTap: () async {
               if (!_zegoJoined) {
                 await _joinZegoRoom();
+              }
+
+              if (!_zegoJoined) {
+                return;
               }
 
               await _setZegoMicrophone(
@@ -7017,16 +6857,19 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               );
             },
           ),
+
           _RoomBottomAction(
             icon:
                 Icons.music_note_rounded,
             onTap: () {},
           ),
+
           _RoomBottomAction(
             icon:
                 Icons.card_giftcard_rounded,
             onTap: () {},
           ),
+
           _RoomBottomAction(
             icon:
                 Icons.sports_esports_rounded,
@@ -7092,15 +6935,12 @@ class _MicLayoutPreview
             ),
           ],
         ),
-        const SizedBox(
-          height: 8,
-        ),
+        const SizedBox(height: 8),
         ...rows.map(
           (count) {
             return Padding(
               padding:
-                  const EdgeInsets
-                      .only(
+                  const EdgeInsets.only(
                 bottom: 5,
               ),
               child: Row(
@@ -7115,8 +6955,7 @@ class _MicLayoutPreview
                         number++;
 
                     return Expanded(
-                      child:
-                          Container(
+                      child: Container(
                         margin:
                             const EdgeInsets
                                 .symmetric(
@@ -7124,12 +6963,11 @@ class _MicLayoutPreview
                         ),
                         height: 25,
                         alignment:
-                            Alignment
-                                .center,
+                            Alignment.center,
                         decoration:
                             BoxDecoration(
-                          shape: BoxShape
-                              .circle,
+                          shape:
+                              BoxShape.circle,
                           color:
                               const Color(
                             0xFF21152F,
@@ -7149,8 +6987,7 @@ class _MicLayoutPreview
                               const TextStyle(
                             fontSize: 8,
                             fontWeight:
-                                FontWeight
-                                    .w800,
+                                FontWeight.w800,
                           ),
                         ),
                       ),
@@ -7168,7 +7005,7 @@ class _MicLayoutPreview
 
 
 // ============================================================
-// MIC SEAT WIDGET
+// NEW MIC SEAT WIDGET
 // ============================================================
 
 class _MicSeatWidget
@@ -7243,13 +7080,15 @@ class _MicSeatWidget
         mainAxisSize:
             MainAxisSize.min,
         children: [
-          Container(
+          AnimatedContainer(
+            duration:
+                const Duration(
+              milliseconds: 120,
+            ),
             width: 68,
             height: 68,
             padding:
-                const EdgeInsets.all(
-              3,
-            ),
+                const EdgeInsets.all(3),
             decoration:
                 BoxDecoration(
               shape:
@@ -7257,20 +7096,15 @@ class _MicSeatWidget
               gradient: occupied
                   ? const LinearGradient(
                       colors: [
-                        PartyColors
-                            .gold,
+                        PartyColors.gold,
                         PartyColors
                             .purpleBright,
                       ],
                     )
                   : const LinearGradient(
                       colors: [
-                        Color(
-                          0xFF32175C,
-                        ),
-                        Color(
-                          0xFF7A2CFF,
-                        ),
+                        Color(0xFF32175C),
+                        Color(0xFF7A2CFF),
                       ],
                     ),
               boxShadow: speaking
@@ -7278,25 +7112,19 @@ class _MicSeatWidget
                       BoxShadow(
                         color:
                             Colors.white,
-                        blurRadius:
-                            22,
-                        spreadRadius:
-                            7,
+                        blurRadius: 22,
+                        spreadRadius: 7,
                       ),
                     ]
                   : const [
                       BoxShadow(
                         color:
-                            Color(
-                          0x447A2CFF,
-                        ),
-                        blurRadius:
-                            12,
+                            Color(0x447A2CFF),
+                        blurRadius: 12,
                       ),
                     ],
             ),
-            child:
-                CircleAvatar(
+            child: CircleAvatar(
               backgroundColor:
                   const Color(
                 0xFF100C18,
@@ -7306,11 +7134,9 @@ class _MicSeatWidget
               child: occupied
                   ? (image == null
                       ? const Icon(
-                          Icons
-                              .person_rounded,
+                          Icons.person_rounded,
                           color:
-                              PartyColors
-                                  .gold,
+                              PartyColors.gold,
                           size: 27,
                         )
                       : null)
@@ -7321,17 +7147,13 @@ class _MicSeatWidget
                           : Icons
                               .add_rounded,
                       color: locked
-                          ? Colors
-                              .white38
-                          : PartyColors
-                              .gold,
+                          ? Colors.white38
+                          : PartyColors.gold,
                       size: 29,
                     ),
             ),
           ),
-          const SizedBox(
-            height: 3,
-          ),
+          const SizedBox(height: 3),
           Text(
             occupied
                 ? name
@@ -7412,9 +7234,7 @@ class _PartyRoomTopAction
               size: 18,
             ),
             if (label != null) ...[
-              const SizedBox(
-                width: 3,
-              ),
+              const SizedBox(width: 3),
               Text(
                 label!,
                 style:
@@ -7433,6 +7253,8 @@ class _PartyRoomTopAction
     );
   }
 }
+
+
 /* ============================================================
        MAIN PAGE
        ============================================================ */
