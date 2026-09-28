@@ -6055,6 +6055,8 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     );
   }
 
+    
+
   Widget _buildRoomHeader({
     required String title,
     required int members,
@@ -6078,8 +6080,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
         ),
         decoration: BoxDecoration(
           color: const Color(0xDD0D0915),
-          borderRadius:
-              BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: PartyColors.purple,
             width: 1.2,
@@ -6098,53 +6099,40 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               width: 78,
               height: 78,
               decoration: BoxDecoration(
-                color:
-                    const Color(0xFF171126),
-                borderRadius:
-                    BorderRadius.circular(18),
+                color: const Color(0xFF171126),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: PartyColors.gold,
                   width: 1.5,
                 ),
               ),
-              child:
-                  _roomImageProvider(data) != null
-                      ? ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(
-                            17,
-                          ),
-                          child: Image(
-                            image:
-                                _roomImageProvider(
-                              data,
-                            )!,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.image_outlined,
-                          color:
-                              PartyColors.gold,
-                          size: 36,
-                        ),
+              child: _roomImageProvider(data) != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(17),
+                      child: Image(
+                        image: _roomImageProvider(data)!,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.image_outlined,
+                      color: PartyColors.gold,
+                      size: 36,
+                    ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
                     maxLines: 1,
-                    overflow:
-                        TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 19,
-                      fontWeight:
-                          FontWeight.w900,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 5),
@@ -6152,49 +6140,36 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                     const Text(
                       'ID: ------',
                       style: TextStyle(
-                        color:
-                            PartyColors.gold,
+                        color: PartyColors.gold,
                         fontSize: 11,
-                        fontWeight:
-                            FontWeight.w700,
+                        fontWeight: FontWeight.w700,
                       ),
                     )
                   else
                     StreamBuilder<
-                        DocumentSnapshot<
-                            Map<String,
-                                dynamic>>>(
-                      stream:
-                          FirebaseFirestore
-                              .instance
-                              .collection('users')
-                              .doc(ownerUid)
-                              .snapshots(),
-                      builder:
-                          (context, snapshot) {
-                        final userData =
-                            snapshot.data?.data();
+                        DocumentSnapshot<Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(ownerUid)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        final userData = snapshot.data?.data();
 
                         final userId =
-                            userData?['userId']
-                                    ?.toString() ??
+                            userData?['userId']?.toString() ??
                                 '------';
 
                         return Text(
                           'ID: $userId',
-                          style:
-                              const TextStyle(
-                            color:
-                                PartyColors
-                                    .gold,
+                          style: const TextStyle(
+                            color: PartyColors.gold,
                             fontSize: 11,
-                            fontWeight:
-                                FontWeight.w700,
+                            fontWeight: FontWeight.w700,
                           ),
                         );
                       },
                     ),
-                                    const SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Row(
                     children: [
                       _PartyRoomTopAction(
@@ -6231,11 +6206,13 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
-  }
+  } 
+
+    
 
   Widget _buildMicArea(
     dynamic value,
