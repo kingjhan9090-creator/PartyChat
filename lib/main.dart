@@ -7065,37 +7065,29 @@ void _showGiftPanel() {
                                         PartyColors
                                             .gold,
                                     fontSize: 9,
-                                    fontWeight:
-                                        FontWeight
-                                            .w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
+                                    fontWeight:.w700,  
+                              ),  
+                            ),  
+                          ],  
+                        ),  
+                      ],  
+                    ),  
+                  ),  
+                );  
+              },  
+            ),  
+          ),  
+        ],  
+      ),  
+    ),  
+  );  
+},  
+                                                                               
 }
-
-         
-    
-  
-
 
 // ============================================================
 // MIC LAYOUT PREVIEW
 // ============================================================
-
 class _MicLayoutPreview
     extends StatelessWidget {
   final int layout;
