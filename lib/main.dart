@@ -6873,12 +6873,9 @@ void _showGiftPanel() {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor:
-        const Color(0xFF08070F),
-    shape:
-        const RoundedRectangleBorder(
-      borderRadius:
-          BorderRadius.vertical(
+    backgroundColor: const Color(0xFF08070F),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
         top: Radius.circular(24),
       ),
     ),
@@ -6886,41 +6883,28 @@ void _showGiftPanel() {
       return SafeArea(
         child: SizedBox(
           height:
-              MediaQuery.of(sheetContext)
-                      .size
-                      .height *
-                  0.82,
+              MediaQuery.of(sheetContext).size.height * 0.82,
           child: Column(
             children: [
               const SizedBox(height: 10),
-
               Container(
                 width: 44,
                 height: 4,
-                decoration:
-                    BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.white24,
-                  borderRadius:
-                      BorderRadius.circular(
-                    10,
-                  ),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-
               const SizedBox(height: 12),
-
               const Text(
                 'Gifts',
                 style: TextStyle(
                   color: PartyColors.gold,
                   fontSize: 22,
-                  fontWeight:
-                      FontWeight.w800,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-
               const SizedBox(height: 4),
-
               const Text(
                 'Send gifts • Show your love • Make it special',
                 style: TextStyle(
@@ -6928,21 +6912,16 @@ void _showGiftPanel() {
                   fontSize: 11,
                 ),
               ),
-
               const SizedBox(height: 14),
-
               Expanded(
-                child:
-                    GridView.builder(
-                  padding:
-                      const EdgeInsets.fromLTRB(
+                child: GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(
                     12,
                     4,
                     12,
                     20,
                   ),
-                  itemCount:
-                      gifts.length,
+                  itemCount: gifts.length,
                   gridDelegate:
                       const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
@@ -6950,24 +6929,15 @@ void _showGiftPanel() {
                     mainAxisSpacing: 10,
                     childAspectRatio: 0.72,
                   ),
-                  itemBuilder:
-                      (context, index) {
-                    final gift =
-                        gifts[index];
+                  itemBuilder: (context, index) {
+                    final gift = gifts[index];
 
                     return InkWell(
-                      borderRadius:
-                          BorderRadius.circular(
-                        14,
-                      ),
+                      borderRadius: BorderRadius.circular(14),
                       onTap: () {
-                        Navigator.pop(
-                          sheetContext,
-                        );
+                        Navigator.pop(sheetContext);
 
-                        ScaffoldMessenger
-                                .of(context)
-                            .showSnackBar(
+                        ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
                               '${gift[1]} selected • ${gift[2]} coins',
@@ -6976,114 +6946,71 @@ void _showGiftPanel() {
                         );
                       },
                       child: Container(
-                        padding:
-                            const EdgeInsets
-                                .all(7),
-                        decoration:
-                            BoxDecoration(
-                          color:
-                              const Color(
-                            0xFF110D1D,
-                          ),
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            14,
-                          ),
-                          border:
-                              Border.all(
-                            color:
-                                PartyColors
-                                    .gold
-                                    .withOpacity(
-                              0.45,
-                            ),
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF110D1D),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: PartyColors.gold.withOpacity(0.45),
                           ),
                         ),
                         child: Column(
-                          mainAxisAlignment:
-                              MainAxisAlignment
-                                  .center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               gift[0],
-                              style:
-                                  const TextStyle(
+                              style: const TextStyle(
                                 fontSize: 32,
                               ),
                             ),
-
-                            const SizedBox(
-                              height: 5,
-                            ),
-
+                            const SizedBox(height: 5),
                             Text(
                               gift[1],
                               maxLines: 2,
-                              textAlign:
-                                  TextAlign
-                                      .center,
-                              overflow:
-                                  TextOverflow
-                                      .ellipsis,
-                              style:
-                                  const TextStyle(
-                                color:
-                                    Colors.white,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
                                 fontSize: 9,
-                                fontWeight:
-                                    FontWeight
-                                        .w600,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-
-                            const SizedBox(
-                              height: 4,
-                            ),
-
+                            const SizedBox(height: 4),
                             Row(
                               mainAxisAlignment:
-                                  MainAxisAlignment
-                                      .center,
+                                  MainAxisAlignment.center,
                               children: [
                                 const Icon(
-                                  Icons
-                                      .monetization_on_rounded,
-                                  color:
-                                      PartyColors
-                                          .gold,
+                                  Icons.monetization_on_rounded,
+                                  color: PartyColors.gold,
                                   size: 13,
                                 ),
-                                const SizedBox(
-                                  width: 2,
-                                ),
+                                const SizedBox(width: 2),
                                 Text(
                                   gift[2],
-                                  style:
-                                      const TextStyle(
-                                    color:
-                                        PartyColors
-                                            .gold,
+                                  style: const TextStyle(
+                                    color: PartyColors.gold,
                                     fontSize: 9,
-                                    fontWeight:.w700,  
-                              ),  
-                            ),  
-                          ],  
-                        ),  
-                      ],  
-                    ),  
-                  ),  
-                );  
-              },  
-            ),  
-          ),  
-        ],  
-      ),  
-    ),  
-  );  
-},  
-                                                                               
-}
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+} 
+                                
 
 // ============================================================
 // MIC LAYOUT PREVIEW
