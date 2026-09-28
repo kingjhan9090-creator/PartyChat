@@ -6194,39 +6194,44 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                         );
                       },
                     ),
-                  const SizedBox(height: 5),
-Row(
-  children: [
-    _PartyRoomTopAction(
-      icon: Icons.people_alt_outlined,
-      label: '$members',
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => JoinedUsersPage(
-            roomId: widget.roomId,
-          ),
-        ),
-      ),
-    ),
-    const SizedBox(width: 4),
-    _PartyRoomTopAction(
-      icon: Icons.more_vert_rounded,
-      onTap: () => _showRoomMenu(
-        data,
-        ownerUid,
-      ),
-    ),
-    const SizedBox(width: 4),
-    _PartyRoomTopAction(
-      icon: Icons.close_rounded,
-      onTap: leaving
-          ? null
-          : () => _showLeaveMenu(
-                data,
+                                    const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      _PartyRoomTopAction(
+                        icon: Icons.people_alt_outlined,
+                        label: '$members',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => JoinedUsersPage(
+                              roomId: widget.roomId,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      _PartyRoomTopAction(
+                        icon: Icons.more_vert_rounded,
+                        onTap: () => _showRoomMenu(
+                          data,
+                          ownerUid,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      _PartyRoomTopAction(
+                        icon: Icons.close_rounded,
+                        onTap: leaving
+                            ? null
+                            : () => _showLeaveMenu(
+                                  data,
+                                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-    ),
-  ],
+            ),
+          ),
         ),
       ),
     );
