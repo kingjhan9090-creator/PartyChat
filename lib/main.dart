@@ -6195,12 +6195,14 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                       },
                     ),
                   const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      const Icon(
-                        
-            const SizedBox(width: 5),
-            _PartyRoomTopAction(
+Row(
+  children: [
+    const Icon(
+      Icons.people_alt_outlined,
+      color: PartyColors.gold,
+      size: 17,
+    ),
+    const SizedBox(width: 5),
               icon:
                   Icons.people_alt_outlined,
               label: '$members',
