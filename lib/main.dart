@@ -4032,7 +4032,9 @@ Widget _glowLayer(double offset) {
     ),
   );
 }
-  
+} 
+
+
 /* ============================================================
    EDIT ROOM PAGE
    ============================================================ */
@@ -6196,110 +6198,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                   Row(
                     children: [
                       const Icon(
-                        Icons.people_alt_outlined,
-                        color:
-                            PartyColors.gold,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$members/$capacity',
-                        style:
-                            const TextStyle(
-                          color:
-                              Colors.white70,
-                          fontSize: 10,
-                          fontWeight:
-                              FontWeight.w800,
-                        ),
-                      ),
-                      if (FirebaseAuth
-                              .instance
-                              .currentUser
-                              ?.uid ==
-                          ownerUid) ...[
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () async {
-                            final result =
-                                await Navigator.push<
-                                    bool>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    EditRoomPage(
-                                  roomId:
-                                      widget.roomId,
-                                  data: data,
-                                ),
-                              ),
-                            );
-
-                            if (result == true &&
-                                mounted) {
-                              Navigator.pop(
-                                context,
-                              );
-                            }
-                          },
-                          child: Container(
-                            padding:
-                                const EdgeInsets
-                                    .symmetric(
-                              horizontal: 7,
-                              vertical: 4,
-                            ),
-                            decoration:
-                                BoxDecoration(
-                              color:
-                                  const Color(
-                                0x33140A24,
-                              ),
-                              borderRadius:
-                                  BorderRadius.circular(
-                                8,
-                              ),
-                              border:
-                                  Border.all(
-                                color:
-                                    PartyColors
-                                        .gold,
-                              ),
-                            ),
-                            child: const Row(
-                              mainAxisSize:
-                                  MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.edit_rounded,
-                                  color:
-                                      PartyColors
-                                          .gold,
-                                  size: 13,
-                                ),
-                                SizedBox(width: 3),
-                                Text(
-                                  'Edit',
-                                  style:
-                                      TextStyle(
-                                    color: Colors
-                                        .white70,
-                                    fontSize: 9,
-                                    fontWeight:
-                                        FontWeight
-                                            .w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                        
             const SizedBox(width: 5),
             _PartyRoomTopAction(
               icon:
