@@ -10667,13 +10667,16 @@ class _PartyRoomTopAction
             },
           ),
         );
-      }
     }
-
+    }
+    }
+    
     /* ============================================================
-   HELP CENTER
-   ============================================================ */
+       HELP CENTER
+       ============================================================ */
 
+class HelpCenterPage extends StatefulWidget {
+  const HelpCenterPage({super.key});
 class HelpCenterPage extends StatefulWidget {
   const HelpCenterPage({super.key});
 
