@@ -3950,75 +3950,88 @@ class _RoomBottomActionState extends State<_RoomBottomAction>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: widget.onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 6,
-        ),
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return SizedBox(
-              width: 43,
-              height: 43,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  if (widget.isGlowing) ...[
-                    _glowLayer(0),
-                    _glowLayer(0.33),
-                    _glowLayer(0.66),
-                  ],
+Widget build(BuildContext context) {
+  final isGiftButton =
+      widget.icon == Icons.card_giftcard_rounded;
+
+  return InkWell(
+    onTap: widget.onTap,
+    borderRadius: BorderRadius.circular(12),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 6,
+      ),
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return SizedBox(
+            width: 43,
+            height: 43,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (widget.isGlowing) ...[
+                  _glowLayer(0),
+                  _glowLayer(0.33),
+                  _glowLayer(0.66),
+                ],
+
+                if (isGiftButton)
+                  const Text(
+                    '🎁',
+                    style: TextStyle(
+                      fontSize: 30,
+                    ),
+                  )
+                else
                   Icon(
                     widget.icon,
                     color: PartyColors.gold,
                     size: 27,
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+              ],
+            ),
+          );
+        },
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _glowLayer(double offset) {
-    final progress =
-        (_controller.value + offset) % 1.0;
+Widget _glowLayer(double offset) {
+  final progress =
+      (_controller.value + offset) % 1.0;
 
-    final size = 28.0 + (progress * 18.0);
-    final opacity = 0.45 * (1.0 - progress);
+  final size =
+      28.0 + (progress * 18.0);
 
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
+  final opacity =
+      0.45 * (1.0 - progress);
+
+  return Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      border: Border.all(
+        color: Colors.white.withValues(
+          alpha: opacity,
+        ),
+        width: 1.4,
+      ),
+      boxShadow: [
+        BoxShadow(
           color: Colors.white.withValues(
             alpha: opacity,
           ),
-          width: 1.4,
+          blurRadius: 9,
+          spreadRadius: 2,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withValues(
-              alpha: opacity,
-            ),
-            blurRadius: 9,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }
-
   
 /* ============================================================
    EDIT ROOM PAGE
@@ -6793,145 +6806,421 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     );
   }
 
-  Widget _buildBottomBar() {
-    final replyName =
-        _replyToName;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        9,
-        6,
-        9,
-        8,
-      ),
-      decoration:
-          const BoxDecoration(
-        color: Color(0xEE0D0915),
-        border: Border(
-          top: BorderSide(
-            color:
-                PartyColors.purple,
-            width: 0.8,
-          ),
+Widget _buildBottomBar() {
+  final replyName = _replyToName;
+
+  return Container(
+    padding: const EdgeInsets.fromLTRB(
+      9,
+      6,
+      9,
+      8,
+    ),
+    decoration: const BoxDecoration(
+      color: Color(0xEE0D0915),
+      border: Border(
+        top: BorderSide(
+          color: PartyColors.purple,
+          width: 0.8,
         ),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 36,
-              padding:
-                  const EdgeInsets
-                      .symmetric(
-                horizontal: 11,
-              ),
-              decoration:
-                  BoxDecoration(
-                color:
-                    const Color(
-                  0xFF08070F,
-                ),
-                borderRadius:
-                    BorderRadius.circular(
-                  13,
-                ),
-                border: Border.all(
-                  color:
-                      PartyColors.purple,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller:
-                          messageController,
-                      style:
-                          const TextStyle(
-                        color:
-                            Colors.white,
-                        fontSize: 11,
-                      ),
-                      onSubmitted:
-                          (_) {
-                        _sendRoomMessage();
-                      },
-                      decoration:
-                          InputDecoration(
-                        hintText:
-                            replyName != null
-                                ? 'Reply to $replyName'
-                                : 'SMS',
-                        hintStyle:
-                            const TextStyle(
-                          color:
-                              Colors.white30,
-                          fontSize: 10,
-                        ),
-                        border:
-                            InputBorder.none,
-                        isDense: true,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed:
-                        _sendRoomMessage,
-                    padding:
-                        EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(
-                      minWidth: 24,
-                      minHeight: 24,
-                    ),
-                    icon:
-                        const Icon(
-                      Icons.send_rounded,
-                      color:
-                          PartyColors.gold,
-                      size: 17,
-                    ),
-                  ),
-                ],
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 36,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 11,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFF08070F),
+              borderRadius:
+                  BorderRadius.circular(13),
+              border: Border.all(
+                color: PartyColors.purple,
               ),
             ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: messageController,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                    ),
+                    onSubmitted: (_) {
+                      _sendRoomMessage();
+                    },
+                    decoration: InputDecoration(
+                      hintText: replyName != null
+                          ? 'Reply to $replyName'
+                          : 'SMS',
+                      hintStyle: const TextStyle(
+                        color: Colors.white30,
+                        fontSize: 10,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: _sendRoomMessage,
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(
+                    minWidth: 24,
+                    minHeight: 24,
+                  ),
+                  icon: const Icon(
+                    Icons.send_rounded,
+                    color: PartyColors.gold,
+                    size: 17,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 5),
+        ),
 
-          // Bottom microphone has no speaking glow.
-          _RoomBottomAction(
-            icon: _micOn
-                ? Icons.mic_rounded
-                : Icons.mic_off_rounded,
-            isGlowing: false,
-            onTap: () async {
-              if (!_zegoJoined) {
-                await _joinZegoRoom();
-              }
+        const SizedBox(width: 5),
 
-              if (!_zegoJoined) {
-                return;
-              }
+        // Bottom microphone has no speaking glow.
+        _RoomBottomAction(
+          icon: _micOn
+              ? Icons.mic_rounded
+              : Icons.mic_off_rounded,
+          isGlowing: false,
+          onTap: () async {
+            if (!_zegoJoined) {
+              await _joinZegoRoom();
+            }
 
-              await _setZegoMicrophone(
-                !_micOn,
-              );
-            },
+            if (!_zegoJoined) {
+              return;
+            }
+
+            await _setZegoMicrophone(
+              !_micOn,
+            );
+          },
+        ),
+
+        _RoomBottomAction(
+          icon: Icons.music_note_rounded,
+          onTap: () {},
+        ),
+
+        _RoomBottomAction(
+          icon: Icons.card_giftcard_rounded,
+          onTap: () {
+            _showGiftPanel();
+          },
+        ),
+
+        _RoomBottomAction(
+          icon: Icons.sports_esports_rounded,
+          onTap: () {},
+        ),
+      ],
+    ),
+  );
+}
+
+void _showGiftPanel() {
+  final gifts = [
+    ['🌹', 'Rose Bouquet', '100'],
+    ['💗', 'Heart Balloon', '100'],
+    ['💌', 'Love Letter', '100'],
+    ['🧸', 'Teddy Bear', '100'],
+    ['💍', 'Diamond Ring', '100'],
+
+    ['🪷', 'Crystal Flower', '50'],
+    ['🎵', 'Music Note', '50'],
+    ['⭐', 'Star Light', '50'],
+    ['🦋', 'Butterfly', '50'],
+    ['👑', 'Sparkle Crown', '50'],
+
+    ['🔥', 'Glowing Phoenix', '15000'],
+    ['👑', 'Royal Crown', '15000'],
+    ['⌚', 'Luxury Watch', '15000'],
+    ['🐉', 'Golden Dragon', '20000'],
+    ['🦢', 'Crystal Swan', '20000'],
+    ['🪽', 'Neon Wings', '20000'],
+    ['🔮', 'Galaxy Orb', '30000'],
+    ['⚔️', 'Magic Sword', '30000'],
+    ['🏎️', 'Luxury Car', '30000'],
+    ['🏎️', 'Ferrari Supercar', '30000'],
+
+    ['🐘', 'Royal Elephant', '40000'],
+    ['💎', 'Diamond Necklace', '40000'],
+    ['🛥️', 'Golden Yacht', '40000'],
+    ['🐉', 'Fire Dragon', '40000'],
+    ['🌳', 'Money Tree', '40000'],
+    ['🏰', 'Ice Castle', '40000'],
+    ['🚀', 'Space Shuttle', '40000'],
+    ['🌸', 'Golden Lotus', '40000'],
+    ['🎹', 'Crystal Piano', '40000'],
+    ['🪑', 'Billionaire Chair', '40000'],
+
+    ['👑', 'Diamond Tiara', '50000'],
+    ['✈️', 'Luxury Jet', '50000'],
+    ['🚢', 'Ocean Cruiser', '50000'],
+    ['✨', 'Aurora Light', '60000'],
+    ['🐅', 'Golden Tiger', '60000'],
+    ['🏝️', 'Treasure Island', '60000'],
+    ['🥚', 'Dragon Egg', '60000'],
+    ['🏰', 'Moon Palace', '60000'],
+    ['🪽', 'Silver Wings', '60000'],
+    ['🌹', 'Crystal Rose', '60000'],
+
+    ['🎡', 'Golden Ferris Wheel', '70000'],
+    ['🏰', 'Sky Castle', '70000'],
+    ['🐉', 'Red Dragon', '70000'],
+    ['🎸', 'Diamond Guitar', '80000'],
+    ['🦄', 'Majestic Horse', '80000'],
+    ['🔫', 'Crystal Cannon', '80000'],
+    ['🐅', 'Neon Tiger', '90000'],
+    ['🏎️', 'Rocket Car', '90000'],
+    ['🚀', 'Starship', '90000'],
+    ['🦋', 'Celestial Wings', '90000'],
+
+    ['👑', 'Golden Throne', '100000'],
+    ['🏰', 'Diamond Castle', '100000'],
+    ['🔥', 'Phoenix Rebirth', '200000'],
+    ['🐉', 'Crystal Dragon', '200000'],
+    ['🚤', 'Love Boat', '300000'],
+    ['🦄', 'Royal Unicorn', '300000'],
+    ['⏳', 'Time Machine', '400000'],
+    ['🐉', 'Galaxy Dragon', '400000'],
+    ['👼', 'Golden Angel', '500000'],
+    ['👑', 'Infinity Crown', '600000'],
+  ];
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor:
+        const Color(0xFF08070F),
+    shape:
+        const RoundedRectangleBorder(
+      borderRadius:
+          BorderRadius.vertical(
+        top: Radius.circular(24),
+      ),
+    ),
+    builder: (sheetContext) {
+      return SafeArea(
+        child: SizedBox(
+          height:
+              MediaQuery.of(sheetContext)
+                      .size
+                      .height *
+                  0.82,
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+
+              Container(
+                width: 44,
+                height: 4,
+                decoration:
+                    BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius:
+                      BorderRadius.circular(
+                    10,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              const Text(
+                'Gifts',
+                style: TextStyle(
+                  color: PartyColors.gold,
+                  fontSize: 22,
+                  fontWeight:
+                      FontWeight.w800,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              const Text(
+                'Send gifts • Show your love • Make it special',
+                style: TextStyle(
+                  color: Colors.white60,
+                  fontSize: 11,
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              Expanded(
+                child:
+                    GridView.builder(
+                  padding:
+                      const EdgeInsets.fromLTRB(
+                    12,
+                    4,
+                    12,
+                    20,
+                  ),
+                  itemCount:
+                      gifts.length,
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.72,
+                  ),
+                  itemBuilder:
+                      (context, index) {
+                    final gift =
+                        gifts[index];
+
+                    return InkWell(
+                      borderRadius:
+                          BorderRadius.circular(
+                        14,
+                      ),
+                      onTap: () {
+                        Navigator.pop(
+                          sheetContext,
+                        );
+
+                        ScaffoldMessenger
+                                .of(context)
+                            .showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${gift[1]} selected • ${gift[2]} coins',
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding:
+                            const EdgeInsets
+                                .all(7),
+                        decoration:
+                            BoxDecoration(
+                          color:
+                              const Color(
+                            0xFF110D1D,
+                          ),
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            14,
+                          ),
+                          border:
+                              Border.all(
+                            color:
+                                PartyColors
+                                    .gold
+                                    .withOpacity(
+                              0.45,
+                            ),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment:
+                              MainAxisAlignment
+                                  .center,
+                          children: [
+                            Text(
+                              gift[0],
+                              style:
+                                  const TextStyle(
+                                fontSize: 32,
+                              ),
+                            ),
+
+                            const SizedBox(
+                              height: 5,
+                            ),
+
+                            Text(
+                              gift[1],
+                              maxLines: 2,
+                              textAlign:
+                                  TextAlign
+                                      .center,
+                              overflow:
+                                  TextOverflow
+                                      .ellipsis,
+                              style:
+                                  const TextStyle(
+                                color:
+                                    Colors.white,
+                                fontSize: 9,
+                                fontWeight:
+                                    FontWeight
+                                        .w600,
+                              ),
+                            ),
+
+                            const SizedBox(
+                              height: 4,
+                            ),
+
+                            Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment
+                                      .center,
+                              children: [
+                                const Icon(
+                                  Icons
+                                      .monetization_on_rounded,
+                                  color:
+                                      PartyColors
+                                          .gold,
+                                  size: 13,
+                                ),
+                                const SizedBox(
+                                  width: 2,
+                                ),
+                                Text(
+                                  gift[2],
+                                  style:
+                                      const TextStyle(
+                                    color:
+                                        PartyColors
+                                            .gold,
+                                    fontSize: 9,
+                                    fontWeight:
+                                        FontWeight
+                                            .w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
+        ),
+      );
+    },
+  );
+}
 
-          _RoomBottomAction(
-            icon:
-                Icons.music_note_rounded,
-            onTap: () {},
-          ),
 
-          _RoomBottomAction(
-  icon: Icons.card_giftcard_rounded,
-  onTap: () {
-    _showGiftPanel();
-  },
-),
 
+
+    
           _RoomBottomAction(
             icon:
                 Icons.sports_esports_rounded,
