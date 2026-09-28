@@ -4567,7 +4567,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
               ? user.displayName!.trim()
               : 'PartyChat User';
 
-      await ZegoUIKit().login(
+      ZegoUIKit().login(
         user.uid,
         userName,
       );
@@ -4586,7 +4586,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           _micOn = false;
         });
 
-        await ZegoUIKit().turnMicrophoneOn(false);
+         ZegoUIKit().turnMicrophoneOn(false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -4617,7 +4617,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
 
     try {
-      await ZegoUIKit().turnMicrophoneOn(
+      ZegoUIKit().turnMicrophoneOn(
         enabled,
       );
 
@@ -4650,9 +4650,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   Future<void> _leaveZegoRoom() async {
     try {
       if (_zegoJoined) {
-        await ZegoUIKit().turnMicrophoneOn(false);
+        ZegoUIKit().turnMicrophoneOn(false);
         await ZegoUIKit().leaveRoom();
-        await ZegoUIKit().logout();
+        ZegoUIKit().logout();
       }
     } catch (_) {}
 
