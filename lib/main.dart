@@ -10671,19 +10671,16 @@ class _PartyRoomTopAction
     }
     }
     
-    /* ============================================================
-       HELP CENTER
-       ============================================================ */
+/* ============================================================
+   HELP CENTER
+   ============================================================ */
 
-class HelpCenterPage extends StatefulWidget {
-  const HelpCenterPage({super.key});
 class HelpCenterPage extends StatefulWidget {
   const HelpCenterPage({super.key});
 
   @override
   State<HelpCenterPage> createState() => _HelpCenterPageState();
 }
-
 class _HelpCenterPageState extends State<HelpCenterPage> {
   final searchController = TextEditingController();
 
