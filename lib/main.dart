@@ -4516,6 +4516,7 @@ class _EditRoomPageState extends State<EditRoomPage> {
 /* ============================================================
    PARTY ROOM PAGE
    ============================================================ */
+                        
 class PartyRoomPage extends StatefulWidget {
   final String roomId;
   final String title;
@@ -4538,10 +4539,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   String? _replyToText;
 
   bool leaving = false;
-
-  // ============================================================
-  // NEW ZEGO MIC + VOICE STATE
-  // ============================================================
 
   bool _zegoJoined = false;
   bool _micOn = false;
@@ -4586,7 +4583,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           _micOn = false;
         });
 
-         ZegoUIKit().turnMicrophoneOn(false);
+        ZegoUIKit().turnMicrophoneOn(false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -4611,7 +4608,50 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-  Future<void> _setZegoMicrophone(bool enabled) async {
+  Future<void> _updateMySeatMicState(
+    bool enabled,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return;
+    }
+
+    try {
+      final seatsSnapshot =
+          await FirebaseFirestore.instance
+              .collection('rooms')
+              .doc(widget.roomId)
+              .collection('micSeats')
+              .where(
+                'uid',
+                isEqualTo: user.uid,
+              )
+              .get();
+
+      if (seatsSnapshot.docs.isEmpty) {
+        return;
+      }
+
+      final batch =
+          FirebaseFirestore.instance.batch();
+
+      for (final doc in seatsSnapshot.docs) {
+        batch.update(
+          doc.reference,
+          {
+            'micOn': enabled,
+          },
+        );
+      }
+
+      await batch.commit();
+    } catch (_) {}
+  }
+
+  Future<void> _setZegoMicrophone(
+    bool enabled,
+  ) async {
     if (!_zegoJoined) {
       return;
     }
@@ -4628,6 +4668,10 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       setState(() {
         _micOn = enabled;
       });
+
+      await _updateMySeatMicState(
+        enabled,
+      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -4636,6 +4680,8 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       setState(() {
         _micOn = false;
       });
+
+      await _updateMySeatMicState(false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -4651,7 +4697,11 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     try {
       if (_zegoJoined) {
         ZegoUIKit().turnMicrophoneOn(false);
+
+        await _updateMySeatMicState(false);
+
         await ZegoUIKit().leaveRoom();
+
         ZegoUIKit().logout();
       }
     } catch (_) {}
@@ -4659,10 +4709,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     _zegoJoined = false;
     _micOn = false;
   }
-
-  // ============================================================
-  // ROOM MESSAGE
-  // ============================================================
 
   Future<void> _sendRoomMessage() async {
     final user =
@@ -4752,10 +4798,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       );
     }
   }
-
-  // ============================================================
-  // FIRESTORE ROOM JOIN
-  // ============================================================
 
   Future<void> _joinCurrentRoom() async {
     final user =
@@ -5113,7 +5155,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     }
   }
 
-      Future<String> _currentRole(
+  Future<String> _currentRole(
     String ownerUid,
   ) async {
     final user =
@@ -5652,6 +5694,14 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       }
 
       try {
+        if (!_zegoJoined) {
+          await _joinZegoRoom();
+        }
+
+        if (!_zegoJoined) {
+          return;
+        }
+
         final oldSeats =
             await FirebaseFirestore.instance
                 .collection('rooms')
@@ -5702,6 +5752,7 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                     '',
             'role': role,
             'onSeat': true,
+            'micOn': true,
             'locked': locked,
             'joinedAt':
                 FieldValue.serverTimestamp(),
@@ -5711,8 +5762,13 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
 
         await batch.commit();
 
-        // Start actual voice transmission.
-        await _setZegoMicrophone(true);
+        ZegoUIKit().turnMicrophoneOn(true);
+
+        if (mounted) {
+          setState(() {
+            _micOn = true;
+          });
+        }
       } catch (e) {
         if (!mounted) {
           return;
@@ -5740,9 +5796,23 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     } else if (choice == 'leave') {
       if (isManager ||
           seatUid == user.uid) {
+        await seatRef.set(
+          {
+            'micOn': false,
+            'onSeat': false,
+          },
+          SetOptions(merge: true),
+        );
+
         await seatRef.delete();
 
-        await _setZegoMicrophone(false);
+        ZegoUIKit().turnMicrophoneOn(false);
+
+        if (mounted) {
+          setState(() {
+            _micOn = false;
+          });
+        }
       }
     } else if (choice == 'invite') {
       if (!isManager) {
@@ -5875,22 +5945,17 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
       ),
     );
   }
-                
-    @override
+
+  @override
   void initState() {
     super.initState();
-
-    // Join ZEGO once when the room opens.
     _joinZegoRoom();
   }
 
   @override
   void dispose() {
-    // Do not leave an active microphone behind.
     _leaveZegoRoom();
-
     messageController.dispose();
-
     super.dispose();
   }
 
@@ -6266,10 +6331,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
     );
   }
 
-  // ============================================================
-  // NEW MIC AREA
-  // ============================================================
-
   Widget _buildMicArea(
     dynamic value,
     Map<String, dynamic> roomData,
@@ -6331,6 +6392,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                 ?.toString() ??
                             '';
 
+                    final micOn =
+                        seat?['micOn'] == true;
+
                     return Expanded(
                       child: Center(
                         child: Padding(
@@ -6341,6 +6405,9 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                           ),
                           child: userId.isEmpty
                               ? _MicSeatWidget(
+                                  key: ValueKey(
+                                    'empty-$number-${seat?['locked'] == true}',
+                                  ),
                                   number: number,
                                   seat: seat,
                                   isSpeaking: false,
@@ -6366,15 +6433,21 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
                                             0.0;
 
                                     final isSpeaking =
+                                        micOn &&
                                         level > 20;
 
                                     return _MicSeatWidget(
+                                      key: ValueKey(
+                                        '$number-$userId',
+                                      ),
                                       number:
                                           number,
                                       seat:
                                           seat,
                                       isSpeaking:
                                           isSpeaking,
+                                      soundLevel:
+                                          level,
                                       onTap: () =>
                                           _showMicSeatOptions(
                                         number,
@@ -6834,15 +6907,12 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
           ),
           const SizedBox(width: 5),
 
-          // ==================================================
-          // NEW MIC BUTTON
-          // ==================================================
-
+          // Bottom microphone has no speaking glow.
           _RoomBottomAction(
             icon: _micOn
                 ? Icons.mic_rounded
                 : Icons.mic_off_rounded,
-            isGlowing: _micOn,
+            isGlowing: false,
             onTap: () async {
               if (!_zegoJoined) {
                 await _joinZegoRoom();
@@ -7005,30 +7075,45 @@ class _MicLayoutPreview
 
 
 // ============================================================
-// NEW MIC SEAT WIDGET
+// SPEAKING MIC SEAT WIDGET
 // ============================================================
 
 class _MicSeatWidget
-    extends StatelessWidget {
+    extends StatefulWidget {
   final int number;
   final Map<String, dynamic>? seat;
   final VoidCallback onTap;
   final bool isSpeaking;
+  final double soundLevel;
 
   const _MicSeatWidget({
+    super.key,
     required this.number,
     required this.seat,
     required this.onTap,
     this.isSpeaking = false,
+    this.soundLevel = 0.0,
   });
 
-  ImageProvider? _image() {
+  @override
+  State<_MicSeatWidget> createState() =>
+      _MicSeatWidgetState();
+}
+
+class _MicSeatWidgetState
+    extends State<_MicSeatWidget> {
+  ImageProvider? _cachedImage;
+  String _cachedImageKey = '';
+
+  ImageProvider? _createImage(
+    Map<String, dynamic>? seat,
+  ) {
     if (seat == null) {
       return null;
     }
 
     final base64Image =
-        seat?['photoBase64']
+        seat['photoBase64']
                 ?.toString() ??
             '';
 
@@ -7043,7 +7128,7 @@ class _MicSeatWidget
     }
 
     final url =
-        seat?['photoURL']
+        seat['photoURL']
                 ?.toString() ??
             '';
 
@@ -7054,28 +7139,124 @@ class _MicSeatWidget
     return null;
   }
 
+  String _imageKey(
+    Map<String, dynamic>? seat,
+  ) {
+    if (seat == null) {
+      return '';
+    }
+
+    final base64Image =
+        seat['photoBase64']
+                ?.toString() ??
+            '';
+
+    if (base64Image.isNotEmpty) {
+      return 'base64:$base64Image';
+    }
+
+    final url =
+        seat['photoURL']
+                ?.toString() ??
+            '';
+
+    return 'url:$url';
+  }
+
+  void _refreshImageCache() {
+    final key =
+        _imageKey(widget.seat);
+
+    if (key == _cachedImageKey) {
+      return;
+    }
+
+    _cachedImageKey = key;
+    _cachedImage =
+        _createImage(widget.seat);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshImageCache();
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant _MicSeatWidget oldWidget,
+  ) {
+    super.didUpdateWidget(
+      oldWidget,
+    );
+
+    final oldKey =
+        _imageKey(oldWidget.seat);
+
+    final newKey =
+        _imageKey(widget.seat);
+
+    if (oldKey != newKey) {
+      _cachedImageKey = '';
+      _refreshImageCache();
+    }
+  }
+
   @override
   Widget build(
     BuildContext context,
   ) {
     final occupied =
-        seat != null;
+        widget.seat != null;
 
     final locked =
-        seat?['locked'] == true;
+        widget.seat?['locked'] == true;
+
+    final micOn =
+        widget.seat?['micOn'] == true;
 
     final speaking =
-        occupied && isSpeaking;
+        occupied &&
+        micOn &&
+        widget.isSpeaking;
 
-    final image = _image();
+    final image =
+        _cachedImage;
 
     final name =
-        seat?['name']
+        widget.seat?['name']
                 ?.toString() ??
-            'Mic $number';
+            'Mic ${widget.number}';
+
+    final level =
+        widget.soundLevel.clamp(
+      0.0,
+      100.0,
+    );
+
+    final intensity =
+        speaking
+            ? ((level - 20.0) / 80.0)
+                .clamp(0.0, 1.0)
+            : 0.0;
+
+    final blur =
+        speaking
+            ? 18.0 + (intensity * 20.0)
+            : 0.0;
+
+    final spread =
+        speaking
+            ? 3.0 + (intensity * 7.0)
+            : 0.0;
+
+    final glowOpacity =
+        speaking
+            ? 0.45 + (intensity * 0.55)
+            : 0.0;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Column(
         mainAxisSize:
             MainAxisSize.min,
@@ -7083,8 +7264,9 @@ class _MicSeatWidget
           AnimatedContainer(
             duration:
                 const Duration(
-              milliseconds: 120,
+              milliseconds: 100,
             ),
+            curve: Curves.easeOut,
             width: 68,
             height: 68,
             padding:
@@ -7108,12 +7290,31 @@ class _MicSeatWidget
                       ],
                     ),
               boxShadow: speaking
-                  ? const [
+                  ? [
                       BoxShadow(
-                        color:
-                            Colors.white,
-                        blurRadius: 22,
-                        spreadRadius: 7,
+                        color: Colors.white
+                            .withOpacity(
+                          glowOpacity,
+                        ),
+                        blurRadius: blur,
+                        spreadRadius: spread,
+                      ),
+                      BoxShadow(
+                        color: PartyColors
+                            .purpleBright
+                            .withOpacity(
+                          0.30 +
+                              (intensity *
+                                  0.45),
+                        ),
+                        blurRadius:
+                            12 +
+                                (intensity *
+                                    14),
+                        spreadRadius:
+                            1 +
+                                (intensity *
+                                    3),
                       ),
                     ]
                   : const [
@@ -7159,7 +7360,7 @@ class _MicSeatWidget
                 ? name
                 : (locked
                     ? 'Locked'
-                    : 'Mic $number'),
+                    : 'Mic ${widget.number}'),
             maxLines: 1,
             overflow:
                 TextOverflow.ellipsis,
@@ -7253,6 +7454,9 @@ class _PartyRoomTopAction
     );
   }
 }
+
+
+
 
 
 /* ============================================================
