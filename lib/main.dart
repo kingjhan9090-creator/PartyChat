@@ -6998,8 +6998,6 @@ class _PartyRoomPageState extends State<PartyRoomPage> {
   }
 }
 
-}
-
 
 // ============================================================
 // MIC LAYOUT PREVIEW
