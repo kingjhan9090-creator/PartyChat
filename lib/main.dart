@@ -11371,13 +11371,13 @@ class MySupportRequestsPage extends StatelessWidget {
                   ),
                   onTap: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SupportTicketPage(
-                          ticketId: doc.id,
-                        ),
-                      ),
-                    );
+  context,
+  MaterialPageRoute(
+    builder: (_) => SupportTicketPage(
+      ticketId: doc.id,
+    ),
+  ),
+);
                   },
                 ),
               );
@@ -11385,8 +11385,7 @@ class MySupportRequestsPage extends StatelessWidget {
           );
         },
       ),
-      );
-    }
+    );
   }
 }
 
