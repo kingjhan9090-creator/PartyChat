@@ -7116,75 +7116,9 @@ void _showGiftPanel() {
   );
 }
 
-
-
-
+         
     
-          _RoomBottomAction(
-            icon:
-                Icons.sports_esports_rounded,
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
- }
-    
-  void _showGiftPanel() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF0D0915),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(22),
-        ),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              14,
-              16,
-              18,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius:
-                        BorderRadius.circular(10),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Gifts',
-                  style: TextStyle(
-                    color: PartyColors.gold,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  'Gift panel coming next.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
+  
 
 
 // ============================================================
